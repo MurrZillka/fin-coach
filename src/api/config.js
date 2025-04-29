@@ -1,5 +1,5 @@
 const config = {
-    useMocks: true, // Убедимся, что по умолчанию true
+    useMocks: false, // Теперь по умолчанию false, чтобы сразу работать с сервером
     apiBaseUrl: 'http://localhost:8888',
 };
 
