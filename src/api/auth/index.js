@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USE_MOCKS, API_BASE_URL } from '../config';
+import { getUseMocks, API_BASE_URL } from '../config';
 import { mockAuth } from './mocks';
 
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
 
 export const getUsers = async () => {
     try {
-        if (USE_MOCKS) return { data: await mockAuth.getUsers(), error: null };
+        if (getUseMocks()) return { data: await mockAuth.getUsers(), error: null };
         const response = await api.get('/users');
         return { data: response.data, error: null };
     } catch (error) {
@@ -25,7 +25,7 @@ export const getUsers = async () => {
 
 export const signup = async (data) => {
     try {
-        if (USE_MOCKS) return { data: await mockAuth.signup(), error: null };
+        if (getUseMocks()) return { data: await mockAuth.signup(), error: null };
         const response = await api.post('/signup', data);
         return { data: response.data, error: null };
     } catch (error) {
@@ -41,7 +41,7 @@ export const signup = async (data) => {
 
 export const login = async (data) => {
     try {
-        if (USE_MOCKS) return { data: await mockAuth.login(data), error: null };
+        if (getUseMocks()) return { data: await mockAuth.login(data), error: null };
         const response = await api.post('/login', data);
         return { data: response.data, error: null };
     } catch (error) {
@@ -57,7 +57,7 @@ export const login = async (data) => {
 
 export const logout = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockAuth.logout(), error: null };
+        if (getUseMocks()) return { data: await mockAuth.logout(), error: null };
         const response = await api.get('/logout', {
             headers: { Authorization: `Bearer ${token}` },
         });

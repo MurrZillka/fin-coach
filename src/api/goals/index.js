@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USE_MOCKS, API_BASE_URL } from '../config';
+import { getUseMocks, API_BASE_URL } from '../config';
 import { mockGoals } from './mocks';
 
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
 
 export const addGoal = async (data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.addGoal(), error: null };
+        if (getUseMocks()) return { data: await mockGoals.addGoal(), error: null };
         const response = await api.post('/AddGoal', data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -27,7 +27,7 @@ export const addGoal = async (data, token) => {
 
 export const getGoals = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.getGoals(), error: null };
+        if (getUseMocks()) return { data: await mockGoals.getGoals(), error: null };
         const response = await api.get('/Goals', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -45,7 +45,7 @@ export const getGoals = async (token) => {
 
 export const getGoalById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.getGoalById(id), error: null };
+        if (getUseMocks()) return { data: await mockGoals.getGoalById(id), error: null };
         const response = await api.get(`/Goal/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,7 +63,7 @@ export const getGoalById = async (id, token) => {
 
 export const updateGoalById = async (id, data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.updateGoalById(), error: null };
+        if (getUseMocks()) return { data: await mockGoals.updateGoalById(), error: null };
         const response = await api.put(`/Goal/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -81,7 +81,7 @@ export const updateGoalById = async (id, data, token) => {
 
 export const setCurrentGoal = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.setCurrentGoal(id), error: null };
+        if (getUseMocks()) return { data: await mockGoals.setCurrentGoal(id), error: null };
         const response = await api.put(`/Goal/${id}/current`, null, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -99,7 +99,7 @@ export const setCurrentGoal = async (id, token) => {
 
 export const getCurrentGoal = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.getCurrentGoal(), error: null };
+        if (getUseMocks()) return { data: await mockGoals.getCurrentGoal(), error: null };
         const response = await api.get('/CurrentGoal', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -117,7 +117,7 @@ export const getCurrentGoal = async (token) => {
 
 export const deleteGoalById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockGoals.deleteGoalById(), error: null };
+        if (getUseMocks()) return { data: await mockGoals.deleteGoalById(), error: null };
         const response = await api.delete(`/Goal/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });

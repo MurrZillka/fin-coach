@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USE_MOCKS, API_BASE_URL } from '../config';
+import { getUseMocks, API_BASE_URL } from '../config';
 import { mockCredit } from './mocks';
 
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
 
 export const addCredit = async (data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCredit.addCredit(), error: null };
+        if (getUseMocks()) return { data: await mockCredit.addCredit(), error: null };
         const response = await api.post('/AddCredit', data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -27,7 +27,7 @@ export const addCredit = async (data, token) => {
 
 export const getCredits = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCredit.getCredits(), error: null };
+        if (getUseMocks()) return { data: await mockCredit.getCredits(), error: null };
         const response = await api.get('/Credits', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -45,7 +45,7 @@ export const getCredits = async (token) => {
 
 export const getCreditsPermanent = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCredit.getCreditsPermanent(), error: null };
+        if (getUseMocks()) return { data: await mockCredit.getCreditsPermanent(), error: null };
         const response = await api.get('/Credits?permanent=true', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,7 +63,7 @@ export const getCreditsPermanent = async (token) => {
 
 export const getCreditById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCredit.getCreditById(id), error: null };
+        if (getUseMocks()) return { data: await mockCredit.getCreditById(id), error: null };
         const response = await api.get(`/Credit/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -81,7 +81,7 @@ export const getCreditById = async (id, token) => {
 
 export const updateCreditById = async (id, data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCredit.updateCreditById(), error: null };
+        if (getUseMocks()) return { data: await mockCredit.updateCreditById(), error: null };
         const response = await api.put(`/Credit/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -99,7 +99,7 @@ export const updateCreditById = async (id, data, token) => {
 
 export const deleteCreditById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCredit.deleteCreditById(), error: null };
+        if (getUseMocks()) return { data: await mockCredit.deleteCreditById(), error: null };
         const response = await api.delete(`/Credit/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });

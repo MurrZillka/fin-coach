@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USE_MOCKS, API_BASE_URL } from '../config';
+import { getUseMocks, API_BASE_URL } from '../config';
 import { mockCategories } from './mocks';
 
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
 
 export const addCategory = async (data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCategories.addCategory(), error: null };
+        if (getUseMocks()) return { data: await mockCategories.addCategory(), error: null };
         const response = await api.post('/AddCategory', data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -27,7 +27,7 @@ export const addCategory = async (data, token) => {
 
 export const getCategories = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCategories.getCategories(), error: null };
+        if (getUseMocks()) return { data: await mockCategories.getCategories(), error: null };
         const response = await api.get('/Categories', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -45,7 +45,7 @@ export const getCategories = async (token) => {
 
 export const getCategoryById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCategories.getCategoryById(id), error: null };
+        if (getUseMocks()) return { data: await mockCategories.getCategoryById(id), error: null };
         const response = await api.get(`/Category/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,7 +63,7 @@ export const getCategoryById = async (id, token) => {
 
 export const updateCategoryById = async (id, data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCategories.updateCategoryById(), error: null };
+        if (getUseMocks()) return { data: await mockCategories.updateCategoryById(), error: null };
         const response = await api.put(`/Category/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -81,7 +81,7 @@ export const updateCategoryById = async (id, data, token) => {
 
 export const deleteCategoryById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockCategories.deleteCategoryById(), error: null };
+        if (getUseMocks()) return { data: await mockCategories.deleteCategoryById(), error: null };
         const response = await api.delete(`/Category/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });

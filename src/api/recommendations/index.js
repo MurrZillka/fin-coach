@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USE_MOCKS, API_BASE_URL } from '../config';
+import { getUseMocks, API_BASE_URL } from '../config';
 import { mockRecommendations } from './mocks';
 
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
 
 export const getRecommendations = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockRecommendations.getRecommendations(), error: null };
+        if (getUseMocks()) return { data: await mockRecommendations.getRecommendations(), error: null };
         const response = await api.get('/Recommendations', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -27,7 +27,7 @@ export const getRecommendations = async (token) => {
 
 export const getFinancialOverview = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockRecommendations.getFinancialOverview(), error: null };
+        if (getUseMocks()) return { data: await mockRecommendations.getFinancialOverview(), error: null };
         const response = await api.get('/FinancialOverview', {
             headers: { Authorization: `Bearer ${token}` },
         });

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USE_MOCKS, API_BASE_URL } from '../config';
+import { getUseMocks, API_BASE_URL } from '../config';
 import { mockSpendings } from './mocks';
 
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
 
 export const addSpending = async (data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockSpendings.addSpending(), error: null };
+        if (getUseMocks()) return { data: await mockSpendings.addSpending(), error: null };
         const response = await api.post('/AddSpending', data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -27,7 +27,7 @@ export const addSpending = async (data, token) => {
 
 export const getSpendings = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockSpendings.getSpendings(), error: null };
+        if (getUseMocks()) return { data: await mockSpendings.getSpendings(), error: null };
         const response = await api.get('/Spendings', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -45,7 +45,7 @@ export const getSpendings = async (token) => {
 
 export const getSpendingsPermanent = async (token) => {
     try {
-        if (USE_MOCKS) return { data: await mockSpendings.getSpendingsPermanent(), error: null };
+        if (getUseMocks()) return { data: await mockSpendings.getSpendingsPermanent(), error: null };
         const response = await api.get('/Spendings?permanent=true', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,7 +63,7 @@ export const getSpendingsPermanent = async (token) => {
 
 export const getSpendingById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockSpendings.getSpendingById(id), error: null };
+        if (getUseMocks()) return { data: await mockSpendings.getSpendingById(id), error: null };
         const response = await api.get(`/Spending/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -81,7 +81,7 @@ export const getSpendingById = async (id, token) => {
 
 export const updateSpendingById = async (id, data, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockSpendings.updateSpendingById(), error: null };
+        if (getUseMocks()) return { data: await mockSpendings.updateSpendingById(), error: null };
         const response = await api.put(`/Spending/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -99,7 +99,7 @@ export const updateSpendingById = async (id, data, token) => {
 
 export const deleteSpendingById = async (id, token) => {
     try {
-        if (USE_MOCKS) return { data: await mockSpendings.deleteSpendingById(), error: null };
+        if (getUseMocks()) return { data: await mockSpendings.deleteSpendingById(), error: null };
         const response = await api.delete(`/Spending/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
