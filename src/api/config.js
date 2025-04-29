@@ -1,10 +1,10 @@
 const config = {
-    useMocks: true,
+    useMocks: true, // Убедимся, что по умолчанию true
     apiBaseUrl: 'http://localhost:8888',
 };
 
 export const getUseMocks = () => config.useMocks;
 export const setUseMocks = (value) => {
-    config.useMocks = !!value; // Приводим к boolean
+    config.useMocks = !!value;
 };
 export const API_BASE_URL = config.apiBaseUrl;

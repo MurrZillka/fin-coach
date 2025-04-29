@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getUseMocks, setUseMocks } from '../api/config';
 import {
     getUsers,
@@ -62,17 +62,57 @@ export default function TestApi() {
     const [useMocks, setLocalUseMocks] = useState(getUseMocks());
     const [token, setToken] = useState('');
     const [response, setResponse] = useState({});
+    const [inputData, setInputData] = useState({
+        signup: JSON.stringify(testData.signup, null, 2),
+        login: JSON.stringify(testData.login, null, 2),
+        addCredit: JSON.stringify(testData.addCredit, null, 2),
+        addSpending: JSON.stringify(testData.addSpending, null, 2),
+        addCategory: JSON.stringify(testData.addCategory, null, 2),
+        addGoal: JSON.stringify(testData.addGoal, null, 2),
+        updateCredit: JSON.stringify(testData.updateCredit, null, 2),
+        updateSpending: JSON.stringify(testData.updateSpending, null, 2),
+        updateCategory: JSON.stringify(testData.updateCategory, null, 2),
+        updateGoal: JSON.stringify(testData.updateGoal, null, 2),
+    });
+    const [inputIds, setInputIds] = useState({
+        getCreditById: '1',
+        updateCreditById: '1',
+        deleteCreditById: '1',
+        getSpendingById: '1',
+        updateSpendingById: '1',
+        deleteSpendingById: '1',
+        getCategoryById: '1',
+        updateCategoryById: '1',
+        deleteCategoryById: '1',
+        getGoalById: '1',
+        updateGoalById: '1',
+        setCurrentGoal: '1',
+        deleteGoalById: '1',
+    });
+
+    // Синхронизация useMocks с config.useMocks
+    useEffect(() => {
+        setUseMocks(useMocks);
+    }, [useMocks]);
 
     // Переключение моков
     const toggleMocks = () => {
-        const newValue = !useMocks;
-        setLocalUseMocks(newValue);
-        setUseMocks(newValue);
+        setLocalUseMocks((prev) => !prev);
     };
 
     // Очистка токена
     const clearToken = () => {
         setToken('');
+    };
+
+    // Обновление входных данных
+    const updateInputData = (method, value) => {
+        setInputData((prev) => ({ ...prev, [method]: value }));
+    };
+
+    // Обновление ID
+    const updateInputId = (method, value) => {
+        setInputIds((prev) => ({ ...prev, [method]: value }));
     };
 
     // Обработчик API-вызовов
@@ -86,6 +126,58 @@ export default function TestApi() {
             return;
         }
 
+        // Парсинг JSON для методов с данными
+        const methodsWithData = [
+            'signup',
+            'login',
+            'addCredit',
+            'addSpending',
+            'addCategory',
+            'addGoal',
+            'updateCreditById',
+            'updateSpendingById',
+            'updateCategoryById',
+            'updateGoalById',
+        ];
+        let parsedData;
+        if (methodsWithData.includes(method)) {
+            try {
+                parsedData = JSON.parse(inputData[method]);
+            } catch {
+                setResponse({
+                    [section]: { [method]: { error: { message: 'Invalid JSON input', status: 400 } } },
+                });
+                return;
+            }
+        }
+
+        // Парсинг ID для методов с ID
+        const methodsWithId = [
+            'getCreditById',
+            'updateCreditById',
+            'deleteCreditById',
+            'getSpendingById',
+            'updateSpendingById',
+            'deleteSpendingById',
+            'getCategoryById',
+            'updateCategoryById',
+            'deleteCategoryById',
+            'getGoalById',
+            'updateGoalById',
+            'setCurrentGoal',
+            'deleteGoalById',
+        ];
+        let parsedId;
+        if (methodsWithId.includes(method)) {
+            parsedId = parseInt(inputIds[method], 10);
+            if (isNaN(parsedId)) {
+                setResponse({
+                    [section]: { [method]: { error: { message: 'Invalid ID', status: 400 } } },
+                });
+                return;
+            }
+        }
+
         try {
             let result;
             switch (method) {
@@ -94,10 +186,10 @@ export default function TestApi() {
                     result = await getUsers();
                     break;
                 case 'signup':
-                    result = await signup(testData.signup);
+                    result = await signup(parsedData);
                     break;
                 case 'login':
-                    result = await login(testData.login);
+                    result = await login(parsedData);
                     if (result.data?.access_token) {
                         setToken(result.data.access_token);
                     }
@@ -110,7 +202,7 @@ export default function TestApi() {
                     break;
                 // Credit
                 case 'addCredit':
-                    result = await addCredit(testData.addCredit, token);
+                    result = await addCredit(parsedData, token);
                     break;
                 case 'getCredits':
                     result = await getCredits(token);
@@ -119,17 +211,17 @@ export default function TestApi() {
                     result = await getCreditsPermanent(token);
                     break;
                 case 'getCreditById':
-                    result = await getCreditById(1, token);
+                    result = await getCreditById(parsedId, token);
                     break;
                 case 'updateCreditById':
-                    result = await updateCreditById(1, testData.updateCredit, token);
+                    result = await updateCreditById(parsedId, parsedData, token);
                     break;
                 case 'deleteCreditById':
-                    result = await deleteCreditById(1, token);
+                    result = await deleteCreditById(parsedId, token);
                     break;
                 // Spendings
                 case 'addSpending':
-                    result = await addSpending(testData.addSpending, token);
+                    result = await addSpending(parsedData, token);
                     break;
                 case 'getSpendings':
                     result = await getSpendings(token);
@@ -138,51 +230,51 @@ export default function TestApi() {
                     result = await getSpendingsPermanent(token);
                     break;
                 case 'getSpendingById':
-                    result = await getSpendingById(1, token);
+                    result = await getSpendingById(parsedId, token);
                     break;
                 case 'updateSpendingById':
-                    result = await updateSpendingById(1, testData.updateSpending, token);
+                    result = await updateSpendingById(parsedId, parsedData, token);
                     break;
                 case 'deleteSpendingById':
-                    result = await deleteSpendingById(1, token);
+                    result = await deleteSpendingById(parsedId, token);
                     break;
                 // Categories
                 case 'addCategory':
-                    result = await addCategory(testData.addCategory, token);
+                    result = await addCategory(parsedData, token);
                     break;
                 case 'getCategories':
                     result = await getCategories(token);
                     break;
                 case 'getCategoryById':
-                    result = await getCategoryById(1, token);
+                    result = await getCategoryById(parsedId, token);
                     break;
                 case 'updateCategoryById':
-                    result = await updateCategoryById(1, testData.updateCategory, token);
+                    result = await updateCategoryById(parsedId, parsedData, token);
                     break;
                 case 'deleteCategoryById':
-                    result = await deleteCategoryById(1, token);
+                    result = await deleteCategoryById(parsedId, token);
                     break;
                 // Goals
                 case 'addGoal':
-                    result = await addGoal(testData.addGoal, token);
+                    result = await addGoal(parsedData, token);
                     break;
                 case 'getGoals':
                     result = await getGoals(token);
                     break;
                 case 'getGoalById':
-                    result = await getGoalById(1, token);
+                    result = await getGoalById(parsedId, token);
                     break;
                 case 'updateGoalById':
-                    result = await updateGoalById(1, testData.updateGoal, token);
+                    result = await updateGoalById(parsedId, parsedData, token);
                     break;
                 case 'setCurrentGoal':
-                    result = await setCurrentGoal(1, token);
+                    result = await setCurrentGoal(parsedId, token);
                     break;
                 case 'getCurrentGoal':
                     result = await getCurrentGoal(token);
                     break;
                 case 'deleteGoalById':
-                    result = await deleteGoalById(1, token);
+                    result = await deleteGoalById(parsedId, token);
                     break;
                 // Balance
                 case 'getBalance':
@@ -219,13 +311,74 @@ export default function TestApi() {
             <h2>{section}</h2>
             <div style={{ marginBottom: '10px' }}>
                 {methods.map(({ name, method }) => (
-                    <button
-                        key={method}
-                        onClick={() => callApi(method, section)}
-                        style={{ marginRight: '10px', padding: '5px 10px' }}
-                    >
-                        {name}
-                    </button>
+                    <div key={method} style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <button
+                            onClick={() => callApi(method, section)}
+                            style={{ padding: '5px 10px' }}
+                        >
+                            {name}
+                        </button>
+                        {[
+                            'signup',
+                            'login',
+                            'addCredit',
+                            'addSpending',
+                            'addCategory',
+                            'addGoal',
+                            'updateCreditById',
+                            'updateSpendingById',
+                            'updateCategoryById',
+                            'updateGoalById',
+                        ].includes(method) && (
+                            <textarea
+                                value={inputData[method]}
+                                onChange={(e) => updateInputData(method, e.target.value)}
+                                placeholder="Edit JSON here"
+                                style={{
+                                    width: '300px',
+                                    minHeight: '50px',
+                                    maxHeight: '150px',
+                                    padding: '5px',
+                                    fontFamily: 'monospace',
+                                    fontSize: '14px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+                                    resize: 'vertical',
+                                    outline: 'none',
+                                }}
+                            />
+                        )}
+                        {[
+                            'getCreditById',
+                            'updateCreditById',
+                            'deleteCreditById',
+                            'getSpendingById',
+                            'updateSpendingById',
+                            'deleteSpendingById',
+                            'getCategoryById',
+                            'updateCategoryById',
+                            'deleteCategoryById',
+                            'getGoalById',
+                            'updateGoalById',
+                            'setCurrentGoal',
+                            'deleteGoalById',
+                        ].includes(method) && (
+                            <input
+                                type="number"
+                                value={inputIds[method]}
+                                onChange={(e) => updateInputId(method, e.target.value)}
+                                placeholder="Enter ID"
+                                style={{
+                                    width: '80px',
+                                    padding: '5px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    outline: 'none',
+                                }}
+                            />
+                        )}
+                    </div>
                 ))}
             </div>
             {response[section] && (
@@ -239,10 +392,10 @@ export default function TestApi() {
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
             <h1>Test API</h1>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <button
                     onClick={toggleMocks}
-                    style={{ padding: '5px 10px', marginRight: '10px' }}
+                    style={{ padding: '5px 10px' }}
                 >
                     Mocks: {useMocks ? 'ON' : 'OFF'}
                 </button>
@@ -251,7 +404,13 @@ export default function TestApi() {
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="Enter token"
-                    style={{ padding: '5px', width: '300px', marginRight: '10px' }}
+                    style={{
+                        padding: '5px',
+                        width: '300px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        outline: 'none',
+                    }}
                 />
                 <button
                     onClick={clearToken}
