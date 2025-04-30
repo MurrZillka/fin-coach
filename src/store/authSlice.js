@@ -1,20 +1,50 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { login as apiLogin, logout as apiLogout } from '../api/auth';
+import { login as apiLogin, logout as apiLogout, signup as apiSignup } from '../api/auth';
 
-// Асинхронный thunk для логина
-export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
+// Восстановление авторизации из localStorage
+export const restoreAuth = createAsyncThunk('auth/restoreAuth', async (_, { rejectWithValue }) => {
     try {
-        const response = await apiLogin(credentials);
-        if (response.error) {
-            return rejectWithValue(response.error);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return rejectWithValue({ message: 'No token found', status: 401 });
         }
-        return response.data; // { access_token, userName, ... }
+        return { token };
     } catch {
-        return rejectWithValue({ message: 'Login failed', status: 500 });
+        return rejectWithValue({ message: 'Failed to restore auth', status: 500 });
     }
 });
 
-// Асинхронный thunk для логаута
+// Логин
+export const login = createAsyncThunk('auth/login', async ({ login, password }, { rejectWithValue }) => {
+    try {
+        const response = await apiLogin({ login, password });
+        if (response.error) {
+            return rejectWithValue(response.error);
+        }
+        localStorage.setItem('token', response.data.access_token);
+        return response.data;
+    } catch {
+        return rejectWithValue({ message: 'Failed to login', status: 500 });
+    }
+});
+
+// Регистрация с авто-логином
+export const signup = createAsyncThunk('auth/signup', async ({ user_name, login, password }, { dispatch, rejectWithValue }) => {
+    try {
+        // Сначала регистрируем
+        const signupResponse = await apiSignup({ user_name, login, password });
+        if (signupResponse.error) {
+            return rejectWithValue(signupResponse.error);
+        }
+        // При успехе сразу логиним
+        await dispatch(login({ login, password })).unwrap();
+        return signupResponse.data; // Возвращаем { ok: true }
+    } catch {
+        return rejectWithValue({ message: 'Failed to signup', status: 500 });
+    }
+});
+
+// Логаут
 export const logout = createAsyncThunk('auth/logout', async (_, { getState, rejectWithValue }) => {
     try {
         const token = getState().auth.token;
@@ -22,9 +52,10 @@ export const logout = createAsyncThunk('auth/logout', async (_, { getState, reje
         if (response.error) {
             return rejectWithValue(response.error);
         }
-        return response.data; // { status: 200 }
+        localStorage.removeItem('token');
+        return response.data;
     } catch {
-        return rejectWithValue({ message: 'Logout failed', status: 500 });
+        return rejectWithValue({ message: 'Failed to logout', status: 500 });
     }
 });
 
@@ -37,14 +68,24 @@ const authSlice = createSlice({
         error: null,
     },
     reducers: {
-        restoreAuth(state, action) {
-            state.token = action.payload;
-            state.isAuthenticated = true;
-            state.status = 'succeeded';
+        clearError(state) {
+            state.error = null;
         },
     },
     extraReducers: (builder) => {
-        // Login
+        // restoreAuth
+        builder
+            .addCase(restoreAuth.fulfilled, (state, action) => {
+                state.token = action.payload.token;
+                state.isAuthenticated = true;
+                state.status = 'succeeded';
+            })
+            .addCase(restoreAuth.rejected, (state) => {
+                state.status = 'failed';
+                state.isAuthenticated = false;
+            });
+
+        // login
         builder
             .addCase(login.pending, (state) => {
                 state.status = 'loading';
@@ -54,36 +95,35 @@ const authSlice = createSlice({
                 state.status = 'succeeded';
                 state.token = action.payload.access_token;
                 state.isAuthenticated = true;
-                // Сохраняем токен в localStorage
-                localStorage.setItem('token', action.payload.access_token);
             })
             .addCase(login.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
             });
-        // Logout
+
+        // signup
         builder
-            .addCase(logout.pending, (state) => {
+            .addCase(signup.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(logout.fulfilled, (state) => {
+            .addCase(signup.fulfilled, (state) => {
                 state.status = 'succeeded';
-                state.token = null;
-                state.isAuthenticated = false;
-                // Очищаем localStorage
-                localStorage.removeItem('token');
+                // token и isAuthenticated уже установлены через login
             })
-            .addCase(logout.rejected, (state, action) => {
+            .addCase(signup.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
-                // На случай ошибки всё равно очищаем состояние
-                state.token = null;
-                state.isAuthenticated = false;
-                localStorage.removeItem('token');
             });
+
+        // logout
+        builder.addCase(logout.fulfilled, (state) => {
+            state.status = 'succeeded';
+            state.token = null;
+            state.isAuthenticated = false;
+        });
     },
 });
 
-export const { restoreAuth } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;
