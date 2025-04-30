@@ -1,61 +1,42 @@
 export const mockSpendings = {
-    addSpending: async () => ({
-        message: 'Spending added successfully',
+    addSpending: async (body) => ({
+        data: { id: 1, amount: body.amount, description: body.description, category_id: body.category_id, is_permanent: body.is_permanent },
+        error: null,
     }),
     getSpendings: async () => ({
-        Spendings: [
-            {
-                id: 5,
-                user_id: 1,
-                is_delete: false,
-                amount: 1000,
-                description: 'Просрал',
-                is_permanent: false,
-                date: '2025-04-27T00:00:00Z',
-                category_id: 1,
-            },
-            {
-                id: 2,
-                user_id: 1,
-                is_delete: false,
-                amount: 1000,
-                description: 'Просрал',
-                is_permanent: false,
-                date: '2025-03-09T00:00:00Z',
-                category_id: 1,
-            },
-        ],
+        data: { spendings: [{ id: 1, amount: 1000, description: 'Test spending', category_id: 1, is_permanent: false }] },
+        error: null,
     }),
     getSpendingsPermanent: async () => ({
-        Spendings: [
-            {
-                id: 8,
-                user_id: 1,
-                is_delete: false,
-                amount: 1000,
-                description: 'Просрал',
-                is_permanent: true,
-                date: '2025-04-27T00:00:00Z',
-                category_id: 2,
-            },
-        ],
+        data: { spendings: [] },
+        error: null,
     }),
-    getSpendingById: async (id) => ({
-        Spending: {
-            id: Number(id),
-            user_id: 1,
-            is_delete: false,
-            amount: 1000,
-            description: 'Просрал',
-            is_permanent: false,
-            date: '2025-02-09T00:00:00Z',
-            category_id: 1,
-        },
-    }),
-    updateSpendingById: async () => ({
-        message: 'Spending updated successfully',
-    }),
-    deleteSpendingById: async () => ({
-        message: 'Spending deleted successfully',
-    }),
+    getSpendingById: async (id) => {
+        if (id === 1) {
+            return { data: { id: 1, amount: 1000, description: 'Test spending', category_id: 1, is_permanent: false }, error: null };
+        }
+        return { data: null, error: { message: 'Spending not found', status: 404 } };
+    },
+    updateSpendingById: async (id, body) => {
+        if (id === 1) {
+            return {
+                data: {
+                    id,
+                    amount: body.amount,
+                    description: body.description,
+                    category_id: body.category_id,
+                    is_permanent: body.is_permanent,
+                    date: body.date, // Добавляем date в ответ
+                },
+                error: null,
+            };
+        }
+        return { data: null, error: { message: 'Spending not found', status: 404 } };
+    },
+    deleteSpendingById: async (id) => {
+        if (id === 1) {
+            return { data: { status: 200 }, error: null };
+        }
+        return { data: null, error: { message: 'Spending not found', status: 404 } };
+    },
 };

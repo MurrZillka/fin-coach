@@ -51,11 +51,11 @@ const testData = {
     addCredit: { amount: 1000000, description: 'Test credit', is_permanent: false },
     addSpending: { amount: 1000, description: 'Test spending', category_id: 1, is_permanent: false },
     addCategory: { name: 'Test Category', description: 'Test description' },
-    addGoal: { amount: 1000000, description: 'Test goal', wish_date: '2025-12-31T00:00:00Z' },
-    updateCredit: { amount: 2000000, description: 'Updated credit', is_permanent: true },
-    updateSpending: { amount: 2000, description: 'Updated spending', category_id: 1, is_permanent: true },
+    addGoal: { amount: 1000000, description: 'Test goal', wish_date: '2025-12-31' },
+    updateCredit: { amount: 2000000, description: 'Updated credit', is_permanent: true, date: "2025-04-28" },
+    updateSpending: { amount: 2000, description: 'Updated spending', category_id: 1, is_permanent: true, date: "2025-04-28" },
     updateCategory: { name: 'Updated Category', description: 'Updated description' },
-    updateGoal: { amount: 2000000, description: 'Updated goal', wish_date: '2026-12-31T00:00:00Z' },
+    updateGoal: { amount: 2000000, description: 'Updated goal', wish_date: '2026-12-31' },
 };
 
 export default function TestApi() {
