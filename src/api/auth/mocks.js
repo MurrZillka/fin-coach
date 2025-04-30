@@ -1,6 +1,12 @@
 export const mockAuth = {
     getUsers: async () => ({
-        users: [{ id: 1, user_name: 'mot', login: 'mot' }],
+        users: [
+            { id: 1, user_name: 'mot', login: 'mot' },
+            { id: 2, user_name: 'alice', login: 'alice' },
+            { id: 3, user_name: 'bob', login: 'bob' },
+            { id: 4, user_name: 'clara', login: 'clara' },
+            { id: 5, user_name: 'dave', login: 'dave' },
+        ],
     }),
     signup: async () => ({
         ok: true,
