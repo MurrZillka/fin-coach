@@ -14,13 +14,13 @@ export const mockRecommendations = {
             {
                 id: 2,
                 amount: 1000000,
-                date: '2025-04-27T00:00:00Z',
+                date: '2025-04-27', // Убрали таймзону
                 type: 'credit',
             },
             {
                 id: 5,
                 amount: 1000,
-                date: '2025-04-27T00:00:00Z',
+                date: '2025-04-27', // Убрали таймзону
                 type: 'spending',
                 category: 1,
             },
