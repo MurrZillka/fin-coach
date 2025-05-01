@@ -62,16 +62,22 @@ export default function CategoriesPage() {
                                 <td className="p-4 text-secondary-500">{category.description}</td>
                                 <td className="p-4 flex gap-2">
                                     <button
-                                        className="p-2 rounded-md text-primary-600 hover:bg-primary-100 hover:text-primary-500 cursor-pointer transition"
-                                        title="Редактировать"
+                                        className="relative p-2 rounded-md text-primary-600 hover:bg-primary-600/10 hover:text-primary-500 cursor-pointer transition group"
                                     >
                                         <PencilIcon className="w-5 h-5" />
+                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-secondary-800 text-background text-xs rounded-sm px-2 py-1 shadow-sm whitespace-nowrap">
+                        Редактировать
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-secondary-800"></span>
+                      </span>
                                     </button>
                                     <button
-                                        className="p-2 rounded-md text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80 cursor-pointer transition"
-                                        title="Удалить"
+                                        className="relative p-2 rounded-md text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80 cursor-pointer transition group"
                                     >
                                         <TrashIcon className="w-5 h-5" />
+                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-secondary-800 text-background text-xs rounded-sm px-2 py-1 shadow-sm whitespace-nowrap">
+                        Удалить
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-secondary-800"></span>
+                      </span>
                                     </button>
                                 </td>
                             </tr>

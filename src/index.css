@@ -1,7 +1,15 @@
-/** {*/
-/*  margin: 0;*/
-/*  padding: 0;*/
-/*  box-sizing: border-box;*/
-/*}*/
-
 @import "tailwindcss";
+
+@theme {
+    --color-primary-500: #3b82f6; /* blue-500 */
+    --color-primary-600: #2563eb; /* blue-600 */
+    --color-primary-700: #1d4ed8; /* blue-700 */
+    --color-secondary-50: #f9fafb; /* gray-50 */
+    --color-secondary-200: #e5e7eb; /* gray-200 */
+    --color-secondary-500: #6b7280; /* gray-500 */
+    --color-secondary-800: #1f2937; /* gray-800 */
+    --color-accent-success: #10b981; /* green-500 */
+    --color-accent-error: #ef4444; /* red-500 */
+    --color-accent-warning: #eab308; /* yellow-500 */
+    --color-background: #ffffff; /* white */
+}
