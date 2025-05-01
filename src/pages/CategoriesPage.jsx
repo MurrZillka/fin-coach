@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import TextButton from '../components/ui/TextButton';
+import IconButton from '../components/ui/IconButton';
 
 export default function CategoriesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,7 +21,6 @@ export default function CategoriesPage() {
 
     return (
         <div className="min-h-screen bg-secondary-50">
-            {/* Хедер */}
             <header className="bg-secondary-800 text-background p-4 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <h1 className="text-2xl font-semibold">Financial Coach</h1>
@@ -31,19 +32,14 @@ export default function CategoriesPage() {
                 </div>
             </header>
 
-            {/* Основной контент */}
             <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold text-secondary-800">Категории</h2>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="bg-primary-600 text-background px-4 py-2 rounded-md hover:bg-primary-500 transition"
-                    >
+                    <TextButton onClick={() => setIsModalOpen(true)}>
                         Добавить категорию
-                    </button>
+                    </TextButton>
                 </div>
 
-                {/* Таблица */}
                 <div className="bg-background shadow-md rounded-md overflow-hidden">
                     <table className="min-w-full">
                         <thead className="bg-secondary-200">
@@ -61,24 +57,16 @@ export default function CategoriesPage() {
                                 <td className="p-4 text-secondary-800">{category.name}</td>
                                 <td className="p-4 text-secondary-500">{category.description}</td>
                                 <td className="p-4 flex gap-2">
-                                    <button
-                                        className="relative p-2 rounded-md text-primary-600 hover:bg-primary-600/10 hover:text-primary-500 cursor-pointer transition group"
-                                    >
-                                        <PencilIcon className="w-5 h-5" />
-                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-secondary-800 text-background text-xs rounded-sm px-2 py-1 shadow-sm whitespace-nowrap">
-                        Редактировать
-                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-secondary-800"></span>
-                      </span>
-                                    </button>
-                                    <button
-                                        className="relative p-2 rounded-md text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80 cursor-pointer transition group"
-                                    >
-                                        <TrashIcon className="w-5 h-5" />
-                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-secondary-800 text-background text-xs rounded-sm px-2 py-1 shadow-sm whitespace-nowrap">
-                        Удалить
-                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-secondary-800"></span>
-                      </span>
-                                    </button>
+                                    <IconButton
+                                        icon={PencilIcon}
+                                        tooltip="Редактировать"
+                                        className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
+                                    />
+                                    <IconButton
+                                        icon={TrashIcon}
+                                        tooltip="Удалить"
+                                        className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
+                                    />
                                 </td>
                             </tr>
                         ))}
@@ -87,7 +75,6 @@ export default function CategoriesPage() {
                 </div>
             </main>
 
-            {/* Модальное окно */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-secondary-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-background p-6 rounded-md shadow-md w-full max-w-md">
@@ -116,19 +103,15 @@ export default function CategoriesPage() {
                                 >
                                     Отмена
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-primary-600 text-background rounded-md hover:bg-primary-500"
-                                >
+                                <TextButton type="submit">
                                     Сохранить
-                                </button>
+                                </TextButton>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Уведомление */}
             {notification && (
                 <div className={`fixed bottom-4 right-4 p-4 rounded-md text-background ${
                     notification.type === 'success' ? 'bg-accent-success' : 'bg-accent-error'
