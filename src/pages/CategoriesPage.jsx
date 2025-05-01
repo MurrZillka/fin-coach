@@ -2,6 +2,7 @@ import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 import Header from '../components/Header';
+import Text from '../components/ui/Text';
 
 export default function CategoriesPage() {
     const categories = [
@@ -16,9 +17,9 @@ export default function CategoriesPage() {
 
             <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-secondary-800">Категории</h2>
+                    <Text variant="h2">Категории</Text>
                     <TextButton>
-                        Добавить категорию
+                        <Text variant="button">Добавить категорию</Text>
                     </TextButton>
                 </div>
 
@@ -26,18 +27,32 @@ export default function CategoriesPage() {
                     <table className="min-w-full">
                         <thead className="bg-secondary-200">
                         <tr>
-                            <th className="text-left p-4 text-secondary-800 font-semibold">№</th>
-                            <th className="text-left p-4 text-secondary-800 font-semibold">Название</th>
-                            <th className="text-left p-4 text-secondary-800 font-semibold">Описание</th>
-                            <th className="text-left p-4 text-secondary-800 font-semibold">Действия</th>
+                            <th className="text-left p-4">
+                                <Text variant="th">№</Text>
+                            </th>
+                            <th className="text-left p-4">
+                                <Text variant="th">Название</Text>
+                            </th>
+                            <th className="text-left p-4">
+                                <Text variant="th">Описание</Text>
+                            </th>
+                            <th className="text-left p-4">
+                                <Text variant="th">Действия</Text>
+                            </th>
                         </tr>
                         </thead>
                         <tbody>
                         {categories.map((category, index) => (
                             <tr key={category.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                <td className="p-4 text-secondary-800">{index + 1}</td>
-                                <td className="p-4 text-secondary-800">{category.name}</td>
-                                <td className="p-4 text-secondary-500">{category.description}</td>
+                                <td className="p-4">
+                                    <Text variant="tdPrimary">{index + 1}</Text>
+                                </td>
+                                <td className="p-4">
+                                    <Text variant="tdPrimary">{category.name}</Text>
+                                </td>
+                                <td className="p-4">
+                                    <Text variant="tdSecondary">{category.description}</Text>
+                                </td>
                                 <td className="p-4 flex gap-2">
                                     <IconButton
                                         icon={PencilIcon}
