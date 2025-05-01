@@ -27,11 +27,11 @@ export const addCategory = async (data, token) => {
 
 export const getCategories = async (token) => {
     try {
-        if (getUseMocks()) return { data: await mockCategories.getCategories(), error: null };
+        if (getUseMocks()) return { data: { categories: (await mockCategories.getCategories()).Categories }, error: null };
         const response = await api.get('/Categories', {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return { data: response.data, error: null };
+        return { data: { categories: response.data.Categories }, error: null };
     } catch (error) {
         return {
             data: null,
@@ -45,11 +45,11 @@ export const getCategories = async (token) => {
 
 export const getCategoryById = async (id, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCategories.getCategoryById(id), error: null };
+        if (getUseMocks()) return { data: (await mockCategories.getCategoryById(id)).Category, error: null };
         const response = await api.get(`/Category/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return { data: response.data, error: null };
+        return { data: response.data.Category, error: null };
     } catch (error) {
         return {
             data: null,
