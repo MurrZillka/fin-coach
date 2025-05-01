@@ -1,6 +1,6 @@
 const config = {
     useMocks: false, // Теперь по умолчанию false, чтобы сразу работать с сервером
-    apiBaseUrl: 'http://localhost:8888',
+    apiBaseUrl: 'http://217.12.38.196:8888',
 };
 
 export const getUseMocks = () => config.useMocks;

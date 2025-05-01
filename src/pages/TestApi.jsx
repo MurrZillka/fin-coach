@@ -1,48 +1,25 @@
 import { useState, useEffect } from 'react';
 import { getUseMocks, setUseMocks } from '../api/config';
 import {
-    getUsers,
-    signup,
-    login,
-    logout,
+    getUsers, signup, login, logout,
 } from '../api/auth';
 import {
-    addCredit,
-    getCredits,
-    getCreditsPermanent,
-    getCreditById,
-    updateCreditById,
-    deleteCreditById,
+    addCredit, getCredits, getCreditsPermanent, getCreditById, updateCreditById, deleteCreditById,
 } from '../api/credit';
 import {
-    addSpending,
-    getSpendings,
-    getSpendingsPermanent,
-    getSpendingById,
-    updateSpendingById,
-    deleteSpendingById,
+    addSpending, getSpendings, getSpendingsPermanent, getSpendingById, updateSpendingById, deleteSpendingById,
 } from '../api/spendings';
 import {
-    addCategory,
-    getCategories,
-    getCategoryById,
-    updateCategoryById,
-    deleteCategoryById,
+    addCategory, getCategories, getCategoryById, updateCategoryById, deleteCategoryById,
 } from '../api/categories';
 import {
-    addGoal,
-    getGoals,
-    getGoalById,
-    updateGoalById,
-    setCurrentGoal,
-    getCurrentGoal,
-    deleteGoalById,
+    addGoal, getGoals, getGoalById, updateGoalById, setCurrentGoal, getCurrentGoal, deleteGoalById,
 } from '../api/goals';
 import { getBalance } from '../api/balance';
 import {
-    getRecommendations,
-    getFinancialOverview,
+    getRecommendations, getFinancialOverview,
 } from '../api/recommendations';
+import Text from '../components/ui/Text';
 
 // Тестовые данные для методов с телом запроса
 const testData = {
@@ -90,380 +67,176 @@ export default function TestApi() {
         deleteGoalById: '1',
     });
 
-    // Синхронизация useMocks с config.useMocks
+    // Синхронизация useMocks с конфигом
     useEffect(() => {
         setUseMocks(useMocks);
     }, [useMocks]);
 
-    // Переключение моков
     const toggleMocks = () => {
         setLocalUseMocks((prev) => !prev);
     };
 
-    // Очистка токена
-    const clearToken = () => {
-        setToken('');
-    };
-
-    // Обновление входных данных
-    const updateInputData = (method, value) => {
-        setInputData((prev) => ({ ...prev, [method]: value }));
-    };
-
-    // Обновление ID
-    const updateInputId = (method, value) => {
-        setInputIds((prev) => ({ ...prev, [method]: value }));
-    };
-
-    // Обработчик API-вызовов
-    const callApi = async (method, section) => {
-        // Проверка токена для авторизованных методов
-        const requiresToken = !['getUsers', 'signup', 'login'].includes(method);
-        if (requiresToken && !token) {
-            setResponse({
-                [section]: { [method]: { error: { message: 'Token required', status: 401 } } },
-            });
-            return;
-        }
-
-        // Парсинг JSON для методов с данными
-        const methodsWithData = [
-            'signup',
-            'login',
-            'addCredit',
-            'addSpending',
-            'addCategory',
-            'addGoal',
-            'updateCreditById',
-            'updateSpendingById',
-            'updateCategoryById',
-            'updateGoalById',
-        ];
-        let parsedData;
-        if (methodsWithData.includes(method)) {
-            try {
-                parsedData = JSON.parse(inputData[method]);
-            } catch {
-                setResponse({
-                    [section]: { [method]: { error: { message: 'Invalid JSON input', status: 400 } } },
-                });
-                return;
-            }
-        }
-
-        // Парсинг ID для методов с ID
-        const methodsWithId = [
-            'getCreditById',
-            'updateCreditById',
-            'deleteCreditById',
-            'getSpendingById',
-            'updateSpendingById',
-            'deleteSpendingById',
-            'getCategoryById',
-            'updateCategoryById',
-            'deleteCategoryById',
-            'getGoalById',
-            'updateGoalById',
-            'setCurrentGoal',
-            'deleteGoalById',
-        ];
-        let parsedId;
-        if (methodsWithId.includes(method)) {
-            parsedId = parseInt(inputIds[method], 10);
-            if (isNaN(parsedId)) {
-                setResponse({
-                    [section]: { [method]: { error: { message: 'Invalid ID', status: 400 } } },
-                });
-                return;
-            }
-        }
+    // Универсальный обработчик вызовов API
+    const callApi = async (method, data = null, id = null) => {
+        const apiMethods = {
+            getUsers, signup, login, logout,
+            addCredit, getCredits, getCreditsPermanent, getCreditById, updateCreditById, deleteCreditById,
+            addSpending, getSpendings, getSpendingsPermanent, getSpendingById, updateSpendingById, deleteSpendingById,
+            addCategory, getCategories, getCategoryById, updateCategoryById, deleteCategoryById,
+            addGoal, getGoals, getGoalById, updateGoalById, setCurrentGoal, getCurrentGoal, deleteGoalById,
+            getBalance,
+            getRecommendations, getFinancialOverview,
+        };
 
         try {
             let result;
-            switch (method) {
-                // Auth
-                case 'getUsers':
-                    result = await getUsers();
-                    break;
-                case 'signup':
-                    result = await signup(parsedData);
-                    break;
-                case 'login':
-                    result = await login(parsedData);
-                    if (result.data?.access_token) {
-                        setToken(result.data.access_token);
-                    }
-                    break;
-                case 'logout':
-                    result = await logout(token);
-                    if (result.data?.status === 200) {
-                        setToken('');
-                    }
-                    break;
-                // Credit
-                case 'addCredit':
-                    result = await addCredit(parsedData, token);
-                    break;
-                case 'getCredits':
-                    result = await getCredits(token);
-                    break;
-                case 'getCreditsPermanent':
-                    result = await getCreditsPermanent(token);
-                    break;
-                case 'getCreditById':
-                    result = await getCreditById(parsedId, token);
-                    break;
-                case 'updateCreditById':
-                    result = await updateCreditById(parsedId, parsedData, token);
-                    break;
-                case 'deleteCreditById':
-                    result = await deleteCreditById(parsedId, token);
-                    break;
-                // Spendings
-                case 'addSpending':
-                    result = await addSpending(parsedData, token);
-                    break;
-                case 'getSpendings':
-                    result = await getSpendings(token);
-                    break;
-                case 'getSpendingsPermanent':
-                    result = await getSpendingsPermanent(token);
-                    break;
-                case 'getSpendingById':
-                    result = await getSpendingById(parsedId, token);
-                    break;
-                case 'updateSpendingById':
-                    result = await updateSpendingById(parsedId, parsedData, token);
-                    break;
-                case 'deleteSpendingById':
-                    result = await deleteSpendingById(parsedId, token);
-                    break;
-                // Categories
-                case 'addCategory':
-                    result = await addCategory(parsedData, token);
-                    break;
-                case 'getCategories':
-                    result = await getCategories(token);
-                    break;
-                case 'getCategoryById':
-                    result = await getCategoryById(parsedId, token);
-                    break;
-                case 'updateCategoryById':
-                    result = await updateCategoryById(parsedId, parsedData, token);
-                    break;
-                case 'deleteCategoryById':
-                    result = await deleteCategoryById(parsedId, token);
-                    break;
-                // Goals
-                case 'addGoal':
-                    result = await addGoal(parsedData, token);
-                    break;
-                case 'getGoals':
-                    result = await getGoals(token);
-                    break;
-                case 'getGoalById':
-                    result = await getGoalById(parsedId, token);
-                    break;
-                case 'updateGoalById':
-                    result = await updateGoalById(parsedId, parsedData, token);
-                    break;
-                case 'setCurrentGoal':
-                    result = await setCurrentGoal(parsedId, token);
-                    break;
-                case 'getCurrentGoal':
-                    result = await getCurrentGoal(token);
-                    break;
-                case 'deleteGoalById':
-                    result = await deleteGoalById(parsedId, token);
-                    break;
-                // Balance
-                case 'getBalance':
-                    result = await getBalance(token);
-                    break;
-                // Recommendations
-                case 'getRecommendations':
-                    result = await getRecommendations(token);
-                    break;
-                case 'getFinancialOverview':
-                    result = await getFinancialOverview(token);
-                    break;
-                default:
-                    throw new Error('Unknown method');
+            if (method === 'login' || method === 'signup') {
+                result = await apiMethods[method](JSON.parse(data));
+                if (result.data && result.data.access_token) {
+                    setToken(result.data.access_token);
+                }
+            } else if (['getCreditById', 'updateCreditById', 'deleteCreditById',
+                'getSpendingById', 'updateSpendingById', 'deleteSpendingById',
+                'getCategoryById', 'updateCategoryById', 'deleteCategoryById',
+                'getGoalById', 'updateGoalById', 'setCurrentGoal', 'deleteGoalById'].includes(method)) {
+                result = await apiMethods[method](id, token);
+            } else {
+                result = await apiMethods[method](token ? token : undefined, ...(data ? [JSON.parse(data)] : []));
             }
-            setResponse((prev) => ({
-                ...prev,
-                [section]: { ...prev[section], [method]: result },
-            }));
+            setResponse(result);
         } catch (error) {
-            setResponse((prev) => ({
-                ...prev,
-                [section]: {
-                    ...prev[section],
-                    [method]: { error: { message: error.message, status: 500 } },
-                },
-            }));
+            setResponse({ data: null, error: { message: error.message || 'API call failed', status: 500 } });
         }
     };
 
-    // Рендеринг секции
-    const renderSection = (section, methods) => (
-        <div style={{ marginBottom: '20px' }}>
-            <h2>{section}</h2>
-            <div style={{ marginBottom: '10px' }}>
+    // Компонент для рендеринга одной секции API-методов
+    const renderSection = (title, methods) => (
+        <div key={title} className="mb-6">
+            {/* Заголовок секции */}
+            <Text variant="h3" className="mb-4 text-primary-600">{title}</Text>
+            <div className="space-y-4">
                 {methods.map(({ name, method }) => (
-                    <div key={method} style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <button
-                            onClick={() => callApi(method, section)}
-                            style={{ padding: '5px 10px' }}
-                        >
-                            {name}
-                        </button>
-                        {[
-                            'signup',
-                            'login',
-                            'addCredit',
-                            'addSpending',
-                            'addCategory',
-                            'addGoal',
-                            'updateCreditById',
-                            'updateSpendingById',
-                            'updateCategoryById',
-                            'updateGoalById',
-                        ].includes(method) && (
+                    <div key={method} className="p-4 bg-secondary-50 rounded-lg shadow-sm">
+                        <div className="flex items-center space-x-3 mb-2">
+                            <button
+                                onClick={() => callApi(method, inputData[method], inputIds[method])}
+                                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition duration-200"
+                            >
+                                {name}
+                            </button>
+                            <Text variant="caption" className="text-secondary-600">Метод: {method}</Text>
+                        </div>
+
+                        {/* Поле ввода для методов с телом запроса */}
+                        {['login', 'signup', 'addCredit', 'addSpending', 'addCategory', 'addGoal',
+                            'updateCredit', 'updateSpending', 'updateCategory', 'updateGoal'].includes(method) && (
                             <textarea
                                 value={inputData[method]}
-                                onChange={(e) => updateInputData(method, e.target.value)}
-                                placeholder="Edit JSON here"
-                                style={{
-                                    width: '300px',
-                                    minHeight: '50px',
-                                    maxHeight: '150px',
-                                    padding: '5px',
-                                    fontFamily: 'monospace',
-                                    fontSize: '14px',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px',
-                                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
-                                    resize: 'vertical',
-                                    outline: 'none',
-                                }}
+                                onChange={(e) => setInputData({ ...inputData, [method]: e.target.value })}
+                                className="w-full p-3 mt-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
+                                rows="4"
+                                placeholder="Введите данные для запроса в формате JSON"
                             />
                         )}
-                        {[
-                            'getCreditById',
-                            'updateCreditById',
-                            'deleteCreditById',
-                            'getSpendingById',
-                            'updateSpendingById',
-                            'deleteSpendingById',
-                            'getCategoryById',
-                            'updateCategoryById',
-                            'deleteCategoryById',
-                            'getGoalById',
-                            'updateGoalById',
-                            'setCurrentGoal',
-                            'deleteGoalById',
-                        ].includes(method) && (
+
+                        {/* Поле ввода для методов с ID */}
+                        {['getCreditById', 'updateCreditById', 'deleteCreditById',
+                            'getSpendingById', 'updateSpendingById', 'deleteSpendingById',
+                            'getCategoryById', 'updateCategoryById', 'deleteCategoryById',
+                            'getGoalById', 'updateGoalById', 'setCurrentGoal', 'deleteGoalById'].includes(method) && (
                             <input
-                                type="number"
+                                type="text"
                                 value={inputIds[method]}
-                                onChange={(e) => updateInputId(method, e.target.value)}
-                                placeholder="Enter ID"
-                                style={{
-                                    width: '80px',
-                                    padding: '5px',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px',
-                                    outline: 'none',
-                                }}
+                                onChange={(e) => setInputIds({ ...inputIds, [method]: e.target.value })}
+                                className="w-full p-3 mt-2 border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                placeholder="Введите ID"
                             />
                         )}
+
+                        {/* Вывод результата */}
+                        <pre className="mt-3 p-3 bg-background rounded-lg border border-secondary-200 text-sm text-secondary-800 overflow-auto">
+                            {JSON.stringify(response, null, 2)}
+                        </pre>
                     </div>
                 ))}
             </div>
-            {response[section] && (
-                <pre style={{ background: '#f4f4f4', padding: '10px', maxHeight: '300px', overflow: 'auto' }}>
-          {JSON.stringify(response[section], null, 2)}
-        </pre>
-            )}
+            {/* Разделительная линия */}
+            <hr className="my-6 border-t-2 border-secondary-200" />
         </div>
     );
 
+    // Основной рендер страницы
     return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <h1>Test API</h1>
-            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <button
-                    onClick={toggleMocks}
-                    style={{ padding: '5px 10px' }}
-                >
-                    Mocks: {useMocks ? 'ON' : 'OFF'}
-                </button>
-                <input
-                    type="text"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    placeholder="Enter token"
-                    style={{
-                        padding: '5px',
-                        width: '300px',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        outline: 'none',
-                    }}
-                />
-                <button
-                    onClick={clearToken}
-                    style={{ padding: '5px 10px' }}
-                >
-                    Clear Token
-                </button>
+        <div className="min-h-screen bg-secondary-50 p-6">
+            <div className="max-w-5xl mx-auto">
+                {/* Заголовок страницы */}
+                <Text variant="h1" className="mb-6 text-primary-800">Тестирование API FinCoach</Text>
+
+                {/* Переключатель моков */}
+                <div className="mb-6 flex items-center space-x-3">
+                    <label className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            checked={useMocks}
+                            onChange={toggleMocks}
+                            className="h-5 w-5 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
+                        />
+                        <Text variant="body">Использовать моки</Text>
+                    </label>
+                    {token && (
+                        <Text variant="caption" className="text-secondary-600">
+                            Токен: {token.slice(0, 20)}...
+                        </Text>
+                    )}
+                </div>
+
+                {/* Секции API */}
+                {renderSection('Аутентификация', [
+                    { name: 'Get Users', method: 'getUsers' },
+                    { name: 'Signup', method: 'signup' },
+                    { name: 'Login', method: 'login' },
+                    { name: 'Logout', method: 'logout' },
+                ])}
+                {renderSection('Кредиты', [
+                    { name: 'Add Credit', method: 'addCredit' },
+                    { name: 'Get Credits', method: 'getCredits' },
+                    { name: 'Get Permanent Credits', method: 'getCreditsPermanent' },
+                    { name: 'Get Credit by ID', method: 'getCreditById' },
+                    { name: 'Update Credit by ID', method: 'updateCreditById' },
+                    { name: 'Delete Credit by ID', method: 'deleteCreditById' },
+                ])}
+                {renderSection('Расходы', [
+                    { name: 'Add Spending', method: 'addSpending' },
+                    { name: 'Get Spendings', method: 'getSpendings' },
+                    { name: 'Get Permanent Spendings', method: 'getSpendingsPermanent' },
+                    { name: 'Get Spending by ID', method: 'getSpendingById' },
+                    { name: 'Update Spending by ID', method: 'updateSpendingById' },
+                    { name: 'Delete Spending by ID', method: 'deleteSpendingById' },
+                ])}
+                {renderSection('Категории', [
+                    { name: 'Add Category', method: 'addCategory' },
+                    { name: 'Get Categories', method: 'getCategories' },
+                    { name: 'Get Category by ID', method: 'getCategoryById' },
+                    { name: 'Update Category by ID', method: 'updateCategoryById' },
+                    { name: 'Delete Category by ID', method: 'deleteCategoryById' },
+                ])}
+                {renderSection('Цели', [
+                    { name: 'Add Goal', method: 'addGoal' },
+                    { name: 'Get Goals', method: 'getGoals' },
+                    { name: 'Get Goal by ID', method: 'getGoalById' },
+                    { name: 'Update Goal by ID', method: 'updateGoalById' },
+                    { name: 'Set Current Goal', method: 'setCurrentGoal' },
+                    { name: 'Get Current Goal', method: 'getCurrentGoal' },
+                    { name: 'Delete Goal by ID', method: 'deleteGoalById' },
+                ])}
+                {renderSection('Баланс', [
+                    { name: 'Get Balance', method: 'getBalance' },
+                ])}
+                {renderSection('Рекомендации', [
+                    { name: 'Get Recommendations', method: 'getRecommendations' },
+                    { name: 'Get Financial Overview', method: 'getFinancialOverview' },
+                ])}
             </div>
-            {renderSection('Auth', [
-                { name: 'Get Users', method: 'getUsers' },
-                { name: 'Signup', method: 'signup' },
-                { name: 'Login', method: 'login' },
-                { name: 'Logout', method: 'logout' },
-            ])}
-            {renderSection('Credit', [
-                { name: 'Add Credit', method: 'addCredit' },
-                { name: 'Get Credits', method: 'getCredits' },
-                { name: 'Get Permanent Credits', method: 'getCreditsPermanent' },
-                { name: 'Get Credit by ID', method: 'getCreditById' },
-                { name: 'Update Credit by ID', method: 'updateCreditById' },
-                { name: 'Delete Credit by ID', method: 'deleteCreditById' },
-            ])}
-            {renderSection('Spendings', [
-                { name: 'Add Spending', method: 'addSpending' },
-                { name: 'Get Spendings', method: 'getSpendings' },
-                { name: 'Get Permanent Spendings', method: 'getSpendingsPermanent' },
-                { name: 'Get Spending by ID', method: 'getSpendingById' },
-                { name: 'Update Spending by ID', method: 'updateSpendingById' },
-                { name: 'Delete Spending by ID', method: 'deleteSpendingById' },
-            ])}
-            {renderSection('Categories', [
-                { name: 'Add Category', method: 'addCategory' },
-                { name: 'Get Categories', method: 'getCategories' },
-                { name: 'Get Category by ID', method: 'getCategoryById' },
-                { name: 'Update Category by ID', method: 'updateCategoryById' },
-                { name: 'Delete Category by ID', method: 'deleteCategoryById' },
-            ])}
-            {renderSection('Goals', [
-                { name: 'Add Goal', method: 'addGoal' },
-                { name: 'Get Goals', method: 'getGoals' },
-                { name: 'Get Goal by ID', method: 'getGoalById' },
-                { name: 'Update Goal by ID', method: 'updateGoalById' },
-                { name: 'Set Current Goal', method: 'setCurrentGoal' },
-                { name: 'Get Current Goal', method: 'getCurrentGoal' },
-                { name: 'Delete Goal by ID', method: 'deleteGoalById' },
-            ])}
-            {renderSection('Balance', [
-                { name: 'Get Balance', method: 'getBalance' },
-            ])}
-            {renderSection('Recommendations', [
-                { name: 'Get Recommendations', method: 'getRecommendations' },
-                { name: 'Get Financial Overview', method: 'getFinancialOverview' },
-            ])}
         </div>
     );
 }
