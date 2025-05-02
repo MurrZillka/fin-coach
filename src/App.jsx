@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { restoreAuth } from './store/authSlice';
 import LayoutWithHeader from './components/LayoutWithHeader';
+import TestApi from "./pages/TestApi.jsx";
 
 function App() {
     const dispatch = useDispatch();
@@ -18,6 +19,7 @@ function App() {
     return (
         <Router>
             <LayoutWithHeader />
+            <TestApi/>
         </Router>
     );
 }

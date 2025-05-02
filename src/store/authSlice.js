@@ -17,32 +17,87 @@ export const restoreAuth = createAsyncThunk('auth/restoreAuth', async (_, { reje
 // Логин
 export const login = createAsyncThunk('auth/login', async ({ login, password }, { rejectWithValue }) => {
     try {
+        console.log('Redux login thunk: начало выполнения', { login });
+
         const response = await apiLogin({ login, password });
+
+        console.log('Redux login thunk: ответ API', response);
+
         if (response.error) {
+            console.error('Redux login thunk: ошибка от API', response.error);
             return rejectWithValue(response.error);
         }
+
         localStorage.setItem('token', response.data.access_token);
+        console.log('Redux login thunk: токен сохранен в localStorage');
+
         return response.data;
-    } catch {
+    } catch (error) {
+        console.error('Redux login thunk: ошибка', error);
         return rejectWithValue({ message: 'Failed to login', status: 500 });
     }
 });
 
-// Регистрация с авто-логином
-export const signup = createAsyncThunk('auth/signup', async ({ user_name, login, password }, { dispatch, rejectWithValue }) => {
-    try {
-        // Сначала регистрируем
-        const signupResponse = await apiSignup({ user_name, login, password });
-        if (signupResponse.error) {
-            return rejectWithValue(signupResponse.error);
+// Регистрация без авто-логина (простая)
+export const signup = createAsyncThunk(
+    'auth/signup', // 🛠 Исправленное имя action type
+    async ({ user_name, login, password }, { rejectWithValue }) => {
+        try {
+            console.log('Redux signup thunk: начало выполнения', { user_name, login });
+
+            // Вызываем API-метод регистрации
+            const signupResponse = await apiSignup({ user_name, login, password });
+
+            console.log('Redux signup thunk: ответ API', signupResponse);
+
+            if (signupResponse.error) {
+                console.error('Redux signup thunk: ошибка от API', signupResponse.error);
+                return rejectWithValue(signupResponse.error);
+            }
+
+            return signupResponse.data;
+        } catch (error) {
+            console.error('Redux signup thunk: необработанная ошибка', error);
+            return rejectWithValue({ message: 'Failed to signup', status: 500 });
         }
-        // При успехе сразу логиним
-        await dispatch(login({ login, password })).unwrap();
-        return signupResponse.data; // Возвращаем { ok: true }
-    } catch {
-        return rejectWithValue({ message: 'Failed to signup', status: 500 });
     }
-});
+);
+
+// Расширенная версия регистрации с авто-логином (если понадобится в будущем)
+export const signupWithAutoLogin = createAsyncThunk(
+    'auth/signupWithAutoLogin',
+    async ({ user_name, login, password }, { dispatch, rejectWithValue }) => {
+        try {
+            console.log('Redux signupWithAutoLogin: начало выполнения', { user_name, login });
+
+            // Вызываем API-метод регистрации
+            const signupResponse = await apiSignup({ user_name, login, password });
+
+            console.log('Redux signupWithAutoLogin: ответ API', signupResponse);
+
+            if (signupResponse.error) {
+                console.error('Redux signupWithAutoLogin: ошибка от API', signupResponse.error);
+                return rejectWithValue(signupResponse.error);
+            }
+
+            // При успехе пытаемся выполнить логин
+            try {
+                console.log('Redux signupWithAutoLogin: начало авто-логина');
+                const loginResult = await dispatch(login({ login, password })).unwrap();
+                console.log('Redux signupWithAutoLogin: авто-логин успешен', loginResult);
+                return { ...signupResponse.data, loginSuccess: true, ...loginResult };
+            } catch (loginError) {
+                console.error('Redux signupWithAutoLogin: ошибка авто-логина', loginError);
+                // Если логин не удался, но регистрация прошла успешно,
+                // мы все равно считаем регистрацию успешной
+                return { ...signupResponse.data, loginSuccess: false };
+            }
+        } catch (error) {
+            console.error('Redux signupWithAutoLogin: необработанная ошибка', error);
+            return rejectWithValue({ message: 'Failed to signup', status: 500 });
+        }
+    }
+);
 
 // Логаут
 export const logout = createAsyncThunk('auth/logout', async (_, { getState, rejectWithValue }) => {
@@ -109,9 +164,28 @@ const authSlice = createSlice({
             })
             .addCase(signup.fulfilled, (state) => {
                 state.status = 'succeeded';
-                // token и isAuthenticated уже установлены через login
+                // Просто отмечаем успешную регистрацию без установки токена
             })
             .addCase(signup.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload;
+            });
+
+        // signupWithAutoLogin (добавляем обработчики для нового thunk)
+        builder
+            .addCase(signupWithAutoLogin.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(signupWithAutoLogin.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                // Если авто-логин прошел успешно, устанавливаем токен
+                if (action.payload.loginSuccess && action.payload.access_token) {
+                    state.token = action.payload.access_token;
+                    state.isAuthenticated = true;
+                }
+            })
+            .addCase(signupWithAutoLogin.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
             });

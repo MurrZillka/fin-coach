@@ -1,14 +1,24 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
+import { signup } from '../store/authSlice';
 
 export default function SignupPage() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { status, error } = useSelector((state) => state.auth);
+    const [signupSuccess, setSignupSuccess] = useState(false);
+
     const [formData, setFormData] = useState({
+        user_name: '',
         login: '',
         password: '',
         confirmPassword: '',
     });
     const [errors, setErrors] = useState({
+        user_name: '',
         login: '',
         password: '',
         confirmPassword: '',
@@ -20,9 +30,10 @@ export default function SignupPage() {
         setErrors({ ...errors, [name]: '' }); // Сбрасываем ошибку при изменении
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {
+            user_name: formData.user_name.length < 3 ? 'Минимум 3 символа' : '',
             login: formData.login.length < 5 ? 'Минимум 5 символов' : '',
             password: formData.password.length < 5 ? 'Минимум 5 символов' : '',
             confirmPassword: formData.confirmPassword.length < 5 ? 'Минимум 5 символов' : '',
@@ -41,12 +52,30 @@ export default function SignupPage() {
 
         const hasErrors = Object.values(newErrors).some((error) => error);
         if (!hasErrors) {
-            // Заглушка для API
-            console.log('Отправка на /signup:', {
-                login: formData.login,
-                password: formData.password,
-            });
-            // TODO: Реальная отправка fetch на /signup
+            try {
+                // Отправляем данные через Redux thunk
+                await dispatch(signup({
+                    user_name: formData.user_name,
+                    login: formData.login,
+                    password: formData.password,
+                })).unwrap();
+
+                // Устанавливаем флаг успешной регистрации
+                setSignupSuccess(true);
+
+                // Перенаправляем на страницу логина через 2 секунды
+                setTimeout(() => {
+                    navigate('/login', {
+                        state: {
+                            fromSignup: true,
+                            login: formData.login
+                        }
+                    });
+                }, 2000);
+            } catch (err) {
+                // При ошибке показываем сообщение
+                console.error('Ошибка регистрации:', err);
+            }
         }
     };
 
@@ -56,41 +85,64 @@ export default function SignupPage() {
                 <Text variant="h2" className="mb-6 text-center">
                     Регистрация
                 </Text>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                        label="Логин"
-                        name="login"
-                        value={formData.login}
-                        onChange={handleChange}
-                        error={errors.login}
-                        placeholder="Введите логин"
-                    />
-                    <Input
-                        label="Пароль"
-                        name="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        error={errors.password}
-                        placeholder="Введите пароль"
-                    />
-                    <Input
-                        label="Подтвердите пароль"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        error={errors.confirmPassword}
-                        placeholder="Повторите пароль"
-                    />
-                    <button
-                        type="submit"
-                        className="w-full bg-primary-500 text-background font-medium py-2 px-4 rounded-md hover:bg-primary-600 disabled:bg-secondary-500 disabled:cursor-not-allowed"
-                        disabled={Object.values(errors).some((error) => error)}
-                    >
-                        Зарегистрироваться
-                    </button>
-                </form>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-form-error bg-opacity-10 text-form-error rounded-md">
+                        {error.message}
+                    </div>
+                )}
+
+                {signupSuccess && (
+                    <div className="mb-4 p-3 bg-green-100 text-green-800 rounded-md">
+                        Регистрация успешно завершена! Перенаправление на страницу входа...
+                    </div>
+                )}
+
+                {!signupSuccess && (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <Input
+                            label="Имя пользователя"
+                            name="user_name"
+                            value={formData.user_name}
+                            onChange={handleChange}
+                            error={errors.user_name}
+                            placeholder="Введите имя пользователя"
+                        />
+                        <Input
+                            label="Логин"
+                            name="login"
+                            value={formData.login}
+                            onChange={handleChange}
+                            error={errors.login}
+                            placeholder="Введите логин"
+                        />
+                        <Input
+                            label="Пароль"
+                            name="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            error={errors.password}
+                            placeholder="Введите пароль"
+                        />
+                        <Input
+                            label="Подтвердите пароль"
+                            name="confirmPassword"
+                            type="password"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            error={errors.confirmPassword}
+                            placeholder="Повторите пароль"
+                        />
+                        <button
+                            type="submit"
+                            className="w-full bg-primary-500 text-background font-medium py-2 px-4 rounded-md hover:bg-primary-600 disabled:bg-secondary-500 disabled:cursor-not-allowed"
+                            disabled={status === 'loading' || Object.values(errors).some((error) => error)}
+                        >
+                            {status === 'loading' ? 'Регистрация...' : 'Зарегистрироваться'}
+                        </button>
+                    </form>
+                )}
             </div>
         </div>
     );
