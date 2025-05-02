@@ -1,7 +1,6 @@
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-import Header from '../components/Header';
 import Text from '../components/ui/Text';
 
 export default function CategoriesPage() {
@@ -13,8 +12,6 @@ export default function CategoriesPage() {
 
     return (
         <div className="min-h-screen bg-secondary-50">
-            <Header />
-
             <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Категории</Text>
