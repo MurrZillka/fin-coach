@@ -1,0 +1,1239 @@
+{
+	"info": {
+		"_postman_id": "43e94be5-08d5-43cb-82c9-7bbc0ab1b68d",
+		"name": "FinCoach",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26772480"
+	},
+	"item": [
+		{
+			"name": "log/reg",
+			"item": [
+				{
+					"name": "users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/users",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signup (register)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_name\":\"mot\",\n    \"login\": \"mot\", \n    \"password\":\"mot\"\n}\n// Формат ответа\n// {\n//     \"ok\": true\n// }\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"mot\", \n    \"password\":\"mot\"\n}\n\n// Формат ответа\n// {\n//     \"expires_in\": 36000000000000,\n//     \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q\",\n//     \"token_type\": \"Bearer\",\n//     \"role\": 0,\n//     \"userName\": \"mot\",\n//     \"userid\": 0\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2MDMsImlhdCI6MTc0NTc3NjYwMywiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.cl4_Nol3UJIZ6TdHzNv_A6yFgV3y2ykHvGrJJ-mtk5w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// В ответе ожидается статус код 200 - OK",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/logout",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Credit",
+			"item": [
+				{
+					"name": "AddCredit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1000000,\n    \"description\": \"No Is perm\",\n    \"is_permanent\": true\n}\n// Формат ответа\n// {\n//     \"message\": \"Credit added successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/AddCredit",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"AddCredit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCredits",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n//  {\r\n//     \"Credits\": [\r\n//         {\r\n//             \"id\": 2,\r\n//             \"user_id\": 1,\r\n//             \"amount\": 1000000,\r\n//             \"description\": \"No Is perm\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-04-27T00:00:00Z\",\r\n//             \"is_delete\": false\r\n//         },\r\n//         {\r\n//             \"id\": 1,\r\n//             \"user_id\": 1,\r\n//             \"amount\": 1000000,\r\n//             \"description\": \"No Is perm\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"is_delete\": false\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Credits",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Credits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCredits Permanent",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2NDgsImlhdCI6MTc0NTc3NjY0OCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.K_0t97H6Z20vH2atGqqHpuSAytTNNN0IJbeMsZTEI8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Credits\": [\r\n//         {\r\n//             \"id\": 1,\r\n//             \"user_id\": 1,\r\n//             \"amount\": 1000000,\r\n//             \"description\": \"No Is perm\",\r\n//             \"is_permanent\": true,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"is_delete\": false\r\n//         },\r\n//         {\r\n//             \"id\": 2,\r\n//             \"user_id\": 1,\r\n//             \"amount\": 1000000,\r\n//             \"description\": \"No Is perm\",\r\n//             \"is_permanent\": true,\r\n//             \"date\": \"2025-04-27T00:00:00Z\",\r\n//             \"is_delete\": false\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Credits?permanent=true",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Credits"
+							],
+							"query": [
+								{
+									"key": "permanent",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCreditByID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Credit\": {\r\n//         \"id\": 1,\r\n//         \"user_id\": 1,\r\n//         \"amount\": 1000000,\r\n//         \"description\": \"No Is perm\",\r\n//         \"is_permanent\": false,\r\n//         \"date\": \"2025-03-09T00:00:00Z\",\r\n//         \"is_delete\": false\r\n//     }\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Credit/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Credit",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateCreditByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2NDgsImlhdCI6MTc0NTc3NjY0OCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.K_0t97H6Z20vH2atGqqHpuSAytTNNN0IJbeMsZTEI8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1500,\n    \"description\": \"Измененное описание 2\",\n    \"date\":\"2024-09-06\"\n}\n// Формат ответа\n// {\n//     \"message\": \"Credit updated successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Credit/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Credit",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteCreditByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2NDgsImlhdCI6MTc0NTc3NjY0OCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.K_0t97H6Z20vH2atGqqHpuSAytTNNN0IJbeMsZTEI8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"message\": \"Credit deleted successfully\"\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Credit/2",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Credit",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Spendings",
+			"item": [
+				{
+					"name": "AddSpending",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1000,\n    \"description\": \"Просрал\",\n    \"is_permanent\": true,\n    \"category_id\": 2\n}\n\n// Формат ответа\n// {\n//     \"message\": \"Spending added successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/AddSpending",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"AddSpending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSpendings",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Spendings\": [\r\n//         {\r\n//             \"id\": 5,\r\n//             \"user_id\": 1,\r\n//             \"is_delete\": false,\r\n//             \"amount\": 1000,\r\n//             \"description\": \"Просрал\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-04-27T00:00:00Z\",\r\n//             \"category_id\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 2,\r\n//             \"user_id\": 1,\r\n//             \"is_delete\": false,\r\n//             \"amount\": 1000,\r\n//             \"description\": \"Просрал\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"category_id\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 3,\r\n//             \"user_id\": 1,\r\n//             \"is_delete\": false,\r\n//             \"amount\": 1000,\r\n//             \"description\": \"Просрал\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"category_id\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 4,\r\n//             \"user_id\": 1,\r\n//             \"is_delete\": false,\r\n//             \"amount\": 1000,\r\n//             \"description\": \"Просрал\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"category_id\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 1,\r\n//             \"user_id\": 1,\r\n//             \"is_delete\": false,\r\n//             \"amount\": 1000,\r\n//             \"description\": \"Просрал\",\r\n//             \"is_permanent\": false,\r\n//             \"date\": \"2025-02-09T00:00:00Z\",\r\n//             \"category_id\": 1\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Spendings",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Spendings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSpendings Permanent",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2NDgsImlhdCI6MTc0NTc3NjY0OCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.K_0t97H6Z20vH2atGqqHpuSAytTNNN0IJbeMsZTEI8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа в случае ошибки - 404\r\n// {\r\n//     \"error\": \"No spendings found for the user with the specified parameters.\"\r\n// }\r\n// Формат ответа в случае успеха\r\n// {\r\n//     \"Spendings\": [\r\n//         {\r\n//             \"id\": 8,\r\n//             \"user_id\": 1,\r\n//             \"is_delete\": false,\r\n//             \"amount\": 1000,\r\n//             \"description\": \"Просрал\",\r\n//             \"is_permanent\": true,\r\n//             \"date\": \"2025-04-27T00:00:00Z\",\r\n//             \"category_id\": 2\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Spendings?permanent=true&category=2",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Spendings"
+							],
+							"query": [
+								{
+									"key": "permanent",
+									"value": "true"
+								},
+								{
+									"key": "category",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSpendingByID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Spending\": {\r\n//         \"id\": 1,\r\n//         \"user_id\": 1,\r\n//         \"is_delete\": false,\r\n//         \"amount\": 1000,\r\n//         \"description\": \"Просрал\",\r\n//         \"is_permanent\": false,\r\n//         \"date\": \"2025-02-09T00:00:00Z\",\r\n//         \"category_id\": 1\r\n//     }\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Spending/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Spending",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateSpendingByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2NDgsImlhdCI6MTc0NTc3NjY0OCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.K_0t97H6Z20vH2atGqqHpuSAytTNNN0IJbeMsZTEI8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1111,\n    \"description\": \"Измененное описание 3\",\n    \"is_permanent\": true,\n    \"category_id\": 4,\n    \"date\":\"2024-08-05\"\n}\n// Формат ответа\n// {\n//     \"message\": \"Spending updated successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Spending/7",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Spending",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteSpendingByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"message\": \"Spending deleted successfully\"\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Spending/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Spending",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "AddCategory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Одежда\",\n    \"description\":\"для моих шмоток\"\n}\n// Формат ответа\n// {\n//     \"message\": \"Category added successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/AddCategory",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"AddCategory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCategories",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Categories\": [\r\n//         {\r\n//             \"id\": 1,\r\n//             \"name\": \"Еда\",\r\n//             \"description\": \"жралово\",\r\n//             \"is_delete\": false,\r\n//             \"user_id\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 3,\r\n//             \"name\": \"Одежда\",\r\n//             \"description\": \"для моих шмоток\",\r\n//             \"is_delete\": false,\r\n//             \"user_id\": 1\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Categories",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCategoryByID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа:\r\n// {\r\n//     \"Category\": {\r\n//         \"id\": 1,\r\n//         \"name\": \"Еда\",\r\n//         \"description\": \"жралово\",\r\n//         \"is_delete\": false,\r\n//         \"user_id\": 1\r\n//     }\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Category/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Category",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateCategoryByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTI2NDgsImlhdCI6MTc0NTc3NjY0OCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.K_0t97H6Z20vH2atGqqHpuSAytTNNN0IJbeMsZTEI8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Еда\",\n    \"description\": \"жралово\"\n}\n// Формат ответа\n// {\n//     \"message\": \"Category updated successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Category/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Category",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteCategoryByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"message\": \"Category deleted successfully\"\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Category/4",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Category",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Goals",
+			"item": [
+				{
+					"name": "AddGoal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1000000,\n    \"description\": \"На жрачку 4\",\n    \"wish_date\": \"2027-08-05\"\n}\n// Формат ответа\n// {\n//     \"message\": \"Goal added successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/AddGoal",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"AddGoal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGoals",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Goals\": [\r\n//         {\r\n//             \"id\": 2,\r\n//             \"user_id\": 1,\r\n//             \"amount\": 1000000,\r\n//             \"description\": \"На жрачку 4\",\r\n//             \"wish_date\": \"2027-08-05T00:00:00Z\",\r\n//             \"achievement_date\": \"0001-01-01T00:00:00Z\",\r\n//             \"is_achieved\": false,\r\n//             \"is_current\": false,\r\n//             \"is_delete\": false\r\n//         },\r\n//         {\r\n//             \"id\": 1,\r\n//             \"user_id\": 1,\r\n//             \"amount\": 0,\r\n//             \"description\": \"\",\r\n//             \"wish_date\": \"0001-01-01T00:00:00Z\",\r\n//             \"achievement_date\": \"2025-03-09T00:00:00Z\",\r\n//             \"is_achieved\": true,\r\n//             \"is_current\": true,\r\n//             \"is_delete\": false\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Goals",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Goals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetGoal",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Goal\": {\r\n//         \"id\": 1,\r\n//         \"user_id\": 1,\r\n//         \"amount\": 0,\r\n//         \"description\": \"\",\r\n//         \"wish_date\": \"0001-01-01T00:00:00Z\",\r\n//         \"achievement_date\": \"2025-03-09T00:00:00Z\",\r\n//         \"is_achieved\": true,\r\n//         \"is_current\": true,\r\n//         \"is_delete\": false\r\n//     }\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Goal/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Goal",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateGoalByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//     \"amount\": 1111,\n//     \"description\": \"Измененное описание 3\",\n//     \"wish_date\": \"2024-05-05\"\n// }\n\n// Формат ответа\n// {\n//     \"message\": \"Goal updated successfully\"\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Goal/2",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Goal",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CurrentGoal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"message\": \"Goal updated successfully\"\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/CurrentGoal/2",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"CurrentGoal",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetCurrentGoal",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTU3MjQsImlhdCI6MTc0NTc3OTcyNCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.wCxZ2hAnNuiKQ5kD-rIQP2roWJksxos8WAQspbBvw4k",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"Goal\": {\r\n//         \"id\": 2,\r\n//         \"user_id\": 1,\r\n//         \"amount\": 1111,\r\n//         \"description\": \"Измененное описание 3\",\r\n//         \"wish_date\": \"2024-05-05T00:00:00Z\",\r\n//         \"achievement_date\": \"0001-01-01T00:00:00Z\",\r\n//         \"is_achieved\": false,\r\n//         \"is_current\": true,\r\n//         \"is_delete\": false\r\n//     }\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/CurrentGoal",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"CurrentGoal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteGoalByID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"message\": \"Goal deleted successfully\"\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Goal/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Goal",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Balance",
+			"item": [
+				{
+					"name": "Balance",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU4MTYyMzQsImlhdCI6MTc0NTc4MDIzNCwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.gamd13Ma3mp-UPCwpkTJwJCeQUGwre159glg9BEqInA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n// {\r\n//     \"balance\": 1996000\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Balance",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Balance"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MainPage",
+			"item": [
+				{
+					"name": "Recommendations",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU5OTE1OTMsImlhdCI6MTc0NTk1NTU5MywiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjozLCJSb2xlIjowfQ.N8sb3CrFk8fudIzdHb30X2KCXWcZepqK9uOOGeHin1c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n\r\n// {\r\n//     \"Recommendations\": null - если нет рекомендаций\r\n// }\r\n\r\n// ИНАЧЕ\r\n\r\n// {\r\n//     \"Recommendations\": [\r\n//         {\r\n//             \"id\": 5,\r\n//             \"name\": \"Основная часть бюджета уходит на одну категорию Еда\",\r\n//             \"description\": \"Я заметил, что большая часть твоих расходов сосредоточена в категории Еда. Это осознанный приоритет или просто так сложилось? Если ты действительно получаешь от этого удовольствие и пользу — окей. Но если это нечто, что можно оптимизировать, почему бы не попробовать? Например, если это еда вне дома, можно часть недели готовить самому, а если это развлечения — искать более бюджетные альтернативы.\"\r\n//         }\r\n//     ]\r\n// }\r\n\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/Recommendations",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"Recommendations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FinancialOverview",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDU3Nzg4MDEsImlhdCI6MTc0NTc0MjgwMSwiaXNzIjoiYml0b3AtYWRtaW4iLCJ1c2VyX2lkIjoxLCJSb2xlIjowfQ.9-XPLVE_2_lKHw8fPqss7mrzr1jrr0Xl2Y68WvlN57Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// Формат ответа\r\n\r\n// {\r\n//     \"FinancialEntries\": [\r\n//         {\r\n//             \"id\": 2,\r\n//             \"amount\": 1000000,\r\n//             \"date\": \"2025-04-27T00:00:00Z\",\r\n//             \"type\": \"credit\"\r\n//         },\r\n//         {\r\n//             \"id\": 5,\r\n//             \"amount\": 1000,\r\n//             \"date\": \"2025-04-27T00:00:00Z\",\r\n//             \"type\": \"spending\",\r\n//             \"category\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 1,\r\n//             \"amount\": 1000000,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"type\": \"credit\"\r\n//         },\r\n//         {\r\n//             \"id\": 2,\r\n//             \"amount\": 1000,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"type\": \"spending\",\r\n//             \"category\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 3,\r\n//             \"amount\": 1000,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"type\": \"spending\",\r\n//             \"category\": 1\r\n//         },\r\n//         {\r\n//             \"id\": 4,\r\n//             \"amount\": 1000,\r\n//             \"date\": \"2025-03-09T00:00:00Z\",\r\n//             \"type\": \"spending\",\r\n//             \"category\": 1\r\n//         }\r\n//     ]\r\n// }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8888/FinancialOverview",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"FinancialOverview"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
