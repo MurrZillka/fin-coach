@@ -1,15 +1,15 @@
-// src/App.jsx
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { restoreAuth } from './store/authSlice';
-import routes from './routes/index.js';
+import routes from './routes/index.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Header from './components/Header.jsx';
 
 function App() {
     const dispatch = useDispatch();
     const { status } = useSelector((state) => state.auth);
+    //const status = false;
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
