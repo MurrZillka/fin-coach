@@ -11,6 +11,7 @@ const variants = {
     button: 'text-base font-normal text-background',
     tooltip: 'text-xs font-normal text-background',
     navLink: 'text-base font-normal text-secondary-200 hover:text-primary-500',
+    navLinkInactive: 'text-base font-normal text-secondary-200',
     error: 'text-sm font-normal text-accent-error',
     success: 'text-sm font-normal text-accent-success',
     caption: 'text-sm font-normal text-secondary-500',

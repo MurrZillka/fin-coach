@@ -2,40 +2,41 @@ import { Link, useLocation } from 'react-router-dom';
 import Text from './ui/Text';
 
 const links = [
-  { path: '/demo', label: 'Обзор' },
-  { path: '/login', label: 'Войти' },
-  { path: '/signup', label: 'Зарегистрироваться' },
+    { path: '/demo', label: 'Обзор' },
+    { path: '/login', label: 'Войти' },
+    { path: '/signup', label: 'Зарегистрироваться' },
 ];
 
-export default function HeaderAuth() {
-  const location = useLocation();
+const HeaderAuth = () => {
+    const location = useLocation();
+    const allowedPaths = ['/demo', '/login', '/signup'];
 
-  return (
-    <header className="bg-primary-500 px-4 py-2 flex items-center justify-between shadow">
-      <Text variant="h1" className="text-white text-lg font-bold">
-        FinCoach
-      </Text>
-      <nav className="flex space-x-4">
-        {links.map(link => {
-          const isActive = location.pathname === link.path;
-          return isActive ? (
-            <span
-              key={link.path}
-              className="text-white opacity-60 cursor-default font-medium"
-            >
-              {link.label}
+    if (!allowedPaths.includes(location.pathname)) {
+        return null;
+    }
+
+    return (
+        <header className="bg-secondary-800 text-background p-4 shadow-md">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+                <Text variant="h1">Financial Coach</Text>
+                <nav>
+                    {links.map((link) => (
+                        <span key={link.path} className="mx-4">
+              {location.pathname === link.path ? (
+                  <Text variant="navLinkInactive" className="opacity-50">
+                      {link.label}
+                  </Text>
+              ) : (
+                  <Link to={link.path}>
+                      <Text variant="navLink">{link.label}</Text>
+                  </Link>
+              )}
             </span>
-          ) : (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="text-white hover:text-primary-200 transition font-medium"
-            >
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </header>
-  );
-}
+                    ))}
+                </nav>
+            </div>
+        </header>
+    );
+};
+
+export default HeaderAuth;
