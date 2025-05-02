@@ -10,6 +10,8 @@ export default function SignupPage() {
     const navigate = useNavigate();
     const { status, error } = useSelector((state) => state.auth);
     const [signupSuccess, setSignupSuccess] = useState(false);
+    const [localError, setLocalError] = useState(null);
+    const [duplicateLoginError, setDuplicateLoginError] = useState(false);
 
     const [formData, setFormData] = useState({
         user_name: '',
@@ -28,6 +30,13 @@ export default function SignupPage() {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: '' }); // Сбрасываем ошибку при изменении
+
+        // Если меняется логин, сбрасываем флаг ошибки дублирования
+        if (name === 'login') {
+            setDuplicateLoginError(false);
+        }
+
+        if (localError) setLocalError(null); // Сбрасываем локальную ошибку
     };
 
     const handleSubmit = async (e) => {
@@ -75,9 +84,28 @@ export default function SignupPage() {
             } catch (err) {
                 // При ошибке показываем сообщение
                 console.error('Ошибка регистрации:', err);
+
+                if (err.status === 500) {
+                    // Если ошибка 500, скорее всего пользователь с таким логином уже существует
+                    setLocalError({
+                        message: 'Пользователь с таким логином уже существует в системе. Пожалуйста, используйте другой логин.'
+                    });
+                    setDuplicateLoginError(true);
+
+                    // Также устанавливаем ошибку в поле логина
+                    setErrors({
+                        ...errors,
+                        login: 'Этот логин уже занят'
+                    });
+                } else {
+                    setLocalError(err);
+                }
             }
         }
     };
+
+    // Определяем, какую ошибку показать: локальную или из Redux store
+    const displayError = localError || error;
 
     return (
         <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
@@ -86,9 +114,9 @@ export default function SignupPage() {
                     Регистрация
                 </Text>
 
-                {error && (
-                    <div className="mb-4 p-3 bg-form-error bg-opacity-10 text-form-error rounded-md">
-                        {error.message}
+                {displayError && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
+                        {displayError.message}
                     </div>
                 )}
 
@@ -114,7 +142,8 @@ export default function SignupPage() {
                             value={formData.login}
                             onChange={handleChange}
                             error={errors.login}
-                            placeholder="Введите логин"
+                            placeholder="Введите логин (минимум 5 символов)"
+                            className={duplicateLoginError ? "border-red-500" : ""}
                         />
                         <Input
                             label="Пароль"
@@ -123,7 +152,7 @@ export default function SignupPage() {
                             value={formData.password}
                             onChange={handleChange}
                             error={errors.password}
-                            placeholder="Введите пароль"
+                            placeholder="Введите пароль (минимум 5 символов)"
                         />
                         <Input
                             label="Подтвердите пароль"
@@ -137,10 +166,19 @@ export default function SignupPage() {
                         <button
                             type="submit"
                             className="w-full bg-primary-500 text-background font-medium py-2 px-4 rounded-md hover:bg-primary-600 disabled:bg-secondary-500 disabled:cursor-not-allowed"
-                            disabled={status === 'loading' || Object.values(errors).some((error) => error)}
+                            disabled={status === 'loading'}
                         >
                             {status === 'loading' ? 'Регистрация...' : 'Зарегистрироваться'}
                         </button>
+
+                        <div className="text-center mt-4">
+                            <Text variant="body" className="text-secondary-600">
+                                Уже есть аккаунт?{' '}
+                                <a href="/login" className="text-primary-600 hover:underline">
+                                    Войти
+                                </a>
+                            </Text>
+                        </div>
                     </form>
                 )}
             </div>
