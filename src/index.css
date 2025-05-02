@@ -12,4 +12,5 @@
     --color-accent-error: #ef4444; /* red-500 */
     --color-accent-warning: #eab308; /* yellow-500 */
     --color-background: #ffffff; /* white */
+    --color-form-error: #dc2626; /* red-600 */
 }
