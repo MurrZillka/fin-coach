@@ -12,7 +12,6 @@ export default function SignupPage() {
 
     const [signupSuccess, setSignupSuccess] = useState(false);
     const [localError, setLocalError] = useState(null);
-    const [duplicateLoginError, setDuplicateLoginError] = useState(false);
 
     const [formData, setFormData] = useState({
         user_name: '',
@@ -31,11 +30,6 @@ export default function SignupPage() {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: '' }); // Сбрасываем ошибку при изменении
-
-        // Если меняется логин, сбрасываем флаг ошибки дублирования
-        if (name === 'login') {
-            setDuplicateLoginError(false);
-        }
 
         if (localError) setLocalError(null); // Сбрасываем локальную ошибку
     };
@@ -86,20 +80,22 @@ export default function SignupPage() {
                 // При ошибке показываем сообщение
                 console.error('Ошибка регистрации:', err);
 
-                if (err.status === 500) {
-                    // Если ошибка 500, скорее всего пользователь с таким логином уже существует
+                if (err.status === 409) {
+                    // Если ошибка 409, пользователь с таким логином уже существует
                     setLocalError({
-                        message: 'Пользователь с таким логином уже существует в системе. Пожалуйста, используйте другой логин.'
+                        message: 'Извините, пользователь с таким логином уже существует.'
                     });
-                    setDuplicateLoginError(true);
 
                     // Также устанавливаем ошибку в поле логина
                     setErrors({
                         ...errors,
-                        login: 'Этот логин уже занят'
+                        login: 'Извините, такой логин занят'
                     });
                 } else {
-                    setLocalError(err);
+                    // Любая другая ошибка
+                    setLocalError({
+                        message: 'Извините, ошибка на сервере. Повторите попытку позже.'
+                    });
                 }
             }
         }
@@ -144,7 +140,6 @@ export default function SignupPage() {
                             onChange={handleChange}
                             error={errors.login}
                             placeholder="Введите логин (минимум 5 символов)"
-                            className={duplicateLoginError ? "border-red-500" : ""}
                         />
                         <Input
                             label="Пароль"
