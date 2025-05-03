@@ -54,11 +54,19 @@ const useAuthStore = create((set) => ({
         }
     },
 
-    logout: async () => {
+    logout: async (token) => {
         set({ status: 'loading' });
         try {
-            await logoutApi();
+            // Вызываем API только если есть токен
+            if (token) {
+                await logoutApi(token);
+            }
+
+            // Очищаем localStorage
             localStorage.removeItem('userName');
+            localStorage.removeItem('token');
+
+            // Сбрасываем состояние
             set({
                 user: null,
                 isAuthenticated: false,
@@ -66,7 +74,17 @@ const useAuthStore = create((set) => ({
                 error: null
             });
         } catch (error) {
-            set({ status: 'failed', error });
+            console.error('Ошибка при выходе:', error);
+            // Даже при ошибке очищаем данные пользователя
+            localStorage.removeItem('userName');
+            localStorage.removeItem('token');
+
+            set({
+                user: null,
+                isAuthenticated: false,
+                status: 'idle',
+                error: null
+            });
         }
     },
 

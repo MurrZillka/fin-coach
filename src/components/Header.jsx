@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../store/authSlice';
+import useAuthStore from '../stores/authStore';
 import Text from './ui/Text';
 
 export default function Header() {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const auth = useSelector(state => state.auth);
+    const { isAuthenticated, logout } = useAuthStore();
 
     // Простая функция для вывода имени пользователя
     const getUserName = () => {
@@ -17,13 +15,15 @@ export default function Header() {
 
     // Обработчик выхода - без лишних эффектов и зависимостей
     const handleLogout = () => {
-        // Важно: сначала диспатчим действие logout, затем очищаем localStorage,
-        // и только потом выполняем навигацию
-        dispatch(logout());
-        localStorage.removeItem('userName');
-        localStorage.removeItem('token');
+        // Получаем токен из localStorage перед его удалением
+        const token = localStorage.getItem('token');
 
-        // Переходим на страницу логина сразу же, без задержек
+        // Вызываем logout из Zustand-стора с токеном
+        logout(token);
+
+        // localStorage будет очищен внутри logout в authStore
+
+        // Переходим на страницу логина сразу же
         navigate('/login', { replace: true });
     };
 
@@ -49,7 +49,7 @@ export default function Header() {
                     </nav>
                 </div>
 
-                {auth.isAuthenticated && (
+                {isAuthenticated && (
                     <div className="flex items-center">
                         <Text variant="body" className="mr-4 text-background">
                             {getUserName()}

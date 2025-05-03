@@ -1,14 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux';
 import App from './App.jsx';
-import { store } from './store/index.js';
 import './index.css';
+
+// Инициализируем authStore при загрузке приложения
+import useAuthStore from './stores/authStore';
+// Вызываем инициализацию состояния
+const initAuth = useAuthStore.getState().initAuth;
+initAuth();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <Provider store={store}>
-            <App />
-        </Provider>
-    </React.StrictMode>
+        <App />
+    </React.StrictMode>,
 );
