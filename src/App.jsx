@@ -3,6 +3,7 @@ import {BrowserRouter as Router} from 'react-router-dom';
 import useAuthStore from './stores/authStore';
 import LayoutWithHeader from './components/LayoutWithHeader';
 import TestApi from "./pages/TestApi.jsx";
+import Modal from "./components/ui/Modal.jsx";
 
 function App() {
     const { status, restoreAuth } = useAuthStore();

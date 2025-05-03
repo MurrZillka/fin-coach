@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
 import useAuthStore from '../stores/authStore';
+import Modal from "../components/ui/Modal.jsx";
 
 export default function LoginPage() {
     const navigate = useNavigate();

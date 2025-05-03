@@ -5,7 +5,7 @@ import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 import Text from '../components/ui/Text';
 import useCategoryStore from '../stores/categoryStore';
-import CategoryModal from '../components/ui/CategoryModal';
+import Modal from '../components/ui/Modal.jsx';
 
 export default function CategoriesPage() {
     const {
@@ -125,7 +125,7 @@ export default function CategoriesPage() {
                     </div>
                 )}
                 {isAddModalOpen && (
-                    <CategoryModal
+                    <Modal
                         category={editCategory}
                         onClose={() => {
                             setIsAddModalOpen(false);
