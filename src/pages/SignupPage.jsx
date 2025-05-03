@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
-import { signup } from '../store/authSlice';
+import useAuthStore from '../stores/authStore';
 
 export default function SignupPage() {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { status, error } = useSelector((state) => state.auth);
+
+    // Получаем состояние и методы из Zustand-стора вместо Redux
+    const { status, error, signup } = useAuthStore();
+
     const [signupSuccess, setSignupSuccess] = useState(false);
     const [localError, setLocalError] = useState(null);
     const [duplicateLoginError, setDuplicateLoginError] = useState(false);
@@ -62,12 +63,12 @@ export default function SignupPage() {
         const hasErrors = Object.values(newErrors).some((error) => error);
         if (!hasErrors) {
             try {
-                // Отправляем данные через Redux thunk
-                await dispatch(signup({
+                // Отправляем данные через Zustand вместо Redux
+                await signup({
                     user_name: formData.user_name,
                     login: formData.login,
                     password: formData.password,
-                })).unwrap();
+                });
 
                 // Устанавливаем флаг успешной регистрации
                 setSignupSuccess(true);
@@ -104,7 +105,7 @@ export default function SignupPage() {
         }
     };
 
-    // Определяем, какую ошибку показать: локальную или из Redux store
+    // Определяем, какую ошибку показать: локальную или из Zustand-стора
     const displayError = localError || error;
 
     return (

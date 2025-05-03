@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
-import { login, clearError } from '../store/authSlice';
+import useAuthStore from '../stores/authStore';
 
 export default function LoginPage() {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const { status, error, isAuthenticated } = useSelector((state) => state.auth);
+
+    // Получаем состояние и методы из Zustand-стора
+    const { status, error, isAuthenticated, login, clearError } = useAuthStore();
 
     // Проверка наличия данных от страницы регистрации
     const fromSignup = location.state?.fromSignup;
@@ -25,10 +25,10 @@ export default function LoginPage() {
         password: '',
     });
 
-    // Очищаем ошибки Redux при монтировании
+    // Очищаем ошибки при монтировании
     useEffect(() => {
-        dispatch(clearError());
-    }, [dispatch]);
+        clearError();
+    }, [clearError]);
 
     // Редирект, если пользователь уже авторизован
     useEffect(() => {
@@ -57,11 +57,11 @@ export default function LoginPage() {
         const hasErrors = Object.values(newErrors).some((error) => error);
         if (!hasErrors) {
             try {
-                // Отправляем данные через Redux thunk
-                const result = await dispatch(login({
+                // Отправляем данные через Zustand вместо Redux
+                const result = await login({
                     login: formData.login,
                     password: formData.password,
-                })).unwrap();
+                });
 
                 // Сохраняем имя пользователя в localStorage для использования в хедере
                 if (result && result.userName) {
