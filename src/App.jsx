@@ -17,7 +17,6 @@ function App() {
     return (
         <Router>
             <LayoutWithHeader />
-            <TestApi/>
         </Router>
     );
 }
