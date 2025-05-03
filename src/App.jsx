@@ -1,20 +1,18 @@
 import {useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
 import {BrowserRouter as Router} from 'react-router-dom';
-import {restoreAuth} from './store/authSlice';
+import useAuthStore from './stores/authStore';
 import LayoutWithHeader from './components/LayoutWithHeader';
 import TestApi from "./pages/TestApi.jsx";
 
 function App() {
-    const dispatch = useDispatch();
-    const { status } = useSelector((state) => state.auth);
+    const { status, restoreAuth } = useAuthStore();
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
         if (savedToken && status === 'idle') {
-            dispatch(restoreAuth(savedToken));
+            restoreAuth(savedToken);
         }
-    }, [dispatch, status]);
+    }, [status, restoreAuth]);
 
     return (
         <Router>
