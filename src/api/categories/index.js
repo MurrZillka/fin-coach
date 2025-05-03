@@ -1,98 +1,82 @@
 import axios from 'axios';
-import { getUseMocks, API_BASE_URL } from '../config';
-import { mockCategories } from './mocks';
+import { API_BASE_URL } from '../config'; // Убрали getUseMocks
 
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: { 'Content-Type': 'application/json' },
 });
 
+// Хелпер для обработки ответов
+const handleResponse = (response) => {
+    // Предполагаем, что успешные ответы всегда имеют status 2xx
+    return { data: response.data, error: null };
+};
+
+// Хелпер для обработки ошибок
+const handleError = (error) => {
+    console.error('API Error:', error); // Логируем ошибку для дебага
+    return {
+        data: null,
+        error: {
+            message: error.response?.data?.error || error.message || 'An unexpected error occurred',
+            status: error.response?.status || 500,
+        },
+    };
+};
+
 export const addCategory = async (data, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCategories.addCategory(), error: null };
         const response = await api.post('/AddCategory', data, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return { data: response.data, error: null };
+        return handleResponse(response);
     } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to add category',
-                status: error.response?.status || 500,
-            },
-        };
+        return handleError(error);
     }
 };
 
 export const getCategories = async (token) => {
     try {
-        if (getUseMocks()) return { data: { categories: (await mockCategories.getCategories()).Categories }, error: null };
         const response = await api.get('/Categories', {
             headers: { Authorization: `Bearer ${token}` },
         });
+        // Извлекаем Categories из ответа, как в Postman
         return { data: { categories: response.data.Categories }, error: null };
     } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to fetch categories',
-                status: error.response?.status || 500,
-            },
-        };
+        return handleError(error);
     }
 };
 
 export const getCategoryById = async (id, token) => {
     try {
-        if (getUseMocks()) return { data: (await mockCategories.getCategoryById(id)).Category, error: null };
         const response = await api.get(`/Category/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
+        // Извлекаем Category из ответа, как в Postman
         return { data: response.data.Category, error: null };
     } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to fetch category',
-                status: error.response?.status || 500,
-            },
-        };
+        return handleError(error);
     }
 };
 
 export const updateCategoryById = async (id, data, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCategories.updateCategoryById(), error: null };
         const response = await api.put(`/Category/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return { data: response.data, error: null };
+        return handleResponse(response);
     } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to update category',
-                status: error.response?.status || 500,
-            },
-        };
+        return handleError(error);
     }
 };
 
 export const deleteCategoryById = async (id, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCategories.deleteCategoryById(), error: null };
         const response = await api.delete(`/Category/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return { data: response.data, error: null };
+        return handleResponse(response);
     } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to delete category',
-                status: error.response?.status || 500,
-            },
-        };
+        return handleError(error);
     }
 };
