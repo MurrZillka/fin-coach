@@ -7,90 +7,92 @@ import useAuthStore from '../stores/authStore';
 export default function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
-
-    // Получаем состояние и методы из Zustand-стора
-    const { status, error, isAuthenticated, login, clearError } = useAuthStore();
-
-    // Проверка наличия данных от страницы регистрации
-    const fromSignup = location.state?.fromSignup;
-    const prefilledLogin = location.state?.login || '';
+    const { login: storeLogin, status, error } = useAuthStore();
 
     const [formData, setFormData] = useState({
-        login: prefilledLogin,
+        login: '',
         password: '',
     });
-
     const [errors, setErrors] = useState({
         login: '',
         password: '',
     });
+    const [localError, setLocalError] = useState(null);
 
-    // Очищаем ошибки при монтировании
+    // Если пользователь перешел со страницы регистрации, заполняем поле логина
     useEffect(() => {
-        clearError();
-    }, [clearError]);
-
-    // Редирект, если пользователь уже авторизован
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/main');
+        if (location.state?.fromSignup && location.state?.login) {
+            setFormData(prev => ({
+                ...prev,
+                login: location.state.login
+            }));
         }
-    }, [isAuthenticated, navigate]);
+    }, [location.state]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: '' });
+
+        // Сбрасываем ошибку при изменении формы
+        if (localError) setLocalError(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Валидация формы
+        // Проверяем, что поля не пустые
         const newErrors = {
-            login: formData.login.length < 3 ? 'Минимум 3 символа' : '',
-            password: formData.password.length < 5 ? 'Минимум 5 символов' : '',
+            login: formData.login ? '' : 'Логин обязателен',
+            password: formData.password ? '' : 'Пароль обязателен',
         };
 
         setErrors(newErrors);
 
-        const hasErrors = Object.values(newErrors).some((error) => error);
-        if (!hasErrors) {
+        // Если нет ошибок в форме, отправляем запрос
+        if (!newErrors.login && !newErrors.password) {
             try {
-                // Отправляем данные через Zustand вместо Redux
-                const result = await login({
-                    login: formData.login,
-                    password: formData.password,
-                });
+                await storeLogin(formData);
 
-                // Сохраняем имя пользователя в localStorage для использования в хедере
-                if (result && result.userName) {
-                    localStorage.setItem('userName', result.userName);
-                }
-
-                // При успешном входе navigate не нужен - его выполнит useEffect
+                // При успешном входе перенаправляем на главную страницу
+                navigate('/main');
             } catch (err) {
                 console.error('Ошибка входа:', err);
+
+                if (err.status === 403) {
+                    // Если ошибка 403 - неверный логин или пароль
+                    setLocalError({
+                        message: 'Неверный логин или пароль. Пожалуйста, проверьте введенные данные.'
+                    });
+                } else {
+                    // Любая другая ошибка
+                    setLocalError({
+                        message: 'Извините, ошибка на сервере. Повторите попытку позже.'
+                    });
+                }
             }
         }
     };
+
+    // Определяем, какую ошибку показать: локальную или из Zustand-стора
+    const displayError = localError || error;
 
     return (
         <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
             <div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-md">
                 <Text variant="h2" className="mb-6 text-center">
-                    Вход в систему
+                    Вход в аккаунт
                 </Text>
 
-                {fromSignup && (
-                    <div className="mb-4 p-3 bg-green-100 text-green-800 rounded-md">
-                        Регистрация прошла успешно! Теперь вы можете войти в систему.
+                {displayError && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
+                        {displayError.message}
                     </div>
                 )}
 
-                {error && (
-                    <div className="mb-4 p-3 bg-form-error bg-opacity-10 text-form-error rounded-md">
-                        {error.message}
+                {location.state?.fromSignup && (
+                    <div className="mb-4 p-3 bg-green-100 text-green-800 rounded-md">
+                        Регистрация успешно завершена! Пожалуйста, войдите в свой аккаунт.
                     </div>
                 )}
 
@@ -101,7 +103,7 @@ export default function LoginPage() {
                         value={formData.login}
                         onChange={handleChange}
                         error={errors.login}
-                        placeholder="Введите логин"
+                        placeholder="Введите ваш логин"
                     />
                     <Input
                         label="Пароль"
@@ -110,19 +112,19 @@ export default function LoginPage() {
                         value={formData.password}
                         onChange={handleChange}
                         error={errors.password}
-                        placeholder="Введите пароль"
+                        placeholder="Введите ваш пароль"
                     />
                     <button
                         type="submit"
                         className="w-full bg-primary-500 text-background font-medium py-2 px-4 rounded-md hover:bg-primary-600 disabled:bg-secondary-500 disabled:cursor-not-allowed"
                         disabled={status === 'loading'}
                     >
-                        {status === 'loading' ? 'Выполняется вход...' : 'Войти'}
+                        {status === 'loading' ? 'Вход...' : 'Войти'}
                     </button>
 
                     <div className="text-center mt-4">
                         <Text variant="body" className="text-secondary-600">
-                            Ещё нет аккаунта?{' '}
+                            Нет аккаунта?{' '}
                             <a href="/signup" className="text-primary-600 hover:underline">
                                 Зарегистрироваться
                             </a>
