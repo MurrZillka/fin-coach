@@ -35,9 +35,10 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
 
     return (
         // --- Измененная строка здесь ---
-        <div className="fixed inset-0 bg-gray-100 bg-opacity-40 flex items-center justify-center z-50">
-            {/* --- Конец измененной строки --- */}
-            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center z-50" // Убираем классы bg-gray-200 и bg-opacity-40
+             style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}>
+            {/* --- Конец {{ backgroundColor: '#d1ebdd'}}измененной строки --- */}
+            <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300">
                 <Text variant="h2" className="mb-4 text-center">
                     {title}
                 </Text>
