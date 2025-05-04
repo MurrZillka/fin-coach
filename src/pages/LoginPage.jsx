@@ -86,7 +86,7 @@ export default function LoginPage() {
                     });
                 } else {
                     setLocalError({
-                        message: `Ошибка входа: ${errorMessage}. Пожалуйста, повторите попытку позже.`
+                        message: `Ошибка связи или сервера: ${errorMessage}. Пожалуйста, повторите попытку позже.`
                     });
                 }
             }
