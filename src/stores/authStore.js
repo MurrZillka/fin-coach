@@ -14,49 +14,36 @@ const useAuthStore = create((set) => ({
     login: async (credentials) => {
         set({ status: 'loading', error: null }); // Сбрасываем ошибку стора в начале
         try {
-            // --- ВОССТАНОВЛЕННЫЙ КОД: ВЫЗОВ API И ПОЛУЧЕНИЕ РЕЗУЛЬТАТА ---
-            // Предполагаем, что loginApi возвращает { data: { access_token, userName, ... }, error: null }
-            // или { data: null, error: { message: ..., status: ... } }
             const result = await loginApi(credentials); // Получаем результат в виде { data, error }
-            // --- КОНЕЦ ВОССТАНОВЛЕННОГО КОДА ---
 
             if (result.error) {
-                // Если API вернуло ошибку в формате { data: null, error: {...} }
-                set({ status: 'failed', error: result.error }); // Устанавливаем ошибку стора
-                // Пробрасываем ошибку дальше, чтобы компонент мог ее перехватить
+                set({ status: 'failed', error: result.error });
                 throw result.error; // Выбрасываем структурированную ошибку из API слоя
             }
 
-            // Если успех (result.error === null), обрабатываем data
             const { data } = result; // Деструктурируем data из result
 
-            // --- ЛОГИКА: СОХРАНЕНИЕ ТОКЕНА И USERNAME В LOCALSTORAGE ---
             if (data && data.access_token) {
                 localStorage.setItem('token', data.access_token);
             }
             if (data && data.userName) {
                 localStorage.setItem('userName', data.userName);
             }
-            // --- КОНЕЦ ЛОГИКИ ---
 
-
-            // Обновляем состояние стора с полученными данными
             set({
-                user: data, // data теперь содержит access_token
+                user: data,
                 isAuthenticated: true,
                 status: 'succeeded',
                 error: null // Успех, ошибки нет
             });
 
-            return data; // Возвращаем данные, если нужно компоненту
+            return data;
         } catch (error) { // Этот catch ловит ошибки, которые НЕ являются результатом { data, error } от API
-            console.error('Непредвиденная ошибка входа в API (из authStore):', error); // Логируем непредвиденную ошибку
+            console.error('Непредвиденная ошибка входа в API (из authStore):', error);
 
-            // Устанавливаем более общую ошибку в сторе для непредвиденных ситуаций
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка авторизации', status: error.status || 500 };
             set({ status: 'failed', error: unexpectedError });
 
-            // Пробрасываем оригинальную ошибку дальше
             throw error;
         }
     },
@@ -71,12 +58,14 @@ const useAuthStore = create((set) => ({
                 throw result.error;
             }
 
+            const { data } = result; // Деструктурируем data из result
+
             // Для регистрации обычно не требуется сохранять токен сразу,
-            // пользователь должен войти после регистрации
+            // пользователь должен войти после регистрации.
 
             set({ status: 'succeeded', error: null }); // Успех, ошибки нет
-            return result.data;
-        } catch (error) {
+            return data; // Возвращаем данные, если нужно компоненту
+        } catch (error) { // Этот catch ловит ошибки, которые НЕ являются результатом { data, error } от API
             console.error('Непредвиденная ошибка регистрации в API (из authStore):', error);
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при регистрации', status: error.status || 500 };
             set({ status: 'failed', error: unexpectedError });
@@ -118,7 +107,6 @@ const useAuthStore = create((set) => ({
 
     clearError: () => set({ error: null }),
 
-    // ИНИЦИАЛИЗАЦИЯ ИЗ LOCALSTORAGE
     initAuth: () => {
         const token = localStorage.getItem('token');
         const userName = localStorage.getItem('userName');

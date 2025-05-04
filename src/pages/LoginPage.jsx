@@ -107,8 +107,10 @@ export default function LoginPage() {
 
                 {/* Блок для отображения ошибки теперь использует только displayError (локальное состояние) */}
                 {displayError && (
-                    <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
-                        {displayError.message}
+                    <div className={`mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md overflow-hidden ${displayError ? 'error-visible' : 'error-hidden'}`}>
+                        {/* Добавляем условное отображение текста внутри, чтобы не было видно сообщения в скрытом состоянии,
+       или чтобы текст рендерился только при наличии ошибки */}
+                        {displayError && displayError.message}
                     </div>
                 )}
 
