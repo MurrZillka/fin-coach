@@ -3,19 +3,17 @@
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
-import Text from './ui/Text.jsx'; // Убедись, что путь к компоненту Text правильный относительно этой папки
+import Text from './ui/Text.jsx'; // Убедись, что путь правильный
 
 export default function Header() {
     const navigate = useNavigate();
     const { isAuthenticated, logout } = useAuthStore();
 
-    // Простая функция для вывода имени пользователя
     const getUserName = () => {
         const storedName = localStorage.getItem('userName');
         return storedName || 'Пользователь';
     };
 
-    // Обработчик выхода
     const handleLogout = () => {
         const token = localStorage.getItem('token');
         logout(token);
@@ -23,13 +21,13 @@ export default function Header() {
     };
 
     return (
-        // ДОБАВЛЕН КЛАСС h-16 для фиксированной высоты
-        <header className="bg-secondary-800 text-background p-4 shadow-md h-16">
-            <div className="max-w-7xl mx-auto flex justify-between items-center h-full"> {/* h-full для заполнения высоты хедера */}
+        // Убран класс h-16. Высота определяется содержимым и p-4. Добавлен flex-shrink-0.
+        <header className="bg-secondary-800 text-background p-5 shadow-md flex-shrink-0">
+            <div className="max-w-7xl mx-auto flex justify-between items-center h-full"> {/* h-full и items-center */}
                 <Text variant="h1">Financial Coach</Text>
 
-                <div className="flex items-center h-full"> {/* h-full */}
-                    <nav className="h-full flex items-center"> {/* h-full и flex items-center для выравнивания */}
+                <div className="flex items-center h-full">
+                    <nav className="h-full flex items-center">
                         <Link to="/main" className="mx-4">
                             <Text variant="navLink">Главная</Text>
                         </Link>
@@ -39,6 +37,7 @@ export default function Header() {
                         <Link to="/spendings" className="mx-4">
                             <Text variant="navLink">Расходы</Text>
                         </Link>
+                        {/* ИСПРАВЛЕНА ОПЕЧАТКА ЗДЕСЬ </ш> -> </Text> */}
                         <Link to="/credits" className="mx-4">
                             <Text variant="navLink">Доходы</Text>
                         </Link>
@@ -46,7 +45,7 @@ export default function Header() {
                 </div>
 
                 {isAuthenticated && (
-                    <div className="flex items-center h-full"> {/* h-full */}
+                    <div className="flex items-center h-full">
                         <Text variant="body" className="mr-4 text-background">
                             {getUserName()}
                         </Text>
