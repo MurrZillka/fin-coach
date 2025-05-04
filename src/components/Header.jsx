@@ -1,10 +1,7 @@
 // src/components/Header.jsx
-
-// Удаляем Link и useLocation, т.к. они теперь внутри NavLinkItem
-import { useNavigate } from 'react-router-dom'; // useNavigate оставляем для handleLogout
-import useAuthStore from '../stores/authStore'; // Убедись, что путь корректный
-
-import Text from './ui/Text'; // Убедись, что путь правильный
+import { useNavigate } from 'react-router-dom';
+import useAuthStore from '../stores/authStore';
+import Text from './ui/Text';
 import IconButton from './ui/IconButton'; // Убедись, что путь правильный
 // --- Импортируем новый компонент NavLinkItem ---
 // Убедись, что путь к NavLinkItem корректный из папки src/components
@@ -13,6 +10,7 @@ import NavLinkItem from './ui/NavLinkItem';
 
 
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
+import HeaderAuth from "./HeaderAuth.jsx";
 
 
 export default function Header() {
@@ -85,3 +83,5 @@ export default function Header() {
         </header>
     );
 }
+
+Header.displayName = 'Header'
