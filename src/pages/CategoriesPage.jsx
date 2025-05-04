@@ -177,7 +177,7 @@ export default function CategoriesPage() {
 
 
     return (
-        <div className="min-h-screen bg-secondary-50">
+        <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
                 {/* Заголовок страницы и кнопка "Добавить категорию" */}
                 <div className="flex justify-between items-center mb-4">

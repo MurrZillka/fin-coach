@@ -9,7 +9,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
 
     return (
         // Подложка модала (используем стили, которые обсуждали)
-        <div className="fixed inset-0 flex items-center justify-center z-50"
+        <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50"
              style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}
         > {/* Здесь ты можешь поправить bg-opacity, когда разберешься со стилями */}
             <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300"

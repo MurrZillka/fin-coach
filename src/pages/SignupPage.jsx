@@ -1,6 +1,6 @@
 // src/pages/SignupPage.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
 // Импортируем обновленный useAuthStore
@@ -11,7 +11,7 @@ export default function SignupPage() {
 
     // Из стора берем только status и signup. Ошибку для отображения на этой странице
     // будем хранить локально.
-    const { status, signup } = useAuthStore(); // Убрали error из деструктуризации
+    const {status, signup} = useAuthStore(); // Убрали error из деструктуризации
 
     const [signupSuccess, setSignupSuccess] = useState(false);
     // Локальное состояние для отображения ошибки API/регистрации
@@ -31,9 +31,9 @@ export default function SignupPage() {
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-        setErrors({ ...errors, [name]: '' }); // Сбрасываем ошибку валидации для этого поля
+        const {name, value} = e.target;
+        setFormData({...formData, [name]: value});
+        setErrors({...errors, [name]: ''}); // Сбрасываем ошибку валидации для этого поля
 
         // Сбрасываем локальную ошибку API при изменении формы
         if (localError) setLocalError(null);
@@ -129,15 +129,17 @@ export default function SignupPage() {
 
 
     return (
-        <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
-            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className=" bg-secondary-50 flex items-center justify-center">
+            <div style={{backgroundColor: `rgb(var(--color-background))`}}
+                 className="p-6 rounded-lg shadow-lg w-full max-w-md mt-[10vh]">
                 <Text variant="h2" className="mb-6 text-center">
                     Регистрация
                 </Text>
 
                 {/* --- ИЗМЕНЕННЫЙ БЛОК ДЛЯ ОТОБРАЖЕНИЯ ОШИБКИ --- */}
                 {/* Всегда рендерим div, но управляем его классами для плавного появления/исчезновения */}
-                <div className={`mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md overflow-hidden ${displayError ? 'error-visible' : 'error-hidden'}`}>
+                <div
+                    className={`mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md overflow-hidden ${displayError ? 'error-visible' : 'error-hidden'}`}>
                     {/* Отображаем текст ошибки только если она есть, чтобы div не занимал место, если его стили transition не учитывают height/margin */}
                     {displayError && displayError.message}
                 </div>

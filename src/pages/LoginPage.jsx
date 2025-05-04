@@ -99,8 +99,8 @@ export default function LoginPage() {
 
 
     return (
-        <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
-            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className="bg-secondary-50 flex items-center justify-center">
+            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md mt-[15vh]">
                 <Text variant="h2" className="mb-6 text-center">
                     Вход в аккаунт
                 </Text>

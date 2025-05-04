@@ -3,7 +3,7 @@ import Text from '../components/ui/Text';
 
 const DemoPage = () => {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className=" flex items-center justify-center bg-background">
             <div className="flex flex-col space-y-4">
                 <Link to="/login">
                     <Text variant="body" className="text-primary hover:text-primary-dark">
