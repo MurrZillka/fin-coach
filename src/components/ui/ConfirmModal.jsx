@@ -9,8 +9,11 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
 
     return (
         // Подложка модала (используем стили, которые обсуждали)
-        <div className="fixed inset-0 bg-gray-200 bg-opacity-40 flex items-center justify-center z-50"> {/* Здесь ты можешь поправить bg-opacity, когда разберешься со стилями */}
-            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center z-50"
+             style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}
+        > {/* Здесь ты можешь поправить bg-opacity, когда разберешься со стилями */}
+            <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300"
+            >
                 {/* Заголовок модала */}
                 <Text variant="h3" className="mb-4 text-center">
                     {title || 'Подтверждение действия'} {/* Если заголовок не передан, используем дефолтный */}
@@ -22,7 +25,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
                 </Text>
 
                 {/* Кнопки Отмена и Подтвердить */}
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center mt-4 gap-4">
                     <TextButton
                         onClick={onClose} // Кнопка Отмена просто закрывает модал
                         style={{
