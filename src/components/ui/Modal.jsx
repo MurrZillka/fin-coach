@@ -34,7 +34,9 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        // --- Измененная строка здесь ---
+        <div className="fixed inset-0 bg-gray-100 bg-opacity-40 flex items-center justify-center z-50">
+            {/* --- Конец измененной строки --- */}
             <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md">
                 <Text variant="h2" className="mb-4 text-center">
                     {title}

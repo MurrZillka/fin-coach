@@ -2,6 +2,7 @@ import {useEffect} from 'react';
 import {BrowserRouter as Router} from 'react-router-dom';
 import useAuthStore from './stores/authStore';
 import LayoutWithHeader from './components/LayoutWithHeader';
+import TestApi from "./pages/TestApi.jsx";
 
 function App() {
     const { status, restoreAuth } = useAuthStore();
@@ -16,6 +17,7 @@ function App() {
     return (
         <Router>
             <LayoutWithHeader />
+            <TestApi/>
         </Router>
     );
 }
