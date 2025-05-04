@@ -1,11 +1,11 @@
+//src/App.jsx
 import {useEffect} from 'react';
 import {BrowserRouter as Router} from 'react-router-dom';
 import useAuthStore from './stores/authStore';
 import LayoutWithHeader from './components/LayoutWithHeader';
-import TestApi from "./pages/TestApi.jsx";
 
 function App() {
-    const { status, restoreAuth } = useAuthStore();
+    const {status, restoreAuth} = useAuthStore();
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
@@ -16,8 +16,7 @@ function App() {
 
     return (
         <Router>
-            <LayoutWithHeader />
-            <TestApi/>
+            <LayoutWithHeader/>
         </Router>
     );
 }

@@ -1,18 +1,19 @@
 // src/pages/CategoriesPage.jsx
-import {useState, useEffect, useMemo} from 'react';
+import {useEffect} from 'react';
 import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 import Text from '../components/ui/Text';
-// Импортируем обновленный стор категорий
 import useCategoryStore from '../stores/categoryStore';
-// Импортируем универсальный компонент модального окна формы
-import Modal from '../components/ui/Modal.jsx';
-// Импортируем новый компонент модального окна подтверждения
-import ConfirmModal from '../components/ui/ConfirmModal.jsx';
+// --- УДАЛЯЕМ ЛОКАЛЬНЫЕ ИМПОРТЫ МОДАЛОВ, ТАК КАК ОНИ РЕНДЕРЯТСЯ ВЫШЕ ---
+// import Modal from '../components/ui/Modal.jsx'; // Эти компоненты теперь импортируются в LayoutWithHeader
+// import ConfirmModal from '../components/ui/ConfirmModal.jsx'; // Эти компоненты теперь импортируются в LayoutWithHeader
+// --- Конец УДАЛЕНИЯ ---
+// --- НОВЫЙ ИМПОРТ ---
+import useModalStore from '../stores/modalStore.js'; // Импортируем стор модалов
+// --- Конец НОВОГО ИМПОРТА ---
 
 
-// Определяем структуру полей для формы категории.
 const categoryFields = [
     {name: 'name', label: 'Название', required: true, type: 'text', placeholder: 'Например: Еда'},
     {
@@ -26,128 +27,141 @@ const categoryFields = [
 
 
 export default function CategoriesPage() {
-    // Получаем состояние и действия из стора категорий
     const {
-        categories, // Список категорий
-        loading, // Статус загрузки (из стора)
-        error, // Ошибка (из стора)
-        fetchCategories, // Действие загрузки категорий
-        deleteCategory, // Действие удаления категории
-        addCategory, // Действие добавления категории
-        updateCategory, // Действие обновления категории
-        clearError // Действие сброса ошибки в сторе
+        categories,
+        loading,
+        error,
+        fetchCategories,
+        deleteCategory,
+        addCategory,
+        updateCategory,
+        clearError
     } = useCategoryStore();
 
-    // --- СОСТОЯНИЕ ДЛЯ Modal (добавление/редактирование) ---
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Открыт ли модал добавления/редактирования
-    const [editCategory, setEditCategory] = useState(null); // Данные категории для редактирования (null для добавления)
-    // const [modalError, setModalError] = useState(null); // Локальная ошибка модала форм - БОЛЬШЕ НЕ НУЖНА ДЛЯ ОТОБРАЖЕНИЯ ВВЕРХУ
-    // --- Конец СОСТОЯНИЯ ДЛЯ Modal ---
+    // --- УДАЛЯЕМ ЛОКАЛЬНОЕ СОСТОЯНИЕ МОДАЛОВ ---
+    // Мы больше не управляем видимостью и данными модалов локально на этой странице
+    // const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    // const [editCategory, setEditCategory] = useState(null);
+    // const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    // const [categoryToDeleteId, setCategoryToDeleteId] = useState(null);
+    // --- Конец УДАЛЕНИЯ ---
 
-    // --- СОСТОЯНИЕ ДЛЯ ConfirmModal (подтверждение удаления) ---
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // Открыт ли модал подтверждения
-    const [categoryToDeleteId, setCategoryToDeleteId] = useState(null); // ID категории для удаления
-    // --- Конец СОСТОЯНИЯ ДЛЯ ConfirmModal ---
+    // --- ПОЛУЧАЕМ ДЕЙСТВИЕ ОТКРЫТИЯ/ЗАКРЫТИЯ МОДАЛА ИЗ СТОРА ---
+    const {openModal, closeModal} = useModalStore(); // Получаем openModal и closeModal для использования
+    // --- Конец ПОЛУЧЕНИЯ ДЕЙСТВИЯ ---
 
 
-    // useEffect для первоначальной загрузки категорий при монтировании компонента
     useEffect(() => {
         fetchCategories();
+        // clearError(); // Ошибка стора будет сброшена при размонтировании компонента ниже
     }, [fetchCategories]);
 
 
+    // --- НОВЫЕ/ИЗМЕНЕННЫЕ ОБРАБОТЧИКИ КЛИКОВ (Используют openModal из стора) ---
+
     // Обработчик клика по кнопке "Добавить категорию"
-    const handleAdd = () => {
-        setEditCategory(null); // Устанавливаем null, чтобы модал открылся в режиме добавления
-        setIsAddModalOpen(true); // Открываем модал
-        // setModalError(null); // Очищаем локальную ошибку модала (она больше не используется для отображения вверху)
-        clearError(); // Сбрасываем общую ошибку стора
+    const handleAddClick = () => {
+        clearError(); // Сбрасываем ошибку стора перед открытием нового модала
+        // Вызываем действие openModal, указывая тип модала и необходимые пропсы для компонента Modal
+        openModal('addCategory', {
+            title: 'Добавить категорию',
+            fields: categoryFields, // Передаем поля формы
+            initialData: {}, // Начальные данные (пустой объект для добавления)
+            onSubmit: handleAddSubmit, // Передаем функцию, которая обрабатывает отправку формы модала
+            submitText: 'Добавить',
+        });
     }
 
     // Обработчик клика по иконке "Редактировать"
-    const handleEdit = (category) => {
-        setEditCategory(category); // Устанавливаем данные категории для редактирования
-        setIsAddModalOpen(true); // Открываем модал
-        // setModalError(null); // Очищаем локальную ошибку модала
-        clearError(); // Сбрасываем общую ошибку стора
+    const handleEditClick = (category) => {
+        clearError(); // Сбрасываем ошибку стора
+        // Вызываем действие openModal, указывая тип модала и необходимые пропсы для компонента Modal
+        openModal('editCategory', {
+            title: 'Редактировать категорию',
+            fields: categoryFields,
+            initialData: category, // Передаем данные выбранной категории
+            // Передаем функцию, которая будет вызвана при отправке формы редактирования
+            // Захватываем category.id, чтобы знать, какую категорию обновлять
+            onSubmit: (formData) => handleEditSubmit(category.id, formData),
+            submitText: 'Сохранить изменения',
+        });
     };
 
-    // --- ОБРАБОТЧИК КЛИКА ПО ИКОНКЕ "Удалить" ---
-    const handleDelete = (id) => {
-        setCategoryToDeleteId(id); // Сохраняем ID категории
-        setIsConfirmModalOpen(true); // Открываем модал подтверждения
-        clearError(); // Сбрасываем общую ошибку стора
+    // Обработчик клика по иконке "Удалить"
+    const handleDeleteClick = (id) => {
+        clearError(); // Сбрасываем ошибку стора
+
+        // Находим название категории для сообщения в модале подтверждения
+        // Это нужно сделать здесь, так как компонент ConfirmModal получит только сообщение и колбэк onConfirm
+        const category = categories.find(cat => cat.id === id);
+        const categoryName = category ? category.name : 'эту категорию'; // Fallback текст, если категория не найдена (не должно случаться)
+
+        // Вызываем действие openModal, указывая тип модала и необходимые пропсы для компонента ConfirmModal
+        openModal('confirmDelete', {
+            title: 'Подтверждение удаления',
+            message: `Вы уверены, что хотите удалить "${categoryName}"?`, // Формируем сообщение с названием
+            // Передаем функцию, которая будет вызвана при подтверждении удаления
+            // Захватываем id, чтобы знать, какую категорию удалять
+            onConfirm: () => handleDeleteConfirm(id),
+            confirmText: 'Удалить',
+        });
     };
-    // --- Конец ИЗМЕНЕННОГО ОБРАБОТЧИКА ---
+    // --- Конец НОВЫХ/ИЗМЕНЕННЫХ ОБРАБОТЧИКОВ КЛИКОВ ---
 
 
-    // --- ОБРАБОТЧИК: Подтверждение удаления в ConfirmModal ---
-    const handleConfirmDelete = async () => {
-        if (categoryToDeleteId === null) return;
+    // --- НОВЫЕ ФУНКЦИИ ЛОГИКИ ПОСЛЕ ОТПРАВКИ/ПОДТВЕРЖДЕНИЯ (ВЫЗЫВАЮТСЯ ИЗ МОДАЛОВ ЧЕРЕЗ PROPS) ---
+    // Эти функции выполняют основную логику (вызов стора категорий) и после успеха/ошибки
+    // вызывают closeModal() из useModalStore.
 
-        // Закрываем модал подтверждения сразу при клике на "Удалить"
-        setIsConfirmModalOpen(false);
-
+    // Логика отправки формы ДОБАВЛЕНИЯ категории (вызывается из Modal через onSubmit)
+    const handleAddSubmit = async (formData) => {
         try {
-            await deleteCategory(categoryToDeleteId);
-
-            // Если удаление успешно, сбрасываем ID для удаления
-            setCategoryToDeleteId(null);
+            // Вызываем действие добавления из стора категорий
+            await addCategory(formData);
+            // Если успешно, закрываем модал через действие стора модалов
+            closeModal();
 
         } catch (err) {
-            // Если deleteCategory выбросил ошибку, она уже в store.error
-            console.error('Ошибка при удалении категории (из ConfirmModal):', err);
-            // При ошибке модал уже закрыт, ID сбрасываем.
-            setCategoryToDeleteId(null);
-            // Ошибка из стора будет отображена в displayError вверху страницы.
+            // Если при добавлении произошла ошибка (из стора категорий),
+            // ошибка уже установлена в store.error и отобразится в LayoutWithHeader.
+            // Мы также должны закрыть модал при ошибке.
+            console.error('Ошибка при добавлении категории (после отправки формы):', err);
+            closeModal(); // Закрываем модал при ошибке
+            throw err; // Пробрасываем ошибку дальше (хотя она уже в сторе, для консистентности)
         }
     };
-    // --- Конец ОБРАБОТЧИКА ПОДТВЕРЖДЕНИЯ ---
 
-    // --- ОБРАБОТЧИК: Отмена удаления в ConfirmModal ---
-    const handleCancelDelete = () => {
-        setIsConfirmModalOpen(false);
-        setCategoryToDeleteId(null);
-        clearError(); // Сбрасываем общую ошибку стора при отмене
-    };
-    // --- Конец ОБРАБОТЧИКА ОТМЕНЫ ---
-
-
-    // --- ОБРАБОТЧИК: Отправка формы в Modal (добавление/редактирование) ---
-    const handleModalSubmit = async (formData) => {
-        // formData - это данные из формы модала { name: ..., description: ... }
-
-        // setModalError(null); // Эта локальная ошибка больше не используется для отображения вверху
-        clearError(); // Сбрасываем общую ошибку стора перед новой попыткой
-
+    // Логика отправки формы РЕДАКТИРОВАНИЯ категории (вызывается из Modal через onSubmit)
+    const handleEditSubmit = async (id, formData) => {
         try {
-            if (editCategory) {
-                // Режим редактирования
-                await updateCategory(editCategory.id, formData);
-            } else {
-                // Режим добавления
-                await addCategory(formData);
-            }
-
-            // Если вызов API успешен (не выбросил ошибку), закрываем модальное окно формы
-            setIsAddModalOpen(false);
-            setEditCategory(null); // Сбрасываем категорию для редактирования
+            // Вызываем действие обновления из стора категорий
+            await updateCategory(id, formData);
+            // Если успешно, закрываем модал
+            closeModal();
 
         } catch (err) {
-            // Если addCategory или updateCategory выбросили ошибку (из стора)
-            // Ошибка из стора уже доступна через store.error и отобразится вверху страницы.
-            console.error('Ошибка при добавлении/обновлении категории:', err);
-
-            // --- ИЗМЕНЕНИЕ: Закрываем модал при ошибке ---
-            setIsAddModalOpen(false);
-            setEditCategory(null); // Сбрасываем категорию для редактирования даже при ошибке
-            // --- Конец ИЗМЕНЕНИЯ ---
-
-            // Ошибка из стора (store.error) будет отображена в displayError вверху страницы.
-            // setModalError(err.error || { message: 'Произошла ошибка при сохранении категории.' }); // Эта локальная ошибка больше не нужна
+            console.error('Ошибка при редактировании категории (после отправки формы):', err);
+            closeModal(); // Закрываем модал при ошибке
+            throw err;
         }
     };
-    // --- Конец ОБРАБОТЧИКА Modal ---
+
+    // Логика подтверждения УДАЛЕНИЯ категории (вызывается из ConfirmModal через onConfirm)
+    const handleDeleteConfirm = async (id) => {
+        try {
+            // Вызываем действие удаления из стора категорий
+            await deleteCategory(id);
+            // Если успешно, закрываем модал
+            console.log(`Логика: Категория ${id} успешно удалена.`);
+            closeModal(); // Закрываем модал после успешного удаления
+
+        } catch (err) {
+            console.error('Ошибка при удалении категории (после подтверждения):', err);
+            closeModal(); // Закрываем модал при ошибке
+            throw err;
+        }
+    };
+    // --- Конец НОВЫХ ФУНКЦИЙ ЛОГИКИ ---
 
 
     // useEffect для сброса ошибки стора при размонтировании компонента
@@ -155,14 +169,11 @@ export default function CategoriesPage() {
         return () => clearError();
     }, [clearError]);
 
-    // Отображаем только общую ошибку из стора (store.error).
-    // Локальная ошибка модала больше не используется для отображения вверху.
-    const displayError = error;
+    // useMemo categoryNameToDelete больше не нужен, т.к. название формируется и передается в openModal
 
-    // Находим название категории для сообщения в ConfirmModal. Используем useMemo для оптимизации.
-    const categoryNameToDelete = useMemo(() => {
-        return categories.find(cat => cat.id === categoryToDeleteId)?.name;
-    }, [categories, categoryToDeleteId]);
+    // Отображаем только общую ошибку из стора (store.error).
+    // Локальная ошибка модала больше не используется.
+    const displayError = error;
 
 
     return (
@@ -171,7 +182,8 @@ export default function CategoriesPage() {
                 {/* Заголовок страницы и кнопка "Добавить категорию" */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Категории</Text>
-                    <TextButton onClick={handleAdd}>
+                    {/* Кнопка теперь вызывает handleAddClick */}
+                    <TextButton onClick={handleAddClick}>
                         <Text variant="button">Добавить категорию</Text>
                     </TextButton>
                 </div>
@@ -192,6 +204,7 @@ export default function CategoriesPage() {
                 ) : (
                     // Контейнер для таблицы или сообщения об отсутствии категорий
                     <div className="bg-background shadow-md rounded-md overflow-hidden">
+                        {/* ИСПРАВЛЕНА СИНТАКСИЧЕСКАЯ ОШИБКА ЗДЕСЬ */}
                         {categories.length === 0 && !loading ? (
                             // Сообщение, если нет категорий
                             <div className="p-4 text-center">
@@ -219,19 +232,19 @@ export default function CategoriesPage() {
                                             <td className="p-4"><Text
                                                 variant="tdSecondary">{category.description}</Text></td>
                                             <td className="p-4 flex gap-2">
-                                                {/* Кнопка Редактировать - открывает Modal в режиме редактирования */}
+                                                {/* Кнопка Редактировать - вызывает handleEditClick */}
                                                 <IconButton
                                                     icon={PencilIcon}
                                                     tooltip="Редактировать"
                                                     className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                    onClick={() => handleEdit(category)}
+                                                    onClick={() => handleEditClick(category)} // Передаем всю категорию
                                                 />
-                                                {/* Кнопка Удалить - открывает ConfirmModal */}
+                                                {/* Кнопка Удалить - вызывает handleDeleteClick */}
                                                 <IconButton
                                                     icon={TrashIcon}
                                                     tooltip="Удалить"
                                                     className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                    onClick={() => handleDelete(category.id)}
+                                                    onClick={() => handleDeleteClick(category.id)} // Передаем ID
                                                 />
                                             </td>
                                         </tr>
@@ -243,33 +256,11 @@ export default function CategoriesPage() {
                     </div>
                 )}
 
-                {isAddModalOpen && (
-                    <Modal
-                        isOpen={isAddModalOpen}
-                        onClose={() => {
-                            setIsAddModalOpen(false);
-                            setEditCategory(null);
-                            // setModalError(null); // Локальная ошибка модала форм больше не нужна для отображения вверху
-                            clearError(); // Сбрасываем общую ошибку стора
-                        }}
-                        title={editCategory ? 'Редактировать категорию' : 'Добавить категорию'}
-                        fields={categoryFields}
-                        initialData={editCategory || {}}
-                        onSubmit={handleModalSubmit}
-                        submitText={editCategory ? 'Сохранить изменения' : 'Добавить'}
-                    />
-                )}
-
-                {isConfirmModalOpen && (
-                    <ConfirmModal
-                        isOpen={isConfirmModalOpen}
-                        onClose={handleCancelDelete}
-                        onConfirm={handleConfirmDelete}
-                        title="Подтверждение удаления"
-                        message={`Вы уверены, что хотите удалить категорию "${categoryNameToDelete || ''}"?`}
-                        confirmText="Удалить"
-                    />
-                )}
+                {/* --- УДАЛЯЕМ РЕНДЕРИНГ МОДАЛОВ ОТСЮДА --- */}
+                {/* Компоненты Modal и ConfirmModal теперь рендерятся в LayoutWithHeader.jsx */}
+                {/* {isAddModalOpen && ( ... )} */}
+                {/* {isConfirmModalOpen && ( ... )} */}
+                {/* --- Конец УДАЛЕНИЯ --- */}
 
             </main>
         </div>
