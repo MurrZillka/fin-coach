@@ -1,10 +1,24 @@
-//src/components/ui/HeaderAuth.jsx
-import { Link, useLocation } from 'react-router-dom';
-import Text from './ui/Text.jsx'; // Убедись, что путь правильный
+// src/components/ui/HeaderAuth.jsx
+// Удалены Link и useLocation, т.к. они теперь внутри NavLinkItem
+// Удаляем Text, т.к. он используется внутри NavLinkItem
+// import { Link, useLocation } from 'react-router-dom'; // Удалено
 
+// --- Добавлен обратно импорт Text ---
+// Убедись, что путь к Text корректный из папки src/components/ui
+import Text from './ui/Text.jsx'; // Добавляем обратно импорт компонента Text
+// --- Конец добавленного импорта ---
+
+// --- Импортируем NavLinkItem ---
+// Убедись, что путь к NavLinkItem корректный (из папки src/components/ui)
+import NavLinkItem from './ui/NavLinkItem.jsx';
+// --- Конец импорта NavLinkItem ---
+
+
+// Компонент HeaderAuth теперь гораздо чище
 const HeaderAuth = () => {
-    const location = useLocation();
+    // useLocation больше не нужен здесь
 
+    // Определяем список ссылок
     const links = [
         { path: '/demo', label: 'Обзор' },
         { path: '/login', label: 'Войти' },
@@ -12,28 +26,29 @@ const HeaderAuth = () => {
     ];
 
     return (
-        // Убран класс h-16. Высота определяется содержимым и p-4. Добавлен flex-shrink-0.
+        // Классы хедера
         <header className="bg-secondary-800 text-background p-5 shadow-md flex-shrink-0">
-            <div className="max-w-7xl mx-auto flex justify-between items-center h-full"> {/* h-full и items-center */}
-                <Text variant="h1">Financial Coach</Text>
-                <nav className="h-full flex items-center"> {/* h-full и flex items-center */}
+            <div className="max-w-7xl mx-auto flex justify-between items-center h-full">
+                {/* --- Теперь компонент Text импортирован и может быть использован --- */}
+                <Text variant="h1">Financial Coach</Text> {/* Рендерим заголовок */}
+                {/* --- Конец использования Text --- */}
+
+                <nav className="h-full flex items-center">
+                    {/* Используем NavLinkItem для ссылок */}
                     {links.map((link) => (
-                        <span key={link.path} className="mx-4">
-                            {location.pathname === link.path ? (
-                                <Text variant="navLinkInactive" className="opacity-50">
-                                    {link.label}
-                                </Text>
-                            ) : (
-                                <Link to={link.path}>
-                                    <Text variant="navLink">{link.label}</Text>
-                                </Link>
-                            )}
-                        </span>
+                        <NavLinkItem
+                            key={link.path}
+                            to={link.path}
+                            label={link.label}
+                        />
                     ))}
                 </nav>
             </div>
         </header>
     );
 };
+
+// Устанавливаем display name для отладки
+HeaderAuth.displayName = 'HeaderAuth';
 
 export default HeaderAuth;
