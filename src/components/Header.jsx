@@ -2,19 +2,24 @@
 
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import useAuthStore from '../stores/authStore';
-// ПРАВИЛЬНЫЙ ПУТЬ импорта Text, т.к. Text.jsx в src/components/ui, а Header.jsx в src/components
+// Убедись, что путь к stores/authStore корректный
+import useAuthStore from '../stores/authStore'; // Импортируем стор авторизации
+
+// ПРАВИЛЬНЫЙ ПУТЬ импорта Text
 import Text from './ui/Text';
-// ПРАВИЛЬНЫЙ ПУТЬ импорта IconButton, т.к. IconButton.jsx в src/components/ui, а Header.jsx в src/components
+// ПРАВИЛЬНЫЙ ПУТЬ импорта IconButton
 import IconButton from './ui/IconButton';
 
-// Импортируем нужную иконку из Heroicons
+// Импортируем иконку выхода
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 
 
 export default function Header() {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuthStore();
+    // --- ИСПРАВЛЕНИЕ: ПОЛУЧАЕМ logout ИЗ СТОРА ---
+    // Получаем isAuthenticated и logout действие из стора авторизации
+    const { isAuthenticated, logout } = useAuthStore();
+    // --- Конец ИСПРАВЛЕНИЯ ---
 
     const getUserName = () => {
         const storedName = localStorage.getItem('userName');
@@ -23,12 +28,12 @@ export default function Header() {
 
     const handleLogout = () => {
         const token = localStorage.getItem('token');
+        // Теперь logout определен, т.к. мы его получили из стора
         logout(token);
         navigate('/login', { replace: true });
     };
 
     return (
-        // shadow-md на хедере. flex-shrink-0 для Flexbox layout.
         <header className="bg-secondary-800 text-background p-4 shadow-md flex-shrink-0">
             <div className="max-w-7xl mx-auto flex justify-between items-center h-full">
                 <Text variant="h1">Financial Coach</Text>
@@ -59,14 +64,11 @@ export default function Header() {
                         </Text>
 
                         {/* --- IconButton для выхода --- */}
-                        {/* УДАЛЕН проп tooltip */}
-                        {/* ИЗМЕНЕН класс ховера для светлого эффекта */}
                         <IconButton
-                            icon={ArrowRightStartOnRectangleIcon} // Компонент иконки
-                            // УДАЛЕНА строка: tooltip="Выйти"
-                            onClick={handleLogout} // Обработчик клика
-                            // Изменен класс ховера на светлый полупрозрачный фон
-                            className="text-background hover:bg-white/10" // Светлый ховер эффект (белый с 10% прозрачностью)
+                            icon={ArrowRightStartOnRectangleIcon}
+                            // Без tooltip="Выйти"
+                            onClick={handleLogout}
+                            className="text-background hover:bg-white/10" // Светлый ховер
                         />
                         {/* --- Конец IconButton --- */}
                     </div>

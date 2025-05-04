@@ -1,9 +1,16 @@
 // src/stores/authStore.js
 import { create } from 'zustand';
 // Убедись, что путь к api/auth корректный
-import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth';
+import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth'; // logoutApi теперь используется
 
-const useAuthStore = create((set) => ({
+// --- ИМПОРТ: стор баланса ---
+// Убедись, что путь к stores/balanceStore корректный
+import useBalanceStore from './balanceStore';
+// --- Конец ИМПОРТА ---
+
+
+// Добавляем get во второй аргумент create для доступа к текущему состоянию стора
+const useAuthStore = create((set, get) => ({
     // Состояние
     user: null, // Теперь user будет содержать { userName, access_token, ...другие_данные }
     isAuthenticated: false,
@@ -12,16 +19,16 @@ const useAuthStore = create((set) => ({
 
     // Действия
     login: async (credentials) => {
-        set({ status: 'loading', error: null }); // Сбрасываем ошибку стора в начале
+        set({ status: 'loading', error: null });
         try {
-            const result = await loginApi(credentials); // Получаем результат в виде { data, error }
+            const result = await loginApi(credentials);
 
             if (result.error) {
                 set({ status: 'failed', error: result.error });
-                throw result.error; // Выбрасываем структурированную ошибку из API слоя
+                throw result.error;
             }
 
-            const { data } = result; // Деструктурируем data из result
+            const { data } = result;
 
             if (data && data.access_token) {
                 localStorage.setItem('token', data.access_token);
@@ -34,16 +41,14 @@ const useAuthStore = create((set) => ({
                 user: data,
                 isAuthenticated: true,
                 status: 'succeeded',
-                error: null // Успех, ошибки нет
+                error: null
             });
 
             return data;
-        } catch (error) { // Этот catch ловит ошибки, которые НЕ являются результатом { data, error } от API
+        } catch (error) {
             console.error('Непредвиденная ошибка входа в API (из authStore):', error);
-
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка авторизации', status: error.status || 500 };
             set({ status: 'failed', error: unexpectedError });
-
             throw error;
         }
     },
@@ -51,21 +56,18 @@ const useAuthStore = create((set) => ({
     signup: async (userData) => {
         set({ status: 'loading', error: null });
         try {
-            const result = await signupApi(userData); // Получаем результат в виде { data, error }
+            const result = await signupApi(userData);
 
             if (result.error) {
                 set({ status: 'failed', error: result.error });
                 throw result.error;
             }
 
-            const { data } = result; // Деструктурируем data из result
+            const { data } = result;
 
-            // Для регистрации обычно не требуется сохранять токен сразу,
-            // пользователь должен войти после регистрации.
-
-            set({ status: 'succeeded', error: null }); // Успех, ошибки нет
-            return data; // Возвращаем данные, если нужно компоненту
-        } catch (error) { // Этот catch ловит ошибки, которые НЕ являются результатом { data, error } от API
+            set({ status: 'succeeded', error: null });
+            return data;
+        } catch (error) {
             console.error('Непредвиденная ошибка регистрации в API (из authStore):', error);
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при регистрации', status: error.status || 500 };
             set({ status: 'failed', error: unexpectedError });
@@ -79,7 +81,9 @@ const useAuthStore = create((set) => ({
 
         try {
             if (token) {
-                await logoutApi(token);
+                // --- РАСКОММЕНТИРОВАН ВЫЗОВ logoutApi ---
+                await logoutApi(token); // Теперь вызывается API разлогинивания
+                // --- Конец РАСКОММЕНТИРОВАННОГО ВЫЗОВА ---
             }
 
             localStorage.removeItem('userName');
@@ -91,8 +95,14 @@ const useAuthStore = create((set) => ({
                 status: 'idle',
                 error: null
             });
+
+            // Сбрасываем состояние других сторов при выходе
+            useBalanceStore.getState().resetBalance();
+            // Здесь будем добавлять сброс для других сторов (категории, расходы и т.д.)
+
         } catch (error) {
-            console.error('Ошибка при выходе (API logout может и не отработать, это нормально):', error);
+            console.error('Ошибка при выходе:', error); // Убрана фраза про "нормально" т.к. теперь вызываем API
+            // Даже если API выхода с ошибкой, локальные данные нужно почистить
             localStorage.removeItem('userName');
             localStorage.removeItem('token');
 
@@ -102,11 +112,41 @@ const useAuthStore = create((set) => ({
                 status: 'idle',
                 error: null
             });
+            // Сброс состояния других сторов также нужно делать здесь в случае ошибки выхода
+            useBalanceStore.getState().resetBalance();
         }
     },
 
     clearError: () => set({ error: null }),
 
+    // --- НОВОЕ ДЕЙСТВИЕ: Инициализация данных пользователя ---
+    fetchInitialUserData: async () => {
+        const { isAuthenticated, user } = get();
+
+        if (isAuthenticated && user && user.access_token) {
+            const token = user.access_token;
+            console.log("Fetching initial user data (balance, etc.)...");
+
+            // --- Вызываем действия загрузки данных из других сторов ---
+            // 1. Загрузка баланса
+            useBalanceStore.getState().fetchBalance(token);
+
+            // --- Здесь в будущем будем добавлять вызовы для загрузки других данных ---
+            // useCategoriesStore.getState().fetchCategories(token);
+            // useSpendingsStore.getState().fetchSpendings(token);
+            // и т.д.
+            // --- Конец вызовов загрузки ---
+
+        } else {
+            // Если пользователь не авторизован (или разлогинился), сбрасываем состояние других сторов
+            useBalanceStore.getState().resetBalance();
+            // Сброс для других сторов
+        }
+    },
+    // --- Конец НОВОГО ДЕЙСТВИЯ ---
+
+
+    // Действие для инициализации стора при запуске приложения (проверка localStorage)
     initAuth: () => {
         const token = localStorage.getItem('token');
         const userName = localStorage.getItem('userName');
@@ -121,6 +161,8 @@ const useAuthStore = create((set) => ({
                 status: 'succeeded',
                 error: null
             });
+            // fetchInitialUserData будет вызван из useEffect в App.jsx после этого.
+
         } else {
             set({
                 isAuthenticated: false,
@@ -128,6 +170,9 @@ const useAuthStore = create((set) => ({
                 status: 'idle',
                 error: null
             });
+            // Если нет токена при инициализации, сбрасываем состояние других сторов
+            useBalanceStore.getState().resetBalance();
+            // Сброс для других сторов
         }
     }
 }));
