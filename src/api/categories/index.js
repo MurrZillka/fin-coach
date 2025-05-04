@@ -1,5 +1,6 @@
+// src/api/categories/index.js
 import axios from 'axios';
-import { API_BASE_URL } from '../config'; // Убрали getUseMocks
+import { API_BASE_URL } from '../config'; // Убедись, что путь правильный
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -12,17 +13,39 @@ const handleResponse = (response) => {
     return { data: response.data, error: null };
 };
 
-// Хелпер для обработки ошибок
+// --- Хелпер для обработки ошибок (ДОРАБОТАНА ДЛЯ ДРУЖЕЛЮБНЫХ СООБЩЕНИЙ) ---
 const handleError = (error) => {
-    console.error('API Error:', error); // Логируем ошибку для дебага
+    console.error('API Error (Categories):', error); // Логируем ошибку для дебага
+
+    let userMessage = 'Операция не удалась, ошибка сервера или связи. Попробуйте, пожалуйста, позже.';
+    let statusCode = error.response?.status || 500;
+
+    // Пытаемся получить более специфичное сообщение от бэкенда
+    const backendErrorMessage = error.response?.data?.error;
+
+    if (backendErrorMessage) {
+        // Если бэкенд вернул специфическое сообщение, используем его
+        userMessage = backendErrorMessage;
+    } else if (axios.isAxiosError(error) && error.code === 'ERR_NETWORK') {
+        // Если это сетевая ошибка (нет связи с сервером)
+        userMessage = 'Не удалось соединиться с сервером. Проверьте подключение к интернету или попробуйте позже.';
+    } else if (statusCode === 401 || statusCode === 403) {
+        // Ошибки авторизации/доступа (хотя это больше относится к логину)
+        userMessage = backendErrorMessage || 'Доступ запрещен. Возможно, требуется повторный вход.';
+    }
+    // Для всех остальных ошибок без специфического сообщения от бэкенда
+    // будет использовано дефолтное "Операция не удалась..." сообщение.
+
     return {
         data: null,
         error: {
-            message: error.response?.data?.error || error.message || 'An unexpected error occurred',
-            status: error.response?.status || 500,
+            message: userMessage, // Пользовательское сообщение
+            status: statusCode,
+            details: backendErrorMessage // Опционально: сохраняем сырое сообщение бэкенда для отладки
         },
     };
 };
+// --- Конец Хелпера для обработки ошибок ---
 
 export const addCategory = async (data, token) => {
     try {
