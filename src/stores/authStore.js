@@ -1,21 +1,25 @@
 // src/stores/authStore.js
 import { create } from 'zustand';
 // Убедись, что путь к api/auth корректный
-import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth'; // logoutApi теперь используется
+import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth';
 
-// --- ИМПОРТ: стор баланса ---
-// Убедись, что путь к stores/balanceStore корректный
+// --- ИМПОРТЫ СТОРОВ ДЛЯ ПЕРВИЧНОЙ ЗАГРУЗКИ И СБРОСА ---
 import useBalanceStore from './balanceStore';
-// --- Конец ИМПОРТА ---
+import useCreditStore from './creditStore'; // Импортируем стор доходов
+// --- Здесь в будущем будем добавлять импорты для других сторов ---
+// import useCategoriesStore from './categoryStore';
+// import useSpendingsStore from './spendingsStore';
+// import useGoalsStore from './goalsStore';
+// --- Конец ИМПОРТОВ ---
 
 
 // Добавляем get во второй аргумент create для доступа к текущему состоянию стора
 const useAuthStore = create((set, get) => ({
     // Состояние
-    user: null, // Теперь user будет содержать { userName, access_token, ...другие_данные }
+    user: null,
     isAuthenticated: false,
-    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-    error: null, // Общая ошибка стора (для общих уведомлений)
+    status: 'idle',
+    error: null,
 
     // Действия
     login: async (credentials) => {
@@ -45,6 +49,7 @@ const useAuthStore = create((set, get) => ({
             });
 
             return data;
+
         } catch (error) {
             console.error('Непредвиденная ошибка входа в API (из authStore):', error);
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка авторизации', status: error.status || 500 };
@@ -81,9 +86,7 @@ const useAuthStore = create((set, get) => ({
 
         try {
             if (token) {
-                // --- РАСКОММЕНТИРОВАН ВЫЗОВ logoutApi ---
-                await logoutApi(token); // Теперь вызывается API разлогинивания
-                // --- Конец РАСКОММЕНТИРОВАННОГО ВЫЗОВА ---
+                await logoutApi(token);
             }
 
             localStorage.removeItem('userName');
@@ -98,10 +101,10 @@ const useAuthStore = create((set, get) => ({
 
             // Сбрасываем состояние других сторов при выходе
             useBalanceStore.getState().resetBalance();
-            // Здесь будем добавлять сброс для других сторов (категории, расходы и т.д.)
-
+            useCreditStore.getState().resetCredits();
+            // Здесь в будущем будем добавлять сброс для других сторов
         } catch (error) {
-            console.error('Ошибка при выходе:', error); // Убрана фраза про "нормально" т.к. теперь вызываем API
+            console.error('Ошибка при выходе:', error);
             // Даже если API выхода с ошибкой, локальные данные нужно почистить
             localStorage.removeItem('userName');
             localStorage.removeItem('token');
@@ -114,36 +117,38 @@ const useAuthStore = create((set, get) => ({
             });
             // Сброс состояния других сторов также нужно делать здесь в случае ошибки выхода
             useBalanceStore.getState().resetBalance();
+            useCreditStore.getState().resetCredits();
+            // Сброс для других сторов при ошибке
         }
     },
 
     clearError: () => set({ error: null }),
 
-    // --- НОВОЕ ДЕЙСТВИЕ: Инициализация данных пользователя ---
+    // --- Действие: Инициализация данных пользователя ---
     fetchInitialUserData: async () => {
         const { isAuthenticated, user } = get();
 
         if (isAuthenticated && user && user.access_token) {
             const token = user.access_token;
-            console.log("Fetching initial user data (balance, etc.)...");
+            // ИСПРАВЛЕНО: убраны лишние экранированные кавычки
+            console.log("Fetching initial user data (balance, credits, etc.)...");
 
-            // --- Вызываем действия загрузки данных из других сторов ---
-            // 1. Загрузка баланса
+            // Вызываем действия загрузки данных из других сторов
             useBalanceStore.getState().fetchBalance(token);
+            useCreditStore.getState().fetchCredits(token);
 
-            // --- Здесь в будущем будем добавлять вызовы для загрузки других данных ---
-            // useCategoriesStore.getState().fetchCategories(token);
-            // useSpendingsStore.getState().fetchSpendings(token);
-            // и т.д.
-            // --- Конец вызовов загрузки ---
+            // Здесь в будущем будем добавлять вызовы для загрузки других данных
 
         } else {
             // Если пользователь не авторизован (или разлогинился), сбрасываем состояние других сторов
+            // ИСПРАВЛЕНО: убраны лишние экранированные кавычки
+            console.log("User not authenticated or logged out, resetting other stores...");
             useBalanceStore.getState().resetBalance();
+            useCreditStore.getState().resetCredits();
             // Сброс для других сторов
         }
     },
-    // --- Конец НОВОГО ДЕЙСТВИЯ ---
+    // --- Конец Действия Инициализации данных ---
 
 
     // Действие для инициализации стора при запуске приложения (проверка localStorage)
@@ -152,6 +157,8 @@ const useAuthStore = create((set, get) => ({
         const userName = localStorage.getItem('userName');
 
         if (token) {
+            // ИСПРАВЛЕНО: убраны лишние экранированные кавычки
+            console.log("authStore: Found token in localStorage, setting isAuthenticated true...");
             set({
                 isAuthenticated: true,
                 user: {
@@ -161,9 +168,9 @@ const useAuthStore = create((set, get) => ({
                 status: 'succeeded',
                 error: null
             });
-            // fetchInitialUserData будет вызван из useEffect в App.jsx после этого.
-
         } else {
+            // ИСПРАВЛЕНО: убраны лишние экранированные кавычки
+            console.log("authStore: No token found in localStorage.");
             set({
                 isAuthenticated: false,
                 user: null,
@@ -172,6 +179,7 @@ const useAuthStore = create((set, get) => ({
             });
             // Если нет токена при инициализации, сбрасываем состояние других сторов
             useBalanceStore.getState().resetBalance();
+            useCreditStore.getState().resetCredits();
             // Сброс для других сторов
         }
     }
