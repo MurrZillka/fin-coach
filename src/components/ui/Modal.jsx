@@ -1,3 +1,4 @@
+//src/components/ui/Modal.jsx
 import { useState } from 'react';
 import Text from './Text';
 import Input from './Input';
