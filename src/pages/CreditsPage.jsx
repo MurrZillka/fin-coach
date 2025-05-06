@@ -31,9 +31,9 @@ const creditFields = [
 export default function CreditsPage() {
     // Get state and actions from the Credit store
     // credits can be null initially
-    const { credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
+    const {credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError} = useCreditStore();
     // Get actions from the Modal store
-    const { openModal, closeModal } = useModalStore();
+    const {openModal, closeModal} = useModalStore();
 
     // --- useEffect for initial data fetching ---
     // Trigger fetch when component mounts or when dependencies change relevant to initial load state
@@ -182,7 +182,8 @@ export default function CreditsPage() {
 
                 {/* Display general error message from the store */}
                 {displayError && (
-                    <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md"> {/* Error message styling */}
+                    <div
+                        className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md"> {/* Error message styling */}
                         {displayError.message}
                     </div>
                 )}
@@ -195,12 +196,14 @@ export default function CreditsPage() {
                     </div>
                 ) : (
                     // Content container: either empty list message or the list/table
-                    <div className="bg-background shadow-md rounded-md overflow-hidden"> {/* White background container for list/table */}
+                    <div
+                        className="bg-background shadow-md rounded-md overflow-hidden"> {/* White background container for list/table */}
                         {/* If not loading and data is loaded but empty */}
                         {credits !== null && credits.length === 0 ? (
                             // Message when the list is empty
                             <div className="p-4 text-center">
-                                <Text variant="body">У вас пока нет добавленных доходов.</Text> {/* Empty list message */}
+                                <Text variant="body">У вас пока нет добавленных
+                                    доходов.</Text> {/* Empty list message */}
                             </div>
                         ) : (
                             // If not loading, no error, and data is loaded and not empty
@@ -208,46 +211,46 @@ export default function CreditsPage() {
                             credits !== null && credits.length > 0 && ( // Explicit check just to be safe
                                 // Table to display the list of credits
                                 <table className="min-w-full">
-                                    <thead className="bg-secondary-200"> {/* Table header styling */}
+                                    <thead className="bg-secondary-200">
                                     <tr>
                                         <th className="text-left p-4"><Text variant="th">№</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Сумма</Text></th> {/* Amount column */}
-                                        <th className="text-left p-4"><Text variant="th">Описание</Text></th> {/* Description column */}
-                                        <th className="text-left p-4"><Text variant="th">Дата</Text></th> {/* Date column */}
-                                        <th className="text-left p-4"><Text variant="th">Постоянный</Text></th> {/* Permanent column */}
-                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th> {/* Actions column */}
+                                        <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Описание</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Дата</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Постоянный</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {/* Mapping over the credits array to create table rows */}
                                     {credits.map((credit, index) => (
                                         <tr key={credit.id}
-                                            className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}> {/* Row styling */}
+                                            className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
                                             <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                                            <td className="p-4"><Text variant="tdPrimary" className="text-accent-success font-semibold"> {/* Amount with success color */}
+                                            <td className="p-4"><Text variant="tdPrimary"
+                                                                      className="text-accent-success font-semibold">
                                                 {typeof credit.amount === 'number' ? credit.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : credit.amount} ₽
                                             </Text></td>
-                                            <td className="p-4"><Text variant="tdSecondary">{credit.description || '-'}</Text></td> {/* Description */}
-                                            <td className="p-4"><Text variant="tdSecondary"> {/* Date formatting */}
+                                            <td className="p-4"><Text
+                                                variant="tdSecondary">{credit.description || '-'}</Text></td>
+                                            <td className="p-4"><Text variant="tdSecondary">
                                                 {credit.date ? new Date(credit.date).toLocaleDateString() : '-'}
                                             </Text></td>
-                                            <td className="p-4"><Text variant="tdSecondary"> {/* Permanent status */}
+                                            <td className="p-4"><Text variant="tdSecondary">
                                                 {credit.is_permanent ? 'Да' : 'Нет'}
                                             </Text></td>
-                                            <td className="p-4 flex gap-2"> {/* Actions column */}
-                                                {/* Edit Button - calls handleEditClick, passing the credit object */}
+                                            <td className="p-4 flex gap-2">
                                                 <IconButton
                                                     icon={PencilIcon}
                                                     tooltip="Редактировать"
                                                     className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                    onClick={() => handleEditClick(credit)} // Pass the whole credit object
+                                                    onClick={() => handleEditClick(credit)}
                                                 />
-                                                {/* Delete Button - calls handleDeleteClick, passing the credit object */}
                                                 <IconButton
                                                     icon={TrashIcon}
                                                     tooltip="Удалить"
                                                     className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                    onClick={() => handleDeleteClick(credit)} // Pass the whole credit object
+                                                    onClick={() => handleDeleteClick(credit)}
                                                 />
                                             </td>
                                         </tr>
