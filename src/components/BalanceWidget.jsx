@@ -1,4 +1,4 @@
-// src/components/BalanceWidget.jsx
+// src/components/BalanceWidget.jsx (Использует кастомные классы)
 import React from 'react';
 // Убедись, что путь к useBalanceStore корректный
 import useBalanceStore from '../stores/balanceStore'; // Импортируем стор баланса
@@ -8,23 +8,21 @@ import Text from './ui/Text'; // Импортируем компонент Text 
 
 export default function BalanceWidget() {
     // Читаем состояние balance, isLoading и error из стора баланса
-    const { balance, isLoading, error } = useBalanceStore();
+    const {balance, isLoading, error} = useBalanceStore();
 
     // --- Форматирование баланса ---
-    // Форматируем абсолютное значение (без знака) до 2 знаков после запятой и разделитель тысяч
+    // Используем toLocaleString для правильного форматирования чисел с разделителями и знаками после запятой
     const formattedBalanceValue = typeof balance === 'number'
-        ? Math.abs(balance).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+        ? balance.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})
         : null;
 
-    // --- Определение класса цвета для баланса ---
-    // Цвет зависит от знака баланса, только когда данные успешно загружены и не null
-    const balanceTextColorClass = balance !== null && !isLoading && !error
-        // --- ИСПРАВЛЕНО: Используем Tailwind произвольные значения для применения CSS переменных напрямую ---
-        // Сравниваем с 0, чтобы 0 и положительные числа были зелеными
-        ? (balance >= 0 ? 'text-[--color-accent-success]' : 'text-[--color-accent-error]') // Применяем переменные цвета успеха/ошибки
-        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
-        : 'text-secondary-600'; // Цвет по умолчанию для "Загрузка", "Ошибка", "--.--"
-    // --- Конец Определение класса цвета ---
+
+    // --- Определение КАСТОМНОГО класса для баланса ---
+    // Возвращаем имя кастомного CSS класса в зависимости от знака баланса
+    const balanceCustomColorClass = balance !== null && !isLoading && !error
+        ? (balance >= 0 ? 'balance-positive' : 'balance-negative') // Имена новых кастомных классов
+        : ''; // Пустая строка, если баланс еще не загружен/ошибка. Базовый стиль от Text компонента.
+    // --- Конец Определения КАСТОМНОГО класса ---
 
     return (
         // Главный контейнер виджета - прямоугольник
@@ -43,32 +41,30 @@ export default function BalanceWidget() {
 
                     {/* --- Динамическое содержимое: Загрузка, Ошибка, Значение Баланса, или Плейсхолдер --- */}
                     {isLoading && (
-                        // Если идет загрузка: Крупный, жирный текст
+                        // Загрузка - оставляем стандартные классы
                         <Text className="text-2xl font-bold text-primary-700">Загрузка...</Text>
                     )}
 
                     {error && (
-                        // Если есть ошибка: Крупный, жирный текст с цветом ошибки
-                        <Text className="text-2xl font-bold text-error-500">
+                        // Ошибка - оставляем стандартные классы (красный, жирный)
+                        <Text className="text-2xl font-bold text-red-500">
                             Ошибка
                         </Text>
                     )}
 
                     {/* Если не загрузка, нет ошибки, и баланс успешно загружен (значение не null) */}
                     {!isLoading && !error && balance !== null && (
-                        // Крупное, жирное значение баланса с динамическим цветом
-                        // Используем balanceTextColorClass для цвета
-                        <Text className={`text-2xl font-bold ${balanceTextColorClass}`}>
+                        <Text
+                            className={`text-2xl ${balanceCustomColorClass}`}> {/* Используем только размер и кастомный класс */}
                             {/* Добавляем знак "-" если баланс отрицательный */}
                             {balance < 0 && '-'}
-                            {formattedBalanceValue} {/* Форматированное значение без знака */}
-                            {' ₽'} {/* Символ валюты */}
+                            {formattedBalanceValue} ₽ {/* Форматированное значение и символ валюты */}
                         </Text>
                     )}
 
                     {/* Если не загрузка, нет ошибки, но баланс еще не загружен или сброшен (значение null) */}
                     {!isLoading && !error && balance === null && (
-                        // Крупный, жирный плейсхолдер
+                        // Плейсхолдер - оставляем стандартные классы
                         <Text className="text-2xl font-bold text-secondary-600">
                             --.-- ₽
                         </Text>
@@ -90,9 +86,9 @@ export default function BalanceWidget() {
                 {/* --- Конец Правой части --- */}
             </div>
 
-            {/* Опционально: Показать подробности ошибки мелким текстом под основным блоком */}
             {error && error.message && (
-                <Text variant="body" className="text-error-500 mt-2">
+                // Текст ошибки - оставляем стандартные классы (красный)
+                <Text variant="body" className="text-red-500 mt-2">
                     Подробно: {error.message}
                 </Text>
             )}

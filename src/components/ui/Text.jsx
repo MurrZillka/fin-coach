@@ -1,3 +1,5 @@
+// src/components/ui/Text.jsx (Простой вариант)
+import React from 'react';
 import PropTypes from 'prop-types';
 
 const variants = {
@@ -6,7 +8,7 @@ const variants = {
     h3: 'text-lg font-medium text-secondary-800',
     h4: 'text-base font-medium text-secondary-800',
     th: 'text-base font-semibold text-secondary-800',
-    tdPrimary: 'text-base font-normal text-secondary-800',
+    tdPrimary: 'text-base font-normal text-secondary-800', // Вариант по умолчанию
     tdSecondary: 'text-base font-normal text-secondary-500',
     button: 'text-base font-normal text-background',
     tooltip: 'text-xs font-normal text-background',
@@ -21,8 +23,11 @@ const variants = {
 };
 
 export default function Text({ variant = 'tdPrimary', children, className = '' }) {
+    // Простое объединение классов: сначала базовые из варианта, потом из className
+    const finalClasses = `${variants[variant] || ''} ${className || ''}`;
+
     return (
-        <span className={`${variants[variant]} ${className}`}>
+        <span className={finalClasses}>
       {children}
     </span>
     );
