@@ -1,11 +1,11 @@
 // src/pages/CreditsPage.jsx
-import React, {useEffect} from 'react'; // Need React import for JSX in older configs, good practice anyway
+import React, {useEffect} from 'react';
 // Import necessary components and stores
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 // Import icons
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 
 // --- Use Credit Store ---
 import useCreditStore from '../stores/creditStore';
@@ -24,7 +24,7 @@ const creditFields = [
     // Note: The API also expects 'date' for UpdateCredit, but not AddCredit body in Postman?
     // Let's add date to the fields, making it optional for add, required for edit potentially.
     // For simplicity now, let's add it as an optional text field and handle formatting later.
-    {name: 'date', label: 'Дата (YYYY-MM-DD)', required: false, type: 'date'}, // Using type="date" might simplify things if using a date input
+    {name: 'date', label: 'Дата получения дохода', required: false, type: 'date'}, // Using type="date" might simplify things if using a date input
 ];
 
 
@@ -44,7 +44,7 @@ export default function CreditsPage() {
             fetchCredits(); // Call the fetch action
         }
 
-        // Cleanup effect: clear error state in the store when component unmounts
+        // Cleanup effect: clear error state in the store when unmounts
         return () => {
             clearError();
         };
@@ -76,7 +76,16 @@ export default function CreditsPage() {
         openModal('editCredit', { // 'editCredit' is a type string
             title: 'Редактировать доход',
             fields: creditFields,
-            initialData: credit, // Pass the credit data to pre-fill the form
+            // --- Prepare initialData, formatting date for the input type="date" ---
+            initialData: {
+                ...credit, // Include all other fields from the credit object
+                // Format the date: if credit.date exists from API (likely ISO), convert it to a Date object,
+                // then get the ISO string and take only the "YYYY-MM-DD" part for the input type="date".
+                // If credit.date is null/undefined, provide an empty string.
+                // Это исправит проблему, когда поле даты в модале редактирования было пустым.
+                date: credit.date ? new Date(credit.date).toISOString().split('T')[0] : '',
+            },
+            // --- End initialData preparation ---
             // onSubmit handler that captures the credit.id
             onSubmit: (formData) => handleEditSubmit(credit.id, formData),
             submitText: 'Сохранить изменения',
@@ -90,12 +99,19 @@ export default function CreditsPage() {
 
         // Formulate confirmation message using credit details
         const creditDescription = credit.description || `с ID ${credit.id}`; // Use description or ID as fallback
-        const message = `Вы уверены, что хотите удалить доход "${creditDescription}" на сумму ${credit.amount} ₽?`;
+
+        // --- НОВОЕ: Форматируем сумму для отображения в сообщении ---
+        const formattedAmount = typeof credit.amount === 'number'
+            // Используем toLocaleString для форматирования с разделителями разрядов и 2 знаками после запятой
+            ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : credit.amount; // На случай, если amount не число (хотя по API должно быть)
+        const message = `Вы уверены, что хотите удалить доход "${creditDescription}" на сумму ${formattedAmount} ₽?`;
+        // --- КОНЕЦ НОВОГО ---
 
         // Open the ConfirmModal component (handled by LayoutWithHeader)
         openModal('confirmDelete', { // 'confirmDelete' is a type string
             title: 'Подтверждение удаления',
-            message: message, // The confirmation message
+            message: message, // Сообщение с отформатированной суммой
             // onConfirm handler that captures the credit.id
             onConfirm: () => handleDeleteConfirm(credit.id),
             confirmText: 'Удалить',
@@ -127,20 +143,57 @@ export default function CreditsPage() {
     };
 
     // Logic for editing a credit (called by Modal component via onSubmit)
+    // This function sends the date in the "YYYY-MM-DD" format if API needs only that.
     const handleEditSubmit = async (id, formData) => {
         try {
-            // Call the updateCredit action from the store
-            await updateCredit(id, formData);
-            // If successful, close the modal
+            console.log(`CreditsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData); // formData.date is "YYYY-MM-DD" string from modal
+
+            const dataToUpdate = { ...formData }; // Create a copy of form data
+
+            // Find the date field definition (optional, but good for reference)
+            const dateField = creditFields.find(field => field.name === 'date');
+
+            // If the date field is defined in creditFields
+            if (dateField) {
+                if (dataToUpdate.date) {
+                    // If date is present in formData (as "YYYY-MM-DD" string from input)
+                    // If API strictly needs "YYYY-MM-DD", we just pass the string as is.
+                    const dateStringFromForm = dataToUpdate.date;
+                    dataToUpdate.date = dateStringFromForm; // Send the "YYYY-MM-DD" string
+                    console.log(`CreditsPage Logic: Passing date string to API:`, dataToUpdate.date);
+                } else {
+                    // If date field was empty in the form (null, undefined, or '')
+                    console.log('CreditsPage Logic: Date field was empty in form. Setting date to null for API.');
+                    dataToUpdate.date = null; // Send null if API accepts it for optional date
+                }
+            } else {
+                // If the date field is NOT defined in creditFields (defensive check)
+                // Ensure 'date' is removed if it somehow exists in formData but isn't expected.
+                // --- ИСПРАВЛЕНИЕ ESLint ошибки на .hasOwnProperty ---
+                if (Object.prototype.hasOwnProperty.call(dataToUpdate, 'date')) { // <-- Исправленная строка
+                    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+                    delete dataToUpdate.date; // Or dataToUpdate.date = null; если API ожидает ключ, но со значением null
+                    console.log('CreditsPage Logic: Date field not defined in fields, ensuring it is not included in API data.');
+                }
+            }
+
+
+            // Примечание: Валидация (проверка на будущие даты) происходит ДО вызова этой функции, в handleSubmit Modal.jsx.
+            // Так что мы предполагаем, что dataToUpdate.date, если он присутствует, не является датой в будущем.
+
+
+            await updateCredit(id, dataToUpdate); // Отправляем подготовленные dataToUpdate
             closeModal();
-            // No need to refetch here, updateCredit action already does it
+            console.log('CreditsPage Logic: handleEditSubmit successful, modal closed.');
 
         } catch (err) {
-            console.error('Error during edit credit (after form submit):', err);
-            closeModal(); // Close modal on error
-            throw err;
+            console.error('CreditsPage Logic: Error during edit credit (after form submit):', err);
+            closeModal();
+            // Сообщение об ошибке от API отображается Layout'ом через store.error
+            // throw err;
         }
     };
+
 
     // Logic for confirming deletion of a credit (called by ConfirmModal component via onConfirm)
     const handleDeleteConfirm = async (id) => {
@@ -229,7 +282,12 @@ export default function CreditsPage() {
                                             <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
                                             <td className="p-4"><Text variant="tdPrimary"
                                                                       className="text-accent-success font-semibold">
-                                                {typeof credit.amount === 'number' ? credit.amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : credit.amount} ₽
+                                                {/* --- НОВОЕ: Форматирование суммы с разделителями --- */}
+                                                {typeof credit.amount === 'number'
+                                                    // Используем toLocaleString с русской локалью для разделителей и 2 знаками после запятой
+                                                    ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                    : credit.amount} ₽
+                                                {/* --- КОНЕЦ НОВОГО --- */}
                                             </Text></td>
                                             <td className="p-4"><Text
                                                 variant="tdSecondary">{credit.description || '-'}</Text></td>

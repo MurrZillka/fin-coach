@@ -27,56 +27,71 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
 
     // Обработчик отправки формы
     const handleSubmit = (e) => {
-        e.preventDefault(); // Предотвращаем стандартную отправку формы браузером
+        e.preventDefault();
 
-        const newErrors = {}; // Объект для сбора ошибок валидации
-        const dataToSend = { ...formData }; // Создаем копию данных формы для отправки (не мутируем напрямую state)
+        const newErrors = {};
+        const dataToSend = { ...formData };
 
-        // Проходимся по всем полям, описанным в массиве fields
+        // Получаем сегодняшнюю дату как объект Date
+        const nowLocal = new Date(); // Время в локальном часовом поясе пользователя
+
+        // Вручную конструируем строку "YYYY-MM-DD" для сегодняшней даты в ЛОКАЛЬНОМ часовом поясе
+        const yearLocal = nowLocal.getFullYear();
+        const monthLocal = String(nowLocal.getMonth() + 1).padStart(2, '0'); // getMonth() is 0-indexed
+        const dayLocal = String(nowLocal.getDate()).padStart(2, '0');
+        const todayLocalString = `${yearLocal}-${monthLocal}-${dayLocal}`; // Строка "YYYY-MM-DD" в ЛОКАЛЬНОМ поясе
+
+        // --- ЛОГИ ДЛЯ ОТЛАДКИ ---
+        console.log('Modal: Validation Debug - todayLocalString (constructed):', todayLocalString);
+        // --- КОНЕЦ ЛОГОВ ---
+
+
         fields.forEach((field) => {
-            // --- ИСПРАВЛЕННАЯ Локальная валидация: проверка на обязательность ---
-            // Проверяем, если поле обязательное (field.required === true)
-            // И его значение в данных для отправки (dataToSend[field.name])
-            // равно undefined ИЛИ пустой строке (для текстовых/числовых полей)
-            // Это условие теперь корректно.
+            // --- Локальная валидация: проверка на обязательность ---
             if (field.required && (dataToSend[field.name] === undefined || dataToSend[field.name] === '')) {
                 newErrors[field.name] = `${field.label} обязателен`;
             }
-            // --- Конец ИСПРАВЛЕННОЙ Локальной валидации ---
+            // --- Конец Локальной валидации на обязательность ---
+
+            // --- ТРЕТЬЯ ВЕРСИЯ Локальной валидации: проверка даты на будущее (сравнение локальных строк) ---
+            // Применяется только к полю с именем 'date' и если в нем есть непустое значение
+            if (field.name === 'date' && dataToSend[field.name]) {
+                const inputDateString = dataToSend[field.name]; // Значение из Input type="date" - это строка "YYYY-MM-DD"
+
+                // --- ЛОГИ ДЛЯ ОТЛАДКИ ---
+                console.log('Modal: Validation Debug - inputDateString:', inputDateString);
+                // --- КОНЕЦ ЛОГОВ ---
+
+                // Сравниваем строку введенной даты со строкой сегодняшней даты, полученной в ЛОКАЛЬНОМ поясе.
+                // Строковое сравнение "YYYY-MM-DD" работает корректно для дат.
+                // Проверяем, строго ли введенная строка даты БОЛЬШЕ строки сегодняшней локальной даты.
+                // Это должно правильно работать для сравнения календарных дней по локальному времени.
+                if (inputDateString > todayLocalString) {
+                    newErrors[field.name] = `${field.label} не может быть в будущем`; // Добавляем ошибку
+                }
+            }
+            // --- Конец ТРЕТЬЕЙ ВЕРСИИ Локальной валидации даты ---
 
 
-            // --- Преобразование типов перед отправкой (логика остается прежней) ---
-            // Преобразуем значения в нужный тип, если это не строка
+            // --- Преобразование типов перед отправкой ---
             if (field.type === 'number') {
                 const valueAsString = dataToSend[field.name];
-                // Только пытаемся преобразовать, если строка не пустая, не null и не undefined
-                if (valueAsString !== undefined && valueAsString !== null && valueAsString !== '') {
-                    // Пытаемся преобразовать строку в число с плавающей точкой
+                if (valueAsString !== undefined && valueAsString !== null && valueAsString !== '' && !newErrors[field.name]) {
                     const parsedAmount = parseFloat(valueAsString);
-                    // Если преобразование успешно (получилось число, а не NaN)
                     if (!isNaN(parsedAmount)) {
-                        // Сохраняем число в данных для отправки
                         dataToSend[field.name] = parsedAmount;
                     } else {
-                        // Если преобразование не удалось (например, пользователь ввел текст),
-                        // добавляем ошибку и устанавливаем значение в 0 (или null)
-                        newErrors[field.name] = `${field.label} должен быть числом`;
-                        dataToSend[field.name] = 0; // Устанавливаем 0, чтобы не отправлять NaN
+                        newErrors[field.name] = newErrors[field.name] || `${field.label} должен быть числом`;
+                        dataToSend[field.name] = 0;
                     }
-                } else {
-                    // Если поле числовое, но было пустое ('' или undefined)
-                    // Если оно было обязательным, ошибка добавлена выше.
-                    // Устанавливаем значение в 0 или null, как требует API для пустого числового поля
-                    dataToSend[field.name] = 0; // Или null, если API предпочитает
+                } else if (valueAsString === '') {
+                    dataToSend[field.name] = 0;
                 }
-
             } else if (field.type === 'checkbox') {
-                // Для чекбокса:
-                // Значение уже должно быть булевым из Input.jsx/handleChange,
-                // но приводим к булеву явно на всякий случай.
                 dataToSend[field.name] = !!dataToSend[field.name];
             }
-            // Типы text и date обычно остаются строками, что подходит для API.
+            // Примечание: Преобразование даты в формат ISO 8601 для API происходит в handleEditSubmit/handleAddSubmit, а не здесь.
+            // Modal передает строку "YYYY-MM-DD" из formData.date в пропс onSubmit.
             // --- Конец Преобразования типов ---
         });
 
@@ -84,14 +99,12 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
         setErrors(newErrors);
 
         // Если ошибок валидации нет (объект ошибок пустой)
+        // Проверяем длину newErrors *после* потенциального добавления ошибок в цикле
         if (Object.keys(newErrors).length === 0) {
-            console.log('Modal: Validation passed, calling onSubmit with data:', dataToSend); // Лог отправляемых данных
-            onSubmit(dataToSend); // <--- Передаем данные С ПРЕОБРАЗОВАННЫМИ ТИПАМИ
-            // Модал должен закрыться после успешной операции в функции, переданной как onSubmit.
+            console.log('Modal: Validation passed, calling onSubmit with data:', dataToSend);
+            onSubmit(dataToSend);
         } else {
-            // Если есть ошибки валидации, логируем их и модал остается открытым.
             console.log('Modal: Validation failed, errors:', newErrors);
-            // Ошибки отобразятся рядом с полями благодаря состоянию `errors` и пропсу `error` в компоненте `Input`.
         }
     };
 
@@ -119,7 +132,7 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
                                 type={field.type || 'text'} // Тип поля (дефолт text)
                                 // Значение поля: берем из локального состояния formData.
                                 // Input ожидает значение (строку или булево для чекбокса).
-                                // Ensure value is never undefined for Input component, default to ''
+                                // Убедимся, что значение для Input никогда не undefined, по умолчанию пустая строка
                                 value={formData[field.name] === undefined ? '' : formData[field.name]} // Значение из состояния формы
                                 onChange={handleChange} // Передаем обработчик изменения из Modal
                                 error={errors[field.name]} // Сообщение об ошибке валидации для этого поля
