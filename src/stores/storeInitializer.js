@@ -7,6 +7,10 @@ import useBalanceStore from './balanceStore';
 import useCreditStore from './creditStore';
 import useSpendingsStore from './spendingsStore';
 import useCategoryStore from './categoryStore';
+// --- ДОБАВЛЕНО: Импортируем стор Целей ---
+import useGoalsStore from './goalsStore';
+// --- Конец ДОБАВЛЕНИЯ ---
+
 
 console.log('storeInitializer: Initializing store subscriptions...'); // Лог начала инициализации
 
@@ -67,6 +71,24 @@ useAuthStore.subscribe(
 );
 console.log('storeInitializer: CategoryStore subscription set up.'); // Лог установки
 
+// --- ДОБАВЛЕНО: Настройка подписки для GoalsStore ---
+useAuthStore.subscribe(
+    (authState) => {
+        console.log('storeInitializer: GoalsStore subscription triggered by auth state change.', authState);
+        const goalsStoreState = useGoalsStore.getState();
+        // Сбрасываем цели, если пользователь становится не аутентифицирован И если в сторе целей есть данные, которые нужно сбросить.
+        // Проверяем, если goals !== null ИЛИ currentGoal !== null
+        if (!authState.isAuthenticated && (goalsStoreState.goals !== null || goalsStoreState.currentGoal !== null)) {
+            console.log('storeInitializer: User became unauthenticated, triggering goalsStore reset.');
+            goalsStoreState.resetGoals(); // Вызываем действие сброса в goalsStore
+        }
+    },
+    (state) => ({ isAuthenticated: state.isAuthenticated })
+);
+console.log('storeInitializer: GoalsStore subscription set up.'); // Лог установки
+// --- Конец ДОБАВЛЕНИЯ ---
+
+
 console.log('storeInitializer: Store subscriptions initialization finished.'); // Лог завершения
 
-// Этот файл не экспортирует ничего, его просто нужно импортировать в корневом файле приложения.
+// Этот файл не экспортирует ничего, его просто нужно импортировать в корневом файле приложения (например, в main.jsx или App.jsx).
