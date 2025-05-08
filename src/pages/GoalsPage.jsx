@@ -1,12 +1,11 @@
 // src/pages/GoalsPage.jsx
-import React, { useState, useEffect, useMemo } from 'react'; // Импортируем useState и useEffect
+import React, {useEffect, useState} from 'react'; // Импортируем useState и useEffect
 // Import necessary components and stores
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 // Import icons
-import { PencilIcon, TrashIcon, StarIcon } from '@heroicons/react/24/outline'; // Добавим StarIcon для текущей цели
-
+import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline'; // Добавим StarIcon для текущей цели
 // --- Import Stores ---
 import useGoalsStore from '../stores/goalsStore'; // Убедись, что путь корректен
 // Импорт useAuthStore может потребоваться, если нужно получить user?.userName или другие данные пользователя
@@ -222,6 +221,7 @@ export default function GoalsPage() {
             await updateGoal(id, formData);
             closeModal(); // Close modal on success
             console.log(`GoalsPage Logic: updateGoal store action finished successfully for ID: ${id}.`);
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
             console.error(`GoalsPage Logic: Error during edit goal ID ${id} (after form submit):`, err);
             closeModal(); // Close modal on error
@@ -238,6 +238,7 @@ export default function GoalsPage() {
             console.log(`GoalsPage Logic: deleteGoal store action finished for ID: ${id}.`);
             closeModal(); // Close modal on success
             console.log(`GoalsPage Logic: handleDeleteConfirm finished.`);
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
             console.error(`GoalsPage Logic: Error during delete goal ID ${id} (after confirmation):', err);`);
             closeModal(); // Close modal on error
@@ -253,7 +254,8 @@ export default function GoalsPage() {
             console.log(`GoalsPage Logic: setCurrentGoal store action finished for ID: ${id}.`);
             closeModal(); // Close modal on success
             console.log(`GoalsPage Logic: handleSetCurrentConfirm finished.`);
-        } catch (err) {
+            // eslint-disable-next-line no-unused-vars
+                } catch (err) {
             console.error(`GoalsPage Logic: Error during setting goal ID ${id} as current (after confirmation):', err);`);
             closeModal(); // Close modal on error
             // Errors are displayed by LayoutWithHeader
