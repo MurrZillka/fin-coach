@@ -461,7 +461,6 @@ export default function GoalsPage() {
                         ) : null}
                     </div>
                 )}
-
                 {/* Modal and ConfirmModal components are rendered by LayoutWithHeader */}
 
             </main>
