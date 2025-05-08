@@ -1,8 +1,11 @@
 // src/App.jsx
 import { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom'; // У тебя Router оборачивает LayoutWithHeader
+import { BrowserRouter as Router } from 'react-router-dom';
 // Убедись, что путь к stores/authStore корректный
-import useAuthStore from './stores/authStore'; // Импортируем стор авторизации
+import useAuthStore from './stores/authStore';
+// --- Импортируем стор Целей ---
+import useGoalsStore from './stores/goalsStore';
+// --- Конец ДОБАВЛЕННОГО ---
 
 import LayoutWithHeader from './components/LayoutWithHeader';
 
@@ -11,7 +14,6 @@ function App() {
     // Получаем действия и состояние из стора авторизации
     // initAuth для первичной проверки токена
     // isAuthenticated для запуска эффекта загрузки данных
-    // fetchInitialUserData для вызова действия загрузки данных (получаем через useAuthStore.getState() в useEffect)
     const { initAuth, isAuthenticated } = useAuthStore(); // Получаем initAuth и isAuthenticated
 
     // --- Первый useEffect: Инициализация авторизации при загрузке приложения ---
@@ -27,19 +29,24 @@ function App() {
     // Этот эффект запускается, когда isAuthenticated меняется.
     // Если пользователь становится авторизован (isAuthenticated === true), запускаем загрузку данных.
     useEffect(() => {
-        // Получаем доступ к действию fetchInitialUserData из стора авторизации
-        // Используем useAuthStore.getState() для доступа к действиям вне зависимостей хука
-        const { fetchInitialUserData } = useAuthStore.getState();
+        // --- ИСПРАВЛЕНО: Вызываем fetchInitialUserData напрямую из getState() ---
+        // Получаем доступ к действию fetchInitialUserData и вызываем его сразу
+        // const { fetchInitialUserData } = useAuthStore.getState(); // <-- Эта строка удалена/изменена
 
         // Если пользователь авторизован...
         if (isAuthenticated) {
-            console.log("App.jsx: User is authenticated, triggering fetchInitialUserData...");
+            console.log("App.jsx: User is authenticated, triggering initial data fetches...");
             // Вызываем действие fetchInitialUserData из стора авторизации.
-            // Это действие, в свою очередь, вызовет fetchBalance, fetchCategories и т.д.
-            fetchInitialUserData();
+            // Теперь вызываем его напрямую
+            useAuthStore.getState().fetchInitialUserData(); // <-- Вызов напрямую
+
+            // --- Загружаем данные о текущей цели при авторизации ---
+            console.log("App.jsx: Also fetching current goal data...");
+            useGoalsStore.getState().getCurrentGoal(); // Вызываем действие загрузки текущей цели из стора Целей
+            // --- Конец ДОБАВЛЕННОГО ---
         }
         // Нет else блока здесь. Если пользователь не авторизован, fetchInitialUserData
-        // сама сбросит состояние других сторов (как мы реализовали).
+        // сама сбросит состояние других сторов (как мы реализовали через storeInitializer).
 
     }, [isAuthenticated]); // Зависимость на isAuthenticated. Эффект сработает при true -> false и false -> true.
 

@@ -4,6 +4,9 @@ import React from 'react';
 import useBalanceStore from '../stores/balanceStore'; // Импортируем стор баланса
 // Убедись, что путь к Text корректный относительно этой папки components
 import Text from './ui/Text'; // Импортируем компонент Text (BalanceWidget.jsx в src/components, Text.jsx в src/components/ui)
+// --- ДОБАВЛЕНО: Импортируем новый компонент виджета прогресса цели ---
+import GoalProgressWidget from './GoalProgressWidget'; // Убедись, что путь к GoalProgressWidget.jsx корректен
+// --- Конец ДОБАВЛЕННОГО ---
 
 
 export default function BalanceWidget() {
@@ -74,16 +77,12 @@ export default function BalanceWidget() {
                 {/* --- Конец Левой части --- */}
 
 
-                {/* --- Правая часть: Место для Финансовой цели (пока плейсхолдер) --- */}
-                {/* flex-shrink-0: не сжимается, w-1/3: пример ширины, text-right: текст справа */}
-                {/* Можешь настроить ширину (w-...) или другие стили этой части */}
-                <div className="flex-shrink-0 w-1/3 text-right">
-                    {/* Плейсхолдер текст */}
-                    <Text variant="body" className="text-secondary-600 italic">
-                        Место для информации о цели.
-                    </Text>
-                </div>
-                {/* --- Конец Правой части --- */}
+                {/* --- Правая часть: Место для Финансовой цели (ТЕПЕРЬ НАШ НОВЫЙ ВИДЖЕТ) --- */}
+                {/* Заменяем placeholder div на наш новый компонент виджета прогресса цели */}
+                {/* --- ИСПРАВЛЕНО: Заменен placeholder на GoalProgressWidget --- */}
+                <GoalProgressWidget />
+                {/* --- Конец ИСПРАВЛЕНИЯ --- */}
+
             </div>
 
             {error && error.message && (
