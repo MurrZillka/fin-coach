@@ -223,7 +223,7 @@ export default function GoalsPage() {
             console.log(`GoalsPage Logic: updateGoal store action finished successfully for ID: ${id}.`);
             // eslint-disable-next-line no-unused-vars
         } catch (err) {
-            console.error(`GoalsPage Logic: Error during edit goal ID ${id} (after form submit):`, err);
+            console.error(`GoalsPage Logic: Error during edit goal ID ${id} (after form submit):', err);`);
             closeModal(); // Close modal on error
             // Errors are displayed by LayoutWithHeader
         }
@@ -275,8 +275,7 @@ export default function GoalsPage() {
                 {/* Header section: Title and Add Button */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Мои цели</Text>
-                    {/* Кнопка Add Goal использует handleAddClick */}
-                    <TextButton onClick={handleAddClick}> {/* <-- handleAddClick используется здесь */}
+                    <TextButton onClick={handleAddClick}>
                         Добавить цель
                     </TextButton>
                 </div>
@@ -348,7 +347,7 @@ export default function GoalsPage() {
                                         // Определяем, является ли текущая цель в итерации текущей выбранной целью
                                         const isCurrent = currentGoal && currentGoal.id === goal.id;
 
-                                        // --- ДОБАВЛЕНО: Расчет процента и определение класса цвета для иконки ---
+                                        // --- Расчет процента и определение класса цвета для иконки ---
                                         let percentage = 0;
                                         let starColorClass = 'text-gray-500'; // Цвет по умолчанию (если не текущая или баланс не загружен)
 
@@ -375,25 +374,21 @@ export default function GoalsPage() {
 
                                         } else if (!isCurrent) {
                                             // Если цель не текущая, звездочка может быть, например, серой или невидимой
-                                            // starColorClass = 'text-gray-400'; // Можно оставить серый, если хотим показывать иконку всегда
                                             starColorClass = 'text-transparent'; // Делаем иконку невидимой, если не текущая цель
                                         }
                                         // --- Конец ДОБАВЛЕННОГО ---
 
 
                                         return (
-                                            <tr key={goal.id} // Ключ строки таблицы
-                                                // Чередующиеся классы фона строк
-                                                className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                                <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td> {/* Номер по порядку */}
-                                                {/* --- ИСПРАВЛЕНО: Добавляем иконку и условные классы для выделения названия --- */}
+                                            // Убран лишний пробел после <tr> и комментарий
+                                            <tr key={goal.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
+                                                {/* Убран лишний пробел после <td> и комментарий */}
+                                                <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
+                                                {/* Убран лишний пробел перед <td> и комментарий */}
                                                 <td className="p-4"> {/* Ячейка для описания цели */}
                                                     {/* Flex контейнер для иконки и текста, выравнивание по центру */}
                                                     <div className="flex items-center">
-                                                        {/* Рендерим StarIcon только если это текущая цель ИЛИ если мы хотим показывать серую звездочку для нетекущих */}
-                                                        {/* Согласно запросу, звездочку ставим только для текущей цели, но цвет берем по проценту */}
-                                                        {/* Рендерим иконку, если это текущая цель, с вычисленным цветом.
-                                                             Если не текущая, она не рендерится благодаря !isCurrent */}
+                                                        {/* Рендерим StarIcon только если это текущая цель */}
                                                         {isCurrent && ( // Рендерим только если isCurrent истинно
                                                             // Используем определенный класс цвета для звездочки
                                                             // Добавляем mx-0 mr-1 для контроля отступа между иконкой и текстом
@@ -402,23 +397,23 @@ export default function GoalsPage() {
                                                         {/* Текст описания цели */}
                                                         <Text
                                                             variant="tdPrimary" // Вариант текста для ячейки таблицы
-                                                            // Убираем старые классы font-bold и text-primary-700 отсюда, так как выделение делается иконкой
-                                                            // className={`${isCurrent ? 'font-bold text-primary-700' : ''}`}
                                                         >
                                                             {goal.description} {/* Само описание цели */}
                                                         </Text>
                                                     </div>
                                                 </td>
-                                                {/* --- Конец ИСПРАВЛЕНИЯ --- */}
+                                                {/* Убран лишний пробел перед <td> и комментарий */}
                                                 <td className="p-4"><Text variant="tdSecondary"> {/* Ячейка для суммы */}
                                                     {typeof goal.amount === 'number'
                                                         ? goal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                                                         : goal.amount} ₽
                                                 </Text></td>
+                                                {/* Убран лишний пробел перед <td> и комментарий */}
                                                 <td className="p-4"><Text variant="tdSecondary"> {/* Ячейка для желаемой даты */}
                                                     {/* Форматирование даты для отображения */}
                                                     {goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z" ? new Date(goal.wish_date).toLocaleDateString() : '-'}
                                                 </Text></td>
+                                                {/* Убран лишний пробел перед <td> и комментарий */}
                                                 <td className="p-4 flex gap-2"> {/* Ячейка для кнопок действий */}
                                                     {/* Кнопка "Редактировать" */}
                                                     <IconButton
@@ -429,7 +424,6 @@ export default function GoalsPage() {
                                                     />
                                                     {/* Кнопка "Установить текущей" */}
                                                     {/* Рендерим кнопку только если эта цель НЕ является текущей */}
-                                                    {/* Используем флаг isCurrent для более чистого условия */}
                                                     {!(isCurrent) && (
                                                         <IconButton
                                                             icon={StarIcon}
@@ -461,6 +455,7 @@ export default function GoalsPage() {
                         ) : null}
                     </div>
                 )}
+
                 {/* Modal and ConfirmModal components are rendered by LayoutWithHeader */}
 
             </main>
