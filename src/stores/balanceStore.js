@@ -2,8 +2,18 @@
 import { create } from 'zustand';
 import { getBalance as fetchBalanceApi } from '../api/balance'; // Импортируем функцию API, переименовывая ее
 // --- ОСТАВЛЯЕМ ИМПОРТ authStore, ОН МОЖЕТ ПОТРЕБОВАТЬСЯ ДЛЯ fetchBalance (если getToken там используется) ---
-import useAuthStore from './authStore'; // Этот импорт может быть нужен для getToken внутри actions
+//import useAuthStore from './authStore'; // Этот импорт может быть нужен для getToken внутри actions
 // --- Конец ИМПОРТОВ ---
+
+
+// --- ОПРЕДЕЛЯЕМ НАЧАЛЬНОЕ СОСТОЯНИЕ ---
+const initialState = {
+    balance: null, // Здесь будет храниться значение баланса (null при сбросе/до загрузки)
+    isLoading: false, // Индикатор загрузки
+    error: null, // Информация об ошибке
+    // Если есть другие свойства состояния, добавь их сюда с их начальными значениями
+};
+// --- Конец ОПРЕДЕЛЕНИЯ ---
 
 
 // --- ИСПРАВЛЕНО: УДАЛЕНА Подписка на изменения в authStore изнутри create ---
@@ -17,9 +27,8 @@ const useBalanceStore = create((set, get) => {
     // --- Возвращаем объект состояния и действий стора ---
     return {
         // --- Состояние (State) ---
-        balance: null, // Здесь будет храниться значение баланса
-        isLoading: false, // Индикатор загрузки
-        error: null, // Информация об ошибке
+        ...initialState, // Распределяем начальное состояние
+
 
         // --- Действия (Actions) ---
 
@@ -59,11 +68,13 @@ const useBalanceStore = create((set, get) => {
             console.log('balanceStore: fetchBalance finished. Current balance state:', get().balance); // Лог завершения (этот лог теперь покажет число)
         },
 
-        // --- ДОБАВЛЕНО: Действие для сброса состояния баланса ---
+        // --- Действие для сброса состояния баланса ---
         // Эта функция будет вызываться подпиской из storeInitializer.js
+        // ИСПОЛЬЗУЕМ initialState для полного сброса
         resetBalance: () => {
             console.log('balanceStore: resetBalance called.'); // Лог вызова сброса
-            set({ balance: null, isLoading: false, error: null }); // Сбрасываем к начальному состоянию null
+            set(initialState); // <--- ИЗМЕНЕНИЕ ЗДЕСЬ: используем initialState
+            console.log('balanceStore: State reset to initialState.'); // Лог сброса
         },
         // --- Конец ДОБАВЛЕНИЯ ---
 
