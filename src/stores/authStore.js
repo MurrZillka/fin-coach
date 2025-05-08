@@ -3,12 +3,14 @@ import { create } from 'zustand';
 // Убедись, что путь к api/auth корректный
 import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth';
 
-// --- ИМПОРТЫ СТОРОВ (БОЛЬШЕ НЕ НУЖНЫ ДЛЯ ПРЯМОГО ВЫЗОВА СБРОСА, НО НУЖНЫ ДЛЯ fetchInitialUserData) ---
+// --- ИМПОРТЫ СТОРОВ ---
 // Убедись, что пути к другим сторам корректны
 import useBalanceStore from './balanceStore';
 import useCreditStore from './creditStore';
 import useCategoryStore from './categoryStore';
 import useSpendingsStore from './spendingsStore';
+// --- ДОБАВЛЕНО: Импортируем стор Целей ---
+import useGoalsStore from './goalsStore'; // Импортируем useGoalsStore
 // --- Конец ИМПОРТОВ ---
 
 
@@ -51,11 +53,11 @@ const useAuthStore = create((set, get) => ({
             });
             console.log('authStore: login successful, isAuthenticated set to true.'); // Лог успеха
 
-            // --- ОСТАВЛЕНО: Вызываем fetchInitialUserData после успешного входа ---
-            // Это гарантирует загрузку данных (включая категории) для только что вошедшего пользователя
+            // --- ВЫЗЫВАЕМ fetchInitialUserData после успешного входа ---
+            // Это гарантирует загрузку данных (включая теперь и цели) для только что вошедшего пользователя
             console.log('authStore: Triggering fetchInitialUserData after successful login.'); // Лог триггера
             get().fetchInitialUserData(); // Вызываем действие через get()
-            // --- Конец ОСТАВЛЕННОГО ---
+            // --- Конец ВЫЗОВА ---
 
             return data;
 
@@ -63,7 +65,12 @@ const useAuthStore = create((set, get) => ({
             console.error('authStore: Unexpected error in login (from authStore):', error); // Лог непредвиденной ошибки
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка авторизации', status: error.status || 500 };
             set({ status: 'failed', error: unexpectedError });
-            throw error;
+            // При ошибке входа также важно сбросить состояние, т.к. аутентификация не удалась
+            localStorage.removeItem('token'); // Убедимся, что токен удален
+            localStorage.removeItem('userName');
+            // Здесь не вызываем полный logout, т.к. это может быть ошибка API до установки auth state
+            // Сброс других сторов при ошибке входа не требуется, они должны сбрасываться при логауте или инициализации без токена
+            throw error; // Пробрасываем ошибку
         } finally {
             console.log('authStore: login finished.'); // Лог завершения
         }
@@ -100,64 +107,41 @@ const useAuthStore = create((set, get) => ({
 
     logout: async () => {
         console.log('authStore: logout started'); // Лог начала
-        set({ status: 'loading' });
-        const token = localStorage.getItem('token');
+        set({ status: 'loading' }); // Опционально, индикатор выхода
+
+        const token = localStorage.getItem('token'); // Берем токен перед очисткой
 
         try {
-            if (token) {
+            if (token) { // Вызываем API выхода только если токен был
                 console.log('authStore: Calling logoutApi...'); // Лог вызова API
                 await logoutApi(token);
                 console.log('authStore: logoutApi successful.'); // Лог успеха API
             }
-
+        } catch (error) {
+            console.error('authStore: Error during logout API call:', error); // Лог ошибки при вызове API выхода
+            // Даже если API выхода с ошибкой, локальные данные и состояние стора нужно почистить
+        } finally {
+            // --- ОЧИСТКА ЛОКАЛЬНЫХ ДАННЫХ И СОСТОЯНИЯ ---
+            // Этот блок выполняется независимо от успеха или ошибки API вызова
+            console.log('authStore: Clearing local storage and state...');
             localStorage.removeItem('userName');
             localStorage.removeItem('token');
-            console.log('authStore: Local storage cleared.'); // Лог очистки Local Storage
 
             set({
                 user: null,
                 isAuthenticated: false, // --- ЭТО ИЗМЕНЕНИЕ ВЫЗЫВАЕТ СБРОС В ДРУГИХ СТОРАХ ЧЕРЕЗ ПОДПИСКУ ---
-                status: 'idle',
-                error: null
+                status: 'idle', // Возвращаемся в исходное состояние
+                error: null // Сбрасываем любые ошибки
             });
-            console.log('authStore: State reset after logout. Other stores reset by subscription.'); // Лог сброса состояния стора
+            console.log('authStore: Local storage cleared and state reset.');
 
+            // --- СБРОС ДРУГИХ СТОРОВ ЧЕРЕЗ ПОДПИСКИ ---
+            // Подписки в storeInitializer.js слушают изменение isAuthenticated на false
+            // и вызывают reset в соответствующих сторах.
+            console.log('authStore: Resetting other stores handled by subscriptions.');
+            // Не вызываем reset() здесь явно, подписки сделают это.
+            // --- Конец СБРОСА ДРУГИХ СТОРОВ ---
 
-            // --- УДАЛЕНО: Вызовы сброса других сторов теперь обрабатываются подписками ---
-            // console.log('authStore: Resetting other stores...');
-            // useBalanceStore.getState().resetBalance();
-            // useCreditStore.getState().resetCredits();
-            // useSpendingsStore.getState().resetSpendings();
-            // useCategoryStore.getState().resetCategories();
-            // console.log('authStore: Other stores reset.');
-            // --- Конец УДАЛЕНИЯ ---
-
-        } catch (error) {
-            console.error('authStore: Error during logout:', error); // Лог ошибки при выходе
-            // Даже если API выхода с ошибкой, локальные данные нужно почистить и состояние стора сбросить
-            localStorage.removeItem('userName');
-            localStorage.removeItem('token');
-            console.log('authStore: Local storage cleared (after error).'); // Лог очистки Local Storage при ошибке
-
-
-            set({
-                user: null,
-                isAuthenticated: false, // --- ЭТО ИЗМЕНЕНИЕ ТАКЖЕ ВЫЗЫВАЕТ СБРОС ЧЕРЕЗ ПОДПИСКУ ---
-                status: 'idle',
-                error: null
-            });
-            console.log('authStore: State reset after logout (after error). Other stores reset by subscription.'); // Лог сброса состояния стора при ошибке
-
-            // --- УДАЛЕНО: Вызовы сброса других сторов теперь обрабатываются подписками ---
-            // console.log('authStore: Resetting other stores (after error)...');
-            // useBalanceStore.getState().resetBalance();
-            // useCreditStore.getState().resetCredits();
-            // useSpendingsStore.getState().resetSpendings();
-            // useCategoryStore.getState().resetCategories();
-            // console.log('authStore: Other stores reset (after error).');
-            // --- Конец УДАЛЕНИЯ ---
-
-        } finally {
             console.log('authStore: logout finished.'); // Лог завершения
         }
     },
@@ -169,41 +153,45 @@ const useAuthStore = create((set, get) => ({
 
 
     // --- Действие: Инициализация данных пользователя (вызывается в App.jsx после initAuth) ---
-    // Это действие вызывается при монтировании App, если initAuth нашел токен.
-    // Оно должно инициировать загрузку данных для текущего пользователя ИЛИ сбросить старые данные,
-    // если по какой-то причине токен есть, но пользователь невалидный (хотя это обрабатывается в fetch).
+    // Это действие вызывается при монтировании App, если initAuth нашел токен, ИЛИ после успешного login.
+    // Оно должно инициировать загрузку данных для текущего пользователя.
     fetchInitialUserData: async () => {
         console.log('authStore: fetchInitialUserData started'); // Лог начала
         const { isAuthenticated, user } = get(); // Получаем текущее состояние authStore
 
         if (isAuthenticated && user && user.access_token) {
-            const token = user.access_token; // Берем токен из текущего состояния
+            const token = user.access_token; // Берем токен из текущего состояния user объекта
             console.log("authStore: User is authenticated, fetching initial user data..."); // Лог
 
-            // Вызываем действия загрузки данных из других сторов
-            console.log('authStore: Triggering fetchBalance, fetchCredits, fetchSpendings, fetchCategories...'); // Лог вызовов
-            // Здесь не сбрасываем сторы, т.к. пользователь аутентифицирован, и мы будем фетчить его данные.
-            // Используем getState() для доступа к действиям загрузки других сторов
-            useBalanceStore.getState().fetchBalance(token);
-            useCreditStore.getState().fetchCredits(token);
-            useSpendingsStore.getState().fetchSpendings(token);
-            useCategoryStore.getState().fetchCategories(token);
+            // --- ВЫЗЫВАЕМ ДЕЙСТВИЯ ЗАГРУЗКИ ДАННЫХ ИЗ ДРУГИХ СТОРОВ ---
+            // Вызываем эти действия, передавая токен
+            console.log('authStore: Triggering fetchBalance, fetchCredits, fetchSpendings, fetchCategories, fetchGoals, getCurrentGoal...'); // Лог вызовов
 
+            // Используем getState() для доступа к действиям загрузки других сторов
+            useBalanceStore.getState().fetchBalance(token); // <-- Здесь передача токена сохранена
+            useCreditStore.getState().fetchCredits(token); // <-- Здесь передача токена сохранена
+            useSpendingsStore.getState().fetchSpendings(token); // <-- Здесь передача токена сохранена
+            useCategoryStore.getState().fetchCategories(token); // <-- Здесь передача токена сохранена
+
+            // --- ДОБАВЛЕНО: Вызываем загрузку целей и текущей цели ---
+            // Убедитесь, что useGoalsStore импортирован в начале файла
+            useGoalsStore.getState().fetchGoals(); // Вызываем загрузку списка целей
+            useGoalsStore.getState().getCurrentGoal(); // Вызываем загрузку текущей цели
+            // --- Конец ДОБАВЛЕННОГО ---
+
+
+            // Здесь не устанавливаем loading в authStore, т.к. loading уже обрабатывается в каждом сторе данных.
+            // Здесь не сбрасываем сторы, т.к. пользователь аутентифицирован, и мы будем фетчить его данные.
 
         } else {
-            // Если пользователь не авторизован (или разлогинился), состояние isAuthenticated становится false.
+            // Если пользователь не авторизован (или разлогинился до этого), состояние isAuthenticated становится false.
             // ЭТО ИЗМЕНЕНИЕ (ЕСЛИ ПРОИЗОШЛО) ВЫЗЫВАЕТ СБРОС В ДРУГИХ СТОРАХ ЧЕРЕЗ ПОДПИСКУ.
-            // Здесь нам не нужно явно вызывать reset, подписки сделают это.
+            // Здесь нам не нужно явно вызывать reset, подписки сделают это при смене isAuthenticated.
             console.log("authStore: User not authenticated or logged out. Resetting other stores handled by subscriptions..."); // Лог сброса
 
-            // --- УДАЛЕНО: Вызовы сброса других сторов теперь обрабатываются подписками ---
-            // useBalanceStore.getState().resetBalance();
-            // useCreditStore.getState().resetCredits();
-            // useSpendingsStore.getState().resetSpendings();
-            // useCategoryStore.getState().resetCategories();
-            // --- Конец УДАЛЕНИЯ ---
-
-            console.log('authStore: Finished attempting to reset other stores (not authenticated).'); // Лог завершения сброса
+            // Убедимся, что состояние authStore корректно сброшено, хотя logout это делает.
+            // Этот блок может сработать при initAuth, если токена нет.
+            set({ user: null, loading: false, error: null }); // Убедимся, что user null если нет аутентификации
         }
         console.log('authStore: fetchInitialUserData finished.'); // Лог завершения
     },
@@ -222,12 +210,12 @@ const useAuthStore = create((set, get) => ({
             // Устанавливаем начальное состояние аутентификации на основе localStorage
             set({
                 isAuthenticated: true,
-                user: {
-                    access_token: token,
-                    userName: userName || 'Пользователь'
+                user: { // Устанавливаем user объект на основе токена и userName из localStorage
+                    access_token: token, // Сохраняем токен в user объекте для легкого доступа
+                    userName: userName || 'Пользователь' // Используем userName из localStorage или дефолт
                 },
-                status: 'succeeded',
-                error: null
+                status: 'succeeded', // Считаем, что если токен есть, то аутентификация успешна
+                error: null // Сбрасываем ошибки при инициализации
             });
             console.log('authStore: initAuth finished (authenticated). State set based on token.'); // Лог завершения
             // fetchInitialUserData будет вызван в App.jsx после initAuth,
@@ -253,7 +241,7 @@ const useAuthStore = create((set, get) => ({
             // useCategoryStore.getState().resetCategories();
             // --- Конец УДАЛЕНИЯ ---
 
-            console.log('authStore: Finished attempting to reset other stores (no token).'); // Лог завершения сброса
+            console.log('authStore: Finished attempting to reset other stores (not authenticated).'); // Лог завершения сброса
             console.log('authStore: initAuth finished (not authenticated).'); // Лог завершения
         }
     }

@@ -8,16 +8,28 @@ import useAuthStore from './authStore'; // Убедись, что путь ко�
 
 
 // --- ВАЖНО: Подписка на authStore для сброса состояния ДОБАВЛЯЕТСЯ НЕ ЗДЕСЬ, а в storeInitializer.js ---
+// Твоя подписка в storeInitializer.js выглядит правильно.
 
 
-const useGoalsStore = create((set, get) => ({
-    // --- Состояние (State) ---
-    goals: null, // Список всех целей пользователя
-    currentGoal: null, // Текущая (активная) цель
+// Определяем начальное состояние для goalsStore
+const initialState = {
+    goals: null, // Список всех целей пользователя (null при сбросе/до загрузки)
+    currentGoal: null, // Текущая (активная) цель (null при сбросе/до загрузки)
     loading: false, // Индикатор загрузки для списка целей и CUD операций
     error: null, // Информация об ошибке для списка целей и CUD операций
     currentGoalLoading: false, // Индикатор загрузки для операций с текущей целью
     currentGoalError: null, // Информация об ошибке для операций с текущей целью
+
+    // Флаги, показывающие, была ли попытка первой загрузки данных
+    // Они используются в useEffect компонента GoalsPage, чтобы не фетчить данные повторно при каждом рендере
+    hasFetchedGoals: false,
+    hasFetchedCurrentGoal: false,
+};
+
+
+const useGoalsStore = create((set, get) => ({
+    // --- Состояние (State) ---
+    ...initialState, // Распределяем начальное состояние при создании стора
 
 
     // --- Вспомогательная функция: Получение токена ---
@@ -39,11 +51,12 @@ const useGoalsStore = create((set, get) => ({
     // Загрузка списка всех целей
     fetchGoals: async () => {
         console.log('goalsStore: fetchGoals started');
-        set({ loading: true, error: null }); // Сбрасываем ошибку перед началом загрузки
+        // Устанавливаем loading, сбрасываем error, но не сбрасываем hasFetchedGoals здесь
+        set({ loading: true, error: null });
 
         const token = get().getToken(); // Получаем токен
         if (!token) {
-            set({ loading: false }); // Если нет токена, просто заканчиваем загрузку
+            set({ goals: null, loading: false, hasFetchedGoals: true }); // Важно сбросить данные и установить флаг fetched=true даже если нет токена при попытке
             console.log('goalsStore: fetchGoals - No token, stopping fetch.');
             return; // Прерываем выполнение
         }
@@ -53,19 +66,21 @@ const useGoalsStore = create((set, get) => ({
             console.log('goalsStore: API getGoals result:', result);
 
             if (result.error) {
-                set({ error: result.error, loading: false });
+                set({ goals: null, error: result.error, loading: false, hasFetchedGoals: true }); // Сбрасываем данные при ошибке
                 console.error('goalsStore: Error fetching goals from API:', result.error);
             } else {
                 // API возвращает { Goals: [...] }
-                set({ goals: result.data.Goals || [], loading: false, error: null }); // Обновляем список целей, учитываем пустой массив
+                set({ goals: result.data.Goals || [], loading: false, error: null, hasFetchedGoals: true }); // Устанавливаем данные и флаг fetched=true
                 console.log('goalsStore: Goals fetched successfully.');
             }
 
         } catch (error) {
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке целей.' };
             set({
+                goals: null, // Сбрасываем данные при непредвиденной ошибке
                 error: unexpectedError,
-                loading: false
+                loading: false,
+                hasFetchedGoals: true // Устанавливаем флаг fetched=true
             });
             console.error('goalsStore: Unexpected error in fetchGoals:', error);
         } finally {
@@ -93,14 +108,12 @@ const useGoalsStore = create((set, get) => ({
                 console.error('goalsStore: Error adding goal from API:', result.error);
                 throw result.error; // Пробрасываем ошибку API
             } else {
-                // Если успешно, перезагружаем список целей
-                await get().fetchGoals(); // fetchGoals сам установит loading=false
-                // После добавления новой цели, возможно, стоит ее установить как текущую и/или обновить currentGoal
-                // Пока просто перезагружаем список. Если API устанавливает новую цель текущей по умолчанию,
-                // то fetchGoals и getCurrentGoal после этого все синхронизируют.
-                // Если не устанавливает, то currentGoal останется прежней.
-                // Для простоты пока не меняем логику после добавления.
-                console.log('goalsStore: Goal added successfully, fetching goals.');
+                // Если успешно, перезагружаем список целей и текущую цель для синхронизации
+                // Сбрасываем флаги fetched в false перед перезагрузкой, чтобы fetchActions точно фетчили
+                set({ hasFetchedGoals: false, hasFetchedCurrentGoal: false });
+                await get().fetchGoals(); // fetchGoals сам установит loading=false и hasFetchedGoals=true
+                await get().getCurrentGoal(); // getCurrentGoal сам установит currentGoalLoading=false и hasFetchedCurrentGoal=true
+                console.log('goalsStore: Goal added successfully, fetching goals and current goal.');
                 return result.data; // Возвращаем ответ
             }
 
@@ -138,14 +151,14 @@ const useGoalsStore = create((set, get) => ({
                 throw result.error;
             } else {
                 // Если успешно, перезагружаем список целей
-                await get().fetchGoals(); // fetchGoals сам установит loading=false
+                // Сбрасываем флаги fetched в false перед перезагрузкой, чтобы fetchGoals и getCurrentGoal точно фетчили
+                set({ hasFetchedGoals: false, hasFetchedCurrentGoal: false });
+                await get().fetchGoals(); // fetchGoals сам установит loading=false и hasFetchedGoals=true
                 console.log(`goalsStore: Goal ID ${id} updated successfully, fetching goals.`);
 
-                // --- ДОБАВЛЕНО: Перезагружаем текущую цель, чтобы обновить ее состояние в сторе ---
-                // Это важно, если обновленная цель является текущей, чтобы виджеты и другие части UI,
-                // использующие `currentGoal`, получили актуальные данные (например, новую сумму).
+                // Перезагружаем текущую цель, чтобы обновить ее состояние в сторе
                 console.log(`goalsStore: Fetching current goal after update to ensure state sync.`);
-                await get().getCurrentGoal(); // <-- Вызываем действие загрузки текущей цели
+                await get().getCurrentGoal(); // <-- Вызываем действие загрузки текущей цели, оно само установит hasFetchedCurrentGoal=true
                 // --- Конец ДОБАВЛЕННОГО ---
 
                 return result.data;
@@ -185,7 +198,9 @@ const useGoalsStore = create((set, get) => ({
                 throw result.error;
             } else {
                 // Если успешно, перезагружаем список целей
-                await get().fetchGoals(); // fetchGoals сам установит loading=false
+                // Сбрасываем флаги fetched в false перед перезагрузкой, чтобы fetchGoals и getCurrentGoal точно фетчили
+                set({ hasFetchedGoals: false, hasFetchedCurrentGoal: false });
+                await get().fetchGoals(); // fetchGoals сам установит loading=false и hasFetchedGoals=true
                 // Если удалили текущую цель, нужно сбросить currentGoal в null в сторе.
                 // Действие deleteGoal не знает, была ли удаленная цель текущей.
                 // Но если мы ПЕРЕЗАГРУЖАЕМ текущую цель после ЛЮБОГО удаления/обновления/добавления
@@ -196,7 +211,7 @@ const useGoalsStore = create((set, get) => ({
 
                 // --- ДОБАВЛЕНО: Перезагружаем текущую цель после удаления ---
                 console.log(`goalsStore: Fetching current goal after deletion to ensure state sync.`);
-                await get().getCurrentGoal(); // <-- Вызываем действие загрузки текущей цели
+                await get().getCurrentGoal(); // <-- Вызываем действие загрузки текущей цели, оно само установит hasFetchedCurrentGoal=true
                 // --- Конец ДОБАВЛЕННОГО ---
 
                 console.log(`goalsStore: Goal ID ${id} deleted successfully, fetching goals.`);
@@ -242,7 +257,7 @@ const useGoalsStore = create((set, get) => ({
                 await get().fetchGoals();
                 // А затем запросим текущую цель
                 // --- ДОБАВЛЕНО: Явно перезагружаем текущую цель после установки ее текущей ---
-                await get().getCurrentGoal(); // <-- Вызываем действие загрузки текущей цели
+                await get().getCurrentGoal(); // <-- Вызываем действие загрузки текущей цели, оно само установит hasFetchedCurrentGoal=true
                 // --- Конец ДОБАВЛЕННОГО ---
 
                 console.log(`goalsStore: Goal ID ${id} set as current successfully, fetching goals and current goal.`);
@@ -317,7 +332,7 @@ const useGoalsStore = create((set, get) => ({
     resetGoals: () => {
         console.log('goalsStore: resetGoals called.');
         // Сбрасываем все состояние к начальным значениям
-        set({
+        set({ // <-- Здесь вручное перечисление
             goals: null,
             currentGoal: null,
             loading: false,
