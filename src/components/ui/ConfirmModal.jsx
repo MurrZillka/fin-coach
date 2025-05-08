@@ -3,14 +3,14 @@ import Text from './Text';
 import TextButton from './TextButton';
 
 // Компонент модального окна подтверждения
-const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Подтвердить' }) => {
+const ConfirmModal = ({isOpen, onClose, onConfirm, title, message, confirmText = 'Подтвердить'}) => {
 
     if (!isOpen) return null;
 
     return (
         // Подложка модала (используем стили, которые обсуждали)
         <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50"
-             style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}
+             style={{backgroundColor: 'rgba(229, 231, 235, 0.7)'}}
         > {/* Здесь ты можешь поправить bg-opacity, когда разберешься со стилями */}
             <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300"
             >
@@ -18,7 +18,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
                 <Text variant="h3" className="mb-4 text-center">
                     {title || 'Подтверждение действия'} {/* Если заголовок не передан, используем дефолтный */}
                 </Text>
-
+                <br/>
                 {/* Текст сообщения */}
                 <Text variant="body" className="mb-6 text-center text-secondary-800">
                     {message || 'Вы уверены?'} {/* Если сообщение не передано, используем дефолтное */}
