@@ -5,13 +5,15 @@ import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 // Import icons
-import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline'; // Добавим StarIcon для текущей цели
+import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline'; // Импортируем StarIcon для использования в списке
 // --- Import Stores ---
 import useGoalsStore from '../stores/goalsStore'; // Убедись, что путь корректен
 // Импорт useAuthStore может потребоваться, если нужно получить user?.userName или другие данные пользователя
 // import useAuthStore from '../stores/authStore'; // Пока не нужен для базовой логики
 // --- Корректный путь к modalStore.js ---
 import useModalStore from '../stores/modalStore.js'; // Убедись, что путь корректен
+// --- ДОБАВЛЕНО: Импорт стора Баланса для расчета процента и цвета иконки ---
+import useBalanceStore from '../stores/balanceStore'; // Убедись, что путь корректен
 // --- Конец ИМПОРТОВ ---
 
 
@@ -35,6 +37,10 @@ export default function GoalsPage() {
         setCurrentGoal, getCurrentGoal,
         clearError, clearCurrentGoalError
     } = useGoalsStore();
+
+    // --- ДОБАВЛЕНО: Получаем баланс и статус его загрузки для расчета процента и цвета иконки ---
+    const { balance, isLoading: isBalanceLoading } = useBalanceStore(); // Убедись, что isLoading переименован
+    // --- Конец ДОБАВЛЕННОГО ---
 
     const { openModal, closeModal } = useModalStore();
 
@@ -84,24 +90,26 @@ export default function GoalsPage() {
             clearCurrentGoalError(); // Clear goals store current goal error
             // Не сбрасываем hasFetchedCurrentGoal здесь, чтобы не вызывать повторную загрузку при перемонтировании компонента
         };
-        // Dependencies: fetch actions and state variables, PLUS the new local state flag
+        // Dependencies: fetch actions и state variables, PLUS the new local state flag
         // --- ИСПРАВЛЕНО: Добавлена зависимость hasFetchedCurrentGoal ---
         // Важно: если setHasFetchedCurrentGoal вызывает ре-рендер, useEffect запустится снова.
         // Зависимость нужна, если флаг используется в условии.
+        // Также добавляем зависимости balance и isBalanceLoading, потому что они используются в рендере (для цвета иконки)
     }, [
         fetchGoals, loading, goals, error, // Зависимости для fetchGoals
         getCurrentGoal, currentGoalLoading, currentGoal, currentGoalError, // Зависимости для getCurrentGoal
         clearError, clearCurrentGoalError, // Зависимости для cleanup
-        hasFetchedCurrentGoal // <-- ДОБАВЛЕНА новая зависимость. useEffect сработает при изменении этого флага
+        hasFetchedCurrentGoal, // <-- ДОБАВЛЕНА новая зависимость
+        balance, isBalanceLoading // <-- ДОБАВЛЕНЫ зависимости для баланса
     ]);
     // Примечание: Когда setHasFetchedCurrentGoal(true) меняет состояние, useEffect запускается снова.
     // Но благодаря проверке `!hasFetchedCurrentGoal` внутри условия, fetchGoals() не будет вызван повторно.
 
 
     // --- Handlers for UI actions (opening modals/confirmations) ---
-
-    // Handle click on "Add Goal" button
-    const handleAddClick = () => {
+    // Определяем все функции обработчики кликов и действий
+    const handleAddClick = () => { // <-- Функция handleAddClick определена здесь
+        console.log('GoalsPage: Add Goal button clicked'); // Лог клика
         clearError(); // Clear store errors before opening modal
         clearCurrentGoalError();
 
@@ -112,15 +120,13 @@ export default function GoalsPage() {
             onSubmit: handleAddSubmit, // Function to call on modal form submission
             submitText: 'Добавить',
         });
-        console.log('GoalsPage: Add Goal button clicked');
     };
 
-    // Handle click on "Edit" icon button for a specific goal
-    const handleEditClick = (goal) => {
+    const handleEditClick = (goal) => { // <-- Функция handleEditClick определена здесь
+        console.log('GoalsPage: Edit button clicked for goal:', goal); // Лог клика
         clearError(); // Clear store errors
         clearCurrentGoalError();
 
-        console.log('GoalsPage: Edit button clicked for goal:', goal);
         // Open the generic Modal component for editing
         openModal('editGoal', { // 'editGoal' is a type string for Modal
             title: 'Редактировать цель',
@@ -139,15 +145,13 @@ export default function GoalsPage() {
             onSubmit: (formData) => handleEditSubmit(goal.id, formData),
             submitText: 'Сохранить изменения',
         });
-        console.log('GoalsPage: Calling openModal for Edit Goal...');
+        console.log('GoalsPage: Calling openModal for Edit Goal...'); // Лог вызова модала
     };
 
-    // Handle click on "Delete" icon button for a specific goal
-    const handleDeleteClick = (goal) => {
+    const handleDeleteClick = (goal) => { // <-- Функция handleDeleteClick определена здесь
+        console.log(`GoalsPage: Delete button clicked for goal ID: ${goal.id}`); // Лог клика
         clearError(); // Clear store errors
         clearCurrentGoalError();
-
-        console.log(`GoalsPage: Delete button clicked for goal ID: ${goal.id}`);
 
         // Formulate confirmation message
         const goalDescription = goal.description || `с ID ${goal.id}`;
@@ -163,19 +167,17 @@ export default function GoalsPage() {
             onConfirm: () => handleDeleteConfirm(goal.id), // Pass ID to confirm handler
             confirmText: 'Удалить',
         });
-        console.log('GoalsPage: Calling openModal for Delete Goal confirmation...');
+        console.log('GoalsPage: Calling openModal for Delete Goal confirmation...'); // Лог вызова модала
     };
 
-    // Handle click on "Set Current" icon button for a specific goal
-    const handleSetCurrentClick = (goal) => {
+    const handleSetCurrentClick = (goal) => { // <-- Функция handleSetCurrentClick определена здесь
+        console.log(`GoalsPage: Set Current button clicked for goal ID: ${goal.id}`); // Лог клика
         clearError(); // Clear store errors
         clearCurrentGoalError();
 
-        console.log(`GoalsPage: Set Current button clicked for goal ID: ${goal.id}`);
-
         // Check if this goal is already the current goal
         if (currentGoal && currentGoal.id === goal.id) {
-            console.log('GoalsPage: Selected goal is already the current one.');
+            console.log('GoalsPage: Selected goal is already the current one.'); // Лог, если уже текущая
             // Optionally show a message or do nothing
             return; // Do nothing if already current
         }
@@ -191,14 +193,13 @@ export default function GoalsPage() {
             onConfirm: () => handleSetCurrentConfirm(goal.id), // Pass ID to confirm handler
             confirmText: 'Установить',
         });
-        console.log('GoalsPage: Calling openModal for Set Current Goal confirmation...');
+        console.log('GoalsPage: Calling openModal for Set Current Goal confirmation...'); // Лог вызова модала
     };
 
 
     // --- Logic functions called by Modal/ConfirmModal components after user interaction ---
-
-    // Logic for adding a goal (called by Modal component via onSubmit)
-    const handleAddSubmit = async (formData) => {
+    // Эти функции вызываются из модальных окон после подтверждения действий
+    const handleAddSubmit = async (formData) => { // <-- Функция handleAddSubmit определена здесь
         console.log('GoalsPage Logic: handleAddSubmit called with data:', formData);
         try {
             // formData contains wish_date as "YYYY-MM-DD" string (from Modal validation)
@@ -213,8 +214,7 @@ export default function GoalsPage() {
         console.log('GoalsPage Logic: handleAddSubmit finished.');
     };
 
-    // Logic for editing a goal (called by Modal component via onSubmit)
-    const handleEditSubmit = async (id, formData) => {
+    const handleEditSubmit = async (id, formData) => { // <-- Функция handleEditSubmit определена здесь
         console.log(`GoalsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData);
         try {
             // formData contains wish_date as "YYYY-MM-DD" string or null
@@ -230,8 +230,7 @@ export default function GoalsPage() {
         console.log(`GoalsPage Logic: handleEditSubmit finished for ID: ${id}.`);
     };
 
-    // Logic for confirming deletion of a goal (called by ConfirmModal component via onConfirm)
-    const handleDeleteConfirm = async (id) => {
+    const handleDeleteConfirm = async (id) => { // <-- Функция handleDeleteConfirm определена здесь
         console.log(`GoalsPage Logic: handleDeleteConfirm called for ID: ${id}`);
         try {
             await deleteGoal(id);
@@ -246,8 +245,7 @@ export default function GoalsPage() {
         }
     };
 
-    // Logic for confirming setting a goal as current (called by ConfirmModal component via onConfirm)
-    const handleSetCurrentConfirm = async (id) => {
+    const handleSetCurrentConfirm = async (id) => { // <-- Функция handleSetCurrentConfirm определена здесь
         console.log(`GoalsPage Logic: handleSetCurrentConfirm called for ID: ${id}`);
         try {
             await setCurrentGoal(id); // Call the store action to set current
@@ -255,13 +253,13 @@ export default function GoalsPage() {
             closeModal(); // Close modal on success
             console.log(`GoalsPage Logic: handleSetCurrentConfirm finished.`);
             // eslint-disable-next-line no-unused-vars
-                } catch (err) {
+        } catch (err) {
             console.error(`GoalsPage Logic: Error during setting goal ID ${id} as current (after confirmation):', err);`);
             closeModal(); // Close modal on error
             // Errors are displayed by LayoutWithHeader
         }
     };
-    // --- End Logic functions ---
+    // --- Конец определения Logic functions ---
 
 
     // Determine if a general error message should be displayed
@@ -272,12 +270,13 @@ export default function GoalsPage() {
     // --- Rendering ---
     return (
         <div className="bg-secondary-50 min-h-screen"> {/* Light grey background */}
-            <main className="max-w-7xl mx-auto p-4"> {/* Centered container with padding */}
+            <main className="max-w-7xl mx-auto p-4"> {/* Centered container с padding */}
 
                 {/* Header section: Title and Add Button */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Мои цели</Text>
-                    <TextButton onClick={handleAddClick}>
+                    {/* Кнопка Add Goal использует handleAddClick */}
+                    <TextButton onClick={handleAddClick}> {/* <-- handleAddClick используется здесь */}
                         Добавить цель
                     </TextButton>
                 </div>
@@ -292,8 +291,8 @@ export default function GoalsPage() {
                 {/* Section for Current Goal */}
                 <div className="mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
                     <Text variant="h3" className="mb-2 text-blue-800">Текущая цель:</Text>
-                    {currentGoalLoading ? (
-                        <div className="text-blue-700"><Text variant="body">Загрузка текущей цели...</Text></div>
+                    {currentGoalLoading || isBalanceLoading ? ( // Добавлена проверка загрузки баланса
+                        <div className="text-blue-700"><Text variant="body">Загрузка текущей цели и баланса...</Text></div>
                     ) : currentGoal ? (
                         <div className="flex items-center flex-wrap gap-x-4">
                             <Text variant="body" className="font-semibold">{currentGoal.description}</Text>
@@ -344,48 +343,112 @@ export default function GoalsPage() {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {goals.map((goal, index) => (
-                                        <tr key={goal.id}
-                                            className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                            <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                                            <td className="p-4"><Text variant="tdPrimary">{goal.description}</Text></td>
-                                            <td className="p-4"><Text variant="tdSecondary">
-                                                {typeof goal.amount === 'number'
-                                                    ? goal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                                    : goal.amount} ₽
-                                            </Text></td>
-                                            <td className="p-4"><Text variant="tdSecondary">
-                                                {/* Форматирование даты для отображения */}
-                                                {goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z" ? new Date(goal.wish_date).toLocaleDateString() : '-'}
-                                            </Text></td>
-                                            <td className="p-4 flex gap-2">
-                                                {/* Кнопка "Редактировать" */}
-                                                <IconButton
-                                                    icon={PencilIcon}
-                                                    tooltip="Редактировать цель"
-                                                    className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                    onClick={() => handleEditClick(goal)}
-                                                />
-                                                {/* Кнопка "Установить текущей" */}
-                                                {/* Рендерим кнопку только если это не текущая цель */}
-                                                {!(currentGoal && currentGoal.id === goal.id) && (
+                                    {/* Проходим по массиву goals и рендерим строку для каждой цели */}
+                                    {goals.map((goal, index) => {
+                                        // Определяем, является ли текущая цель в итерации текущей выбранной целью
+                                        const isCurrent = currentGoal && currentGoal.id === goal.id;
+
+                                        // --- ДОБАВЛЕНО: Расчет процента и определение класса цвета для иконки ---
+                                        let percentage = 0;
+                                        let starColorClass = 'text-gray-500'; // Цвет по умолчанию (если не текущая или баланс не загружен)
+
+                                        // Рассчитываем процент только если это текущая цель, баланс и сумма цели - числа и сумма цели > 0
+                                        // Убедимся, что balance и goal.amount доступны и валидны
+                                        if (isCurrent && typeof balance === 'number' && typeof goal.amount === 'number' && goal.amount > 0) {
+                                            const achieved = balance >= 0 ? balance : 0; // Достигнутая часть
+                                            percentage = Math.min((achieved / goal.amount) * 100, 100); // Процент (не более 100)
+
+                                            // Определяем класс цвета на основе процента (логика по пороговым значениям)
+                                            if (percentage < 25) {
+                                                starColorClass = 'text-red-500';      // Красный до 25%
+                                            } else if (percentage < 50) {
+                                                starColorClass = 'text-orange-500';   // Оранжевый до 50% (используем оранжевый Tailwind)
+                                            } else if (percentage < 75) {
+                                                starColorClass = 'text-yellow-500';   // Желтый до 75%
+                                            } else { // percentage >= 75
+                                                starColorClass = 'text-green-500';    // Зеленый от 75% и выше
+                                            }
+                                            // Дополнительно можно сделать цвет ярче, если цель достигнута (percentage >= 100)
+                                            if (percentage >= 100) {
+                                                starColorClass = 'text-green-600'; // Или text-green-700 для более насыщенного зеленого
+                                            }
+
+                                        } else if (!isCurrent) {
+                                            // Если цель не текущая, звездочка может быть, например, серой или невидимой
+                                            // starColorClass = 'text-gray-400'; // Можно оставить серый, если хотим показывать иконку всегда
+                                            starColorClass = 'text-transparent'; // Делаем иконку невидимой, если не текущая цель
+                                        }
+                                        // --- Конец ДОБАВЛЕННОГО ---
+
+
+                                        return (
+                                            <tr key={goal.id} // Ключ строки таблицы
+                                                // Чередующиеся классы фона строк
+                                                className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
+                                                <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td> {/* Номер по порядку */}
+                                                {/* --- ИСПРАВЛЕНО: Добавляем иконку и условные классы для выделения названия --- */}
+                                                <td className="p-4"> {/* Ячейка для описания цели */}
+                                                    {/* Flex контейнер для иконки и текста, выравнивание по центру */}
+                                                    <div className="flex items-center">
+                                                        {/* Рендерим StarIcon только если это текущая цель ИЛИ если мы хотим показывать серую звездочку для нетекущих */}
+                                                        {/* Согласно запросу, звездочку ставим только для текущей цели, но цвет берем по проценту */}
+                                                        {/* Рендерим иконку, если это текущая цель, с вычисленным цветом.
+                                                             Если не текущая, она не рендерится благодаря !isCurrent */}
+                                                        {isCurrent && ( // Рендерим только если isCurrent истинно
+                                                            // Используем определенный класс цвета для звездочки
+                                                            // Добавляем mx-0 mr-1 для контроля отступа между иконкой и текстом
+                                                            <StarIcon className={`w-5 h-5 mr-1 ${starColorClass}`} />
+                                                        )}
+                                                        {/* Текст описания цели */}
+                                                        <Text
+                                                            variant="tdPrimary" // Вариант текста для ячейки таблицы
+                                                            // Убираем старые классы font-bold и text-primary-700 отсюда, так как выделение делается иконкой
+                                                            // className={`${isCurrent ? 'font-bold text-primary-700' : ''}`}
+                                                        >
+                                                            {goal.description} {/* Само описание цели */}
+                                                        </Text>
+                                                    </div>
+                                                </td>
+                                                {/* --- Конец ИСПРАВЛЕНИЯ --- */}
+                                                <td className="p-4"><Text variant="tdSecondary"> {/* Ячейка для суммы */}
+                                                    {typeof goal.amount === 'number'
+                                                        ? goal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                        : goal.amount} ₽
+                                                </Text></td>
+                                                <td className="p-4"><Text variant="tdSecondary"> {/* Ячейка для желаемой даты */}
+                                                    {/* Форматирование даты для отображения */}
+                                                    {goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z" ? new Date(goal.wish_date).toLocaleDateString() : '-'}
+                                                </Text></td>
+                                                <td className="p-4 flex gap-2"> {/* Ячейка для кнопок действий */}
+                                                    {/* Кнопка "Редактировать" */}
                                                     <IconButton
-                                                        icon={StarIcon}
-                                                        tooltip="Установить как текущую"
-                                                        className="text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-400"
-                                                        onClick={() => handleSetCurrentClick(goal)}
+                                                        icon={PencilIcon}
+                                                        tooltip="Редактировать цель"
+                                                        className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
+                                                        onClick={() => handleEditClick(goal)}
                                                     />
-                                                )}
-                                                {/* Кнопка "Удалить" */}
-                                                <IconButton
-                                                    icon={TrashIcon}
-                                                    tooltip="Удалить цель"
-                                                    className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                    onClick={() => handleDeleteClick(goal)}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                    {/* Кнопка "Установить текущей" */}
+                                                    {/* Рендерим кнопку только если эта цель НЕ является текущей */}
+                                                    {/* Используем флаг isCurrent для более чистого условия */}
+                                                    {!(isCurrent) && (
+                                                        <IconButton
+                                                            icon={StarIcon}
+                                                            tooltip="Установить как текущую"
+                                                            className="text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-400"
+                                                            onClick={() => handleSetCurrentClick(goal)}
+                                                        />
+                                                    )}
+                                                    {/* Кнопка "Удалить" */}
+                                                    <IconButton
+                                                        icon={TrashIcon}
+                                                        tooltip="Удалить цель"
+                                                        className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
+                                                        onClick={() => handleDeleteClick(goal)}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ); // Конец возврата из map
+                                    })}
                                     </tbody>
                                 </table>
                             )
