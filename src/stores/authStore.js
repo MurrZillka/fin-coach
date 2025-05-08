@@ -4,11 +4,12 @@ import { create } from 'zustand';
 import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth';
 
 // --- ИМПОРТЫ СТОРОВ ДЛЯ ПЕРВИЧНОЙ ЗАГРУЗКИ И СБРОСА ---
-import useBalanceStore from './balanceStore';
+import useBalanceStore from './balanceStore'; // Импортируем стор баланса
 import useCreditStore from './creditStore'; // Импортируем стор доходов
-// --- Здесь в будущем будем добавлять импорты для других сторов ---
-// import useCategoriesStore from './categoryStore'; // Возможно, уже импортировано, проверь
-// import useGoalsStore from './goalsStore';
+// --- ДОБАВЛЕНО: Раскомментирован импорт стора категорий ---
+import useCategoryStore from './categoryStore'; // Импортируем стор категорий
+// --- Конец ДОБАВЛЕНИЯ ---
+// import useGoalsStore from './goalsStore'; // Если есть другие сторы, убедись в их импорте
 // --- ДОБАВЛЕНО: Импорт стора расходов ---
 import useSpendingsStore from './spendingsStore'; // Импортируем стор расходов
 // --- Конец ИМПОРТОВ ---
@@ -123,8 +124,9 @@ const useAuthStore = create((set, get) => ({
             console.log('authStore: Resetting other stores...'); // Лог сброса других сторов
             useBalanceStore.getState().resetBalance();
             useCreditStore.getState().resetCredits();
-            // --- ДОБАВЛЕНО: Сброс стора расходов при выходе ---
             useSpendingsStore.getState().resetSpendings();
+            // --- ДОБАВЛЕНО: Сброс стора категорий при выходе ---
+            useCategoryStore.getState().resetCategories();
             // --- Конец ДОБАВЛЕНИЯ ---
             console.log('authStore: Other stores reset.'); // Лог завершения сброса других сторов
 
@@ -148,8 +150,9 @@ const useAuthStore = create((set, get) => ({
             console.log('authStore: Resetting other stores (after error)...'); // Лог сброса других сторов при ошибке
             useBalanceStore.getState().resetBalance();
             useCreditStore.getState().resetCredits();
-            // --- ДОБАВЛЕНО: Сброс стора расходов при ошибке выхода ---
             useSpendingsStore.getState().resetSpendings();
+            // --- ДОБАВЛЕНО: Сброс стора категорий при ошибке выхода ---
+            useCategoryStore.getState().resetCategories();
             // --- Конец ДОБАВЛЕНИЯ ---
             console.log('authStore: Other stores reset (after error).'); // Лог завершения сброса других сторов при ошибке
         } finally {
@@ -176,23 +179,22 @@ const useAuthStore = create((set, get) => ({
             console.log('authStore: Triggering fetchBalance, fetchCredits...'); // Лог вызовов
             useBalanceStore.getState().fetchBalance(token);
             useCreditStore.getState().fetchCredits(token);
+            useSpendingsStore.getState().fetchSpendings(token); // Вызов fetchSpendings уже был
 
-            // --- ДОБАВЛЕНО: Вызов fetchSpendings при инициализации данных ---
-            // Убедись, что categoryStore импортирован и fetchCategories доступен, если нужен здесь
-            // Расходы часто зависят от категорий, поэтому возможно, fetchCategories должен быть здесь или вызван перед fetchSpendings
-            // Для простоты пока вызовем только fetchSpendings. fetchCategories будем вызывать на странице расходов.
-            console.log('authStore: Triggering fetchSpendings...'); // Лог вызова
-            useSpendingsStore.getState().fetchSpendings(token); // Передаем токен
+            // --- ДОБАВЛЕНО: Вызов fetchCategories при инициализации данных ---
+            // fetchCategories также должен вызываться здесь при успешной авторизации
+            console.log('authStore: Triggering fetchCategories...'); // Лог вызова fetchCategories
+            useCategoryStore.getState().fetchCategories(token); // Вызов fetchCategories
 
-            // Здесь в будущем будем добавлять вызовы для загрузки других данных
 
         } else {
             // Если пользователь не авторизован (или разлогинился), сбрасываем состояние других сторов
             console.log("authStore: User not authenticated or logged out, resetting other stores..."); // Лог сброса
             useBalanceStore.getState().resetBalance();
             useCreditStore.getState().resetCredits();
-            // --- ДОБАВЛЕНО: Сброс стора расходов при неаутентифицированном пользователе ---
             useSpendingsStore.getState().resetSpendings();
+            // --- ДОБАВЛЕНО: Сброс стора категорий при неаутентифицированном пользователе ---
+            useCategoryStore.getState().resetCategories();
             // --- Конец ДОБАВЛЕНИЯ ---
             console.log('authStore: Other stores reset.'); // Лог завершения сброса
         }
@@ -231,8 +233,9 @@ const useAuthStore = create((set, get) => ({
             console.log('authStore: Resetting other stores due to no token on init.'); // Лог сброса
             useBalanceStore.getState().resetBalance();
             useCreditStore.getState().resetCredits();
-            // --- ДОБАВЛЕНО: Сброс стора расходов при отсутствии токена ---
             useSpendingsStore.getState().resetSpendings();
+            // --- ДОБАВЛЕНО: Сброс стора категорий при отсутствии токена ---
+            useCategoryStore.getState().resetCategories();
             // --- Конец ДОБАВЛЕНИЯ ---
             console.log('authStore: Other stores reset (no token).'); // Лог завершения сброса
             console.log('authStore: initAuth finished (not authenticated).'); // Лог завершения

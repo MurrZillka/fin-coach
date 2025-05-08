@@ -3,24 +3,24 @@
 // Импортируем компоненты и хуки React Router
 import { useLocation, Routes, Route } from 'react-router-dom'; // useEffect удален из импорта
 // Импортируем компоненты хедера
-import Header from './Header.jsx';
-import HeaderAuth from './HeaderAuth.jsx';
+import Header from './Header.jsx'; // Убедись, что путь корректен
+import HeaderAuth from './HeaderAuth.jsx'; // Убедись, что путь корректен
 // Импортируем компонент ProtectedRoute для защиты маршрутов
-import ProtectedRoute from './ProtectedRoute.jsx';
+import ProtectedRoute from './ProtectedRoute.jsx'; // Убедись, что путь корректен
 // Импортируем массив с определениями маршрутов
-import routes from '../routes';
+import routes from '../routes'; // Убедись, что путь корректен
 // Импортируем стор авторизации (нужен для isAuthenticated)
-import useAuthStore from '../stores/authStore.js';
+import useAuthStore from '../stores/authStore.js'; // Убедись, что путь корректен
 
 // --- ИМПОРТЫ МОДАЛОК И ВИДЖЕТА БАЛАНСА ---
 // Импортируем стор модальных окон
-import useModalStore from '../stores/modalStore.js';
+import useModalStore from '../stores/modalStore.js'; // Убедись, что путь корректен
 // Импортируем компоненты модальных окон
-import Modal from './ui/Modal.jsx';
-import ConfirmModal from './ui/ConfirmModal.jsx';
+import Modal from './ui/Modal.jsx'; // Убедись, что путь корректен
+import ConfirmModal from './ui/ConfirmModal.jsx'; // Убедись, что путь корректен
 // Импортируем компонент виджета Баланса
 // Убедись, что путь к BalanceWidget корректный
-import BalanceWidget from './BalanceWidget.jsx';
+import BalanceWidget from './BalanceWidget.jsx'; // Убедись, что путь корректен
 // --- Конец ИМПОРТОВ ---
 
 
@@ -102,8 +102,9 @@ export default function LayoutWithHeader() {
             {/* Условно рендерим компонент модала на основе значения modalType из стора */}
             {modalType && ( // Если modalType не null (т.е., какой-то модал должен быть открыт)
                 // Проверяем, какой тип модала открыт, и рендерим соответствующий компонент
-                // ИСПРАВЛЕНО: добавлено ['addCredit', 'editCredit'] в условие рендеринга Modal
-                ['addCategory', 'editCategory', 'addCredit', 'editCredit'].includes(modalType) ? ( // Если тип - один из типов форм (для Modal.jsx)
+                // --- ИСПРАВЛЕНО: ДОБАВЛЕНЫ ТИПЫ 'addSpending' и 'editSpending' ---
+                ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending'].includes(modalType) ? ( // Если тип - один из типов форм (для Modal.jsx)
+                    // --- Конец ИСПРАВЛЕНИЯ ---
                     <Modal // Рендерим компонент Modal
                         isOpen={true} // Всегда передаем true, т.к. условный рендеринг выше уже определяет его видимость
                         onClose={closeModal} // Передаем функцию закрытия из стора

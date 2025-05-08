@@ -13,15 +13,15 @@ const optionShape = PropTypes.shape({
 
 export default function Input({
                                   label,
-                                  value, // value для всех типов теперь
+                                  value, // value для text/number/date/select, булево для checkbox
                                   onChange,
                                   type = 'text',
                                   name,
                                   error,
-                                  placeholder, // Обычно не используется для checkbox и select
+                                  placeholder, // Используется не для всех типов
                                   disabled = false,
                                   options, // <--- НОВЫЙ prop: массив опций для типа 'select'
-                                  required = false, // Добавляем пропс required для Input
+                                  required = false, // Добавляем пропс required
                               }) {
     const errorId = `${name}-error`;
 
@@ -31,7 +31,7 @@ export default function Input({
 
 
     // Обработчик изменения поля ввода
-    // Нормализует событие для разных типов полей
+    // Нормализует событие для разных типов полей, чтобы всегда возвращать { name: ..., value: ... }
     const handleInputChange = (e) => {
         if (isCheckbox) {
             // Для чекбокса передаем булево значение checked
@@ -42,9 +42,14 @@ export default function Input({
                 }
             });
         } else {
-            // Для остальных типов (text, number, date, select), передаем стандартное значение из e.target.value
+            // Для остальных типов (text, number, date, select) передаем стандартное значение из e.target.value
             // Для select, e.target.value будет строкой (значением выбранной опции)
-            onChange(e); // <--- Передаем исходный объект события
+            onChange({
+                target: { // Возвращаем объект, похожий на event.target, но нормализованный
+                    name: e.target.name,
+                    value: e.target.value,
+                }
+            });
         }
     };
 
@@ -105,10 +110,7 @@ export default function Input({
                     }`}
                 >
                     {/* Опция по умолчанию (пустая) */}
-                    {/* Ее наличие зависит от того, является ли поле обязательным */}
-                    {/* Если поле обязательное, эту опцию можно сделать disabled или убрать, но часто она нужна как плейсхолдер */}
                     {/* Рендерим пустую опцию, только если она нужна (т.е. select не обязательный ИЛИ есть ошибка required) */}
-                    {/* Проще всегда рендерить первую опцию с value="", она будет выбрана по умолчанию если value='' */}
                     <option value="">-- Выберите категорию --</option> {/* Плейсхолдер/пустая опция */}
 
                     {/* Перебираем массив опций и рендерим элементы <option> */}
@@ -148,6 +150,7 @@ export default function Input({
             {/* Контейнер для сообщения об ошибке (фиксированная высота и скрытие overflow) */}
             <div className="h-[20px] overflow-hidden"> {/* Фиксированная высота, чтобы не прыгало */}
                 {/* Текст ошибки, управляемый классами видимости error-visible/error-hidden */}
+                {/* Классы error-visible/error-hidden должны быть определены в index.css */}
                 <Text variant="formError" id={errorId} className={error ? 'error-visible' : 'error-hidden'}>
                     {error || ''} {/* Отображаем текст ошибки или пусто */}
                 </Text>
@@ -164,7 +167,7 @@ Input.propTypes = {
     label: PropTypes.string,
     // value теперь может быть строкой, числом, булевым, или null/undefined
     // Правильный способ указать, что проп может быть одним из типов ИЛИ null/undefined - это не ставить .isRequired
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]), // <--- ИСПРАВЛЕНО: Убран null и undefined из массива
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]), // <--- ИСПРАВЛЕНО: Убран null и undefined из массива. allow null/undefined by NOT using isRequired.
     onChange: PropTypes.func.isRequired,
     type: PropTypes.string, // Включает 'select' теперь
     name: PropTypes.string.isRequired,
