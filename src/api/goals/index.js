@@ -1,3 +1,5 @@
+//src/api/goals/index.js
+
 import axios from 'axios';
 import { getUseMocks, API_BASE_URL } from '../config';
 import { mockGoals } from './mocks';
@@ -79,10 +81,11 @@ export const updateGoalById = async (id, data, token) => {
     }
 };
 
+// --- Путь запроса для setCurrentGoal исправлен согласно описанию API: /CurrentGoal/{id} ---
 export const setCurrentGoal = async (id, token) => {
     try {
         if (getUseMocks()) return { data: await mockGoals.setCurrentGoal(id), error: null };
-        const response = await api.put(`/Goal/${id}/current`, null, {
+        const response = await api.put(`/CurrentGoal/${id}`, null, { // Используем null в теле, так как API не показывает явного тела
             headers: { Authorization: `Bearer ${token}` },
         });
         return { data: response.data, error: null };
@@ -96,6 +99,8 @@ export const setCurrentGoal = async (id, token) => {
         };
     }
 };
+// --- Конец исправления ---
+
 
 export const getCurrentGoal = async (token) => {
     try {

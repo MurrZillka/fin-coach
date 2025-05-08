@@ -361,6 +361,3 @@ export default function SpendingsPage() {
         </div>
     );
 }
-
-// --- УДАЛЕНО: PropTypes определение для компонента SpendingsPage (не использовалось) ---
-// SpendingsPage.propTypes = {};
