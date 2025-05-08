@@ -290,17 +290,15 @@ export default function SpendingsPage() {
                             spendings !== null && spendings.length > 0 && categories !== null && ( // Убедимся, что все нужные данные загружены
                                 <table className="min-w-full">
                                     <thead className="bg-secondary-200">
-                                    {/* --- ПРЕДУПРЕЖДЕНИЕ validateTextNesting - проверь отсутствие пробелов между <tr> и <th>/<td> --- */}
                                     <tr>
                                         <th className="text-left p-4"><Text variant="th">№</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Описание</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Категория</Text></th> {/* Колонка для категории */}
+                                        <th className="text-left p-4"><Text variant="th">Категория</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Дата</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Постоянный</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Действия</Text></th>
                                     </tr>
-                                    {/* --- ПРЕДУПРЕЖДЕНИЕ validateTextNesting - проверь отсутствие пробелов между <tr> и <th>/<td> --- */}
                                     </thead>
                                     <tbody>
                                     {spendings.map((spending, index) => {
