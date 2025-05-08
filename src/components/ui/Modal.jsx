@@ -1,5 +1,5 @@
 // src/components/ui/Modal.jsx
-import { useState, useEffect } from 'react'; // Импортируем useEffect для сброса формы при открытии/изменении данных
+import { useState, useEffect } from 'react'; // Добавляем useEffect для сброса формы
 import Text from './Text'; // Убедись, что путь корректен
 import Input from './Input'; // Убедись, что путь корректен
 import TextButton from './TextButton'; // Убедись, что путь корректен
@@ -7,31 +7,37 @@ import Tooltip from './Tooltip'; // Убедись, что путь коррек
 import PropTypes from 'prop-types'; // Убедись, что импортирован
 import { XMarkIcon } from '@heroicons/react/24/outline'; // Убедись, что импортирован
 import IconButton from './IconButton'; // Убедись, что путь корректен
-// Импортируем useModalStore для доступа к его состоянию, если нужно для отладки рендеринга
-// import useModalStore from '../stores/modalStore'; // Опциональный импорт для отладки, если нужно
+// Импорт useModalStore не нужен здесь, он используется в LayoutWithHeader и на страницах
+
+
+// --- Определяем propTypes для опций выпадающего списка (такое же определение, как в Input.jsx) ---
+const optionShape = PropTypes.shape({
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired, // Значение опции
+    label: PropTypes.string.isRequired, // Отображаемый текст опции
+});
+// --- Конец propTypes для опций ---
+
 
 const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, submitText = 'Сохранить' }) => {
     // Локальное состояние формы и ошибок
     const [formData, setFormData] = useState(initialData);
     const [errors, setErrors] = useState({});
 
-    // Эффект для сброса formData и errors при изменении initialData или при открытии/закрытии модала
-    // Это гарантирует, что при открытии для нового объекта (или закрытии/открытии) форма будет сброшена
+    // Эффект для сброса formData и errors при изменении initialData или при открытии модала
+    // Это гарантирует, что при открытии для нового объекта или редактировании форма будет заполнена/сброшена корректно
     useEffect(() => {
-        console.log('Modal: useEffect triggered. Re-initializing formData and errors.'); // Лог триггера useEffect
-        // Устанавливаем начальные данные. Если initialData {}, форма пустая. Если для редактирования, она заполнится.
+        console.log('Modal: useEffect triggered. Re-initializing formData and errors based on initialData/fields.'); // Лог триггера useEffect
+        // Подготавливаем начальные данные, учитывая типы полей для корректной инициализации формы
         const initialFormData = fields.reduce((acc, field) => {
             const initialValue = initialData[field.name];
-            // Специальная обработка начальных значений для разных типов полей, чтобы Input получал ожидаемый формат
             if (field.type === 'checkbox') {
-                // Для чекбокса значение должно быть булевым (true/false)
                 acc[field.name] = initialValue === undefined || initialValue === null ? false : !!initialValue;
             } else if (field.type === 'select') {
-                // Для select значение должно быть строкой, соответствующей value опции, или пустой строкой для плейсхолдера
+                // Для select значение должно быть строкой или пустой строкой
                 acc[field.name] = initialValue === undefined || initialValue === null ? '' : String(initialValue);
             }
             else {
-                // Для остальных типов (text, number, date) значение - строка (или число/дата, но Input преобразует в строку)
+                // Для остальных типов (text, number, date) значение - строка
                 acc[field.name] = initialValue === undefined || initialValue === null ? '' : initialValue;
             }
             return acc;
@@ -41,21 +47,17 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
         setErrors({}); // Сбрасываем ошибки при re-initialization
         console.log('Modal: formData initialized to:', initialFormData); // Лог начальных данных формы
 
-    }, [initialData, fields]); // Зависим от initialData и definitions of fields (если они могут меняться динамически)
+    }, [initialData, fields]); // Зависим от initialData и определений полей
 
 
-    // Если модал не открыт, ничего не рендерим (контролируется в LayoutWithHeader, но эта проверка здесь для безопасности)
-    if (!isOpen) {
-        // console.log('Modal component: isOpen is false, returning null.'); // Отладочный лог
-        return null;
-    }
+    // Если модал не открыт, ничего не рендерим (контролируется в LayoutWithHeader)
+    if (!isOpen) return null;
 
     // Обработчик изменения полей формы
-    // Принимает объект события или объект { name, value } для специальных случаев (как checkbox в Input)
+    // Принимает объект события или объект { name, value } (из Input.jsx)
     const handleChange = (e) => {
-        // e.target будет либо HTMLInputElement, либо HTMLSelectElement.
-        // В Input.jsx мы уже нормализовали событие для чекбокса, возвращая { target: { name, value: checked } }.
-        // Для остальных типов, e.target имеет name и value.
+        // e.target будет либо HTMLInputElement, либо HTMLSelectElement,
+        // либо объект, нормализованный в Input.jsx для чекбокса/селекта
         const { name, value } = e.target; // Деструктурируем name и value
 
         console.log(`Modal: handleChange - Field "${name}" changed to value:`, value); // Лог изменения поля
@@ -89,28 +91,22 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
         fields.forEach((field) => {
             const fieldName = field.name;
             const fieldType = field.type || 'text';
-            const fieldValue = dataToSend[fieldName];
+            const fieldValue = dataToSend[fieldName]; // Значение из formData
 
             // 1. Валидация на обязательность (Required)
-            // Проверяем, является ли поле обязательным И его значение отсутствует или является "пустым"
-            // "Пустое" для разных типов: undefined, null, пустая строка ("", для text, number, select, date), false (для checkbox, если required)
-            // Более строгая проверка для обязательных полей:
             if (field.required) {
                 let isFieldMissing = false;
                 if (fieldValue === undefined || fieldValue === null) {
                     isFieldMissing = true;
                 } else if (fieldType === 'checkbox') {
-                    // Для обязательного чекбокса, он должен быть true. Если false, считаем "отсутствующим"
-                    if (fieldValue === false) isFieldMissing = true;
-                } else if (fieldType === 'number' || fieldType === 'text' || fieldType === 'date' || fieldType === 'select') {
-                    // Для этих типов, пустая строка считается "отсутствующей"
+                    if (fieldValue === false) isFieldMissing = true; // Обязательный чекбокс должен быть true
+                } else if (fieldType === 'number' || fieldType === 'text' || fieldType === 'date') {
+                    // Для этих типов, пустая строка (после trim) считается "отсутствующей"
                     if (String(fieldValue).trim() === '') isFieldMissing = true;
+                } else if (fieldType === 'select') {
+                    // Для select, пустая строка ("") считается "отсутствующей"
+                    if (String(fieldValue) === '') isFieldMissing = true;
                 }
-                // Дополнительная проверка для select: если опции есть, но выбрана пустая опция ("")
-                if (fieldType === 'select' && Array.isArray(field.options) && field.options.length > 0 && String(fieldValue) === '') {
-                    isFieldMissing = true; // Если select обязателен и выбрана пустая опция
-                }
-
 
                 if (isFieldMissing) {
                     newErrors[fieldName] = `${field.label} обязателен`;
@@ -119,7 +115,7 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
 
 
             // 2. Локальная валидация: проверка даты на будущее (для типа 'date' и поля с именем 'date')
-            if (fieldName === 'date' && fieldType === 'date' && fieldValue && !newErrors[fieldName]) { // Проверяем только если нет других ошибок
+            if (fieldName === 'date' && fieldType === 'date' && fieldValue && !newErrors[fieldName]) { // Проверяем только если есть значение и нет других ошибок
                 const inputDateString = String(fieldValue); // Должна быть строка "YYYY-MM-DD"
 
                 // Сравниваем строку введенной даты со строкой сегодняшней даты (локально)
@@ -131,16 +127,14 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
             // 3. Преобразование типов перед отправкой (на основе field.type)
             if (!newErrors[fieldName]) { // Только если нет ошибок валидации для этого поля
                 if (fieldType === 'number') {
-                    // Преобразуем в число. Пустая строка, null, undefined -> 0 или undefined если не required?
-                    // Если required: true и пусто -> ошибка (уже обработано выше).
-                    // Если not required и пусто -> отправляем 0 (как договорились ранее)
+                    // Преобразуем в число. Пустая строка, null, undefined -> 0 (если не required и пусто)
                     const valueAsString = String(fieldValue);
-                    if (valueAsString.trim() !== '') {
+                    if (valueAsString.trim() !== '') { // Если не пустая строка
                         const parsedAmount = parseFloat(valueAsString);
                         if (!isNaN(parsedAmount)) {
                             dataToSend[fieldName] = parsedAmount; // Успешно спарсили в число
                         } else {
-                            // Если парсинг не удался и поле не было пустым, это ошибка
+                            // Если парсинг не удался
                             newErrors[fieldName] = `${field.label} должен быть числом`;
                             dataToSend[fieldName] = 0; // Отправляем 0 при ошибке парсинга
                         }
@@ -157,20 +151,18 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
                     // Значение из select придет как строка. Если API ждет число (как для category_id), нужно преобразовать.
                     // Если выбрана пустая опция (""), то fieldValue будет пустой строкой.
                     // Если поле обязательное и пусто, ошибка уже добавлена выше.
-                    // Если не обязательное и пусто, отправляем null (как договорились ранее для числовых ID из select)
+                    // Если не обязательное и пусто, отправляем null (как договорились)
                     if (String(fieldValue).trim() === '' || fieldValue === null || fieldValue === undefined) {
                         dataToSend[fieldName] = null; // Отправляем null, если значение из select пустое/не определено
                     } else {
                         // Иначе, преобразуем строку значения из select в число.
-                        // Убедимся, что результат - число, иначе может быть ошибка.
                         const parsedValue = Number(fieldValue);
                         if (!isNaN(parsedValue)) {
                             dataToSend[fieldName] = parsedValue; // Отправляем числовое значение
                         } else {
-                            // Если парсинг в число не удался (хотя для select с value="число" такого быть не должно)
+                            // Если парсинг в число не удался (для select с value="число" такого не должно быть)
                             console.warn(`Modal: Could not parse select value "${fieldValue}" for field "${fieldName}" to number. Sending null.`);
-                            // Отправим null, так как поле не обязательное (обязательность обработана выше) и парсинг не удался
-                            dataToSend[fieldName] = null;
+                            dataToSend[fieldName] = null; // Отправим null
                         }
                     }
                 }
@@ -187,18 +179,9 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
         if (Object.keys(newErrors).length === 0) {
             console.log('Modal: Validation passed. Calling onSubmit with data:', dataToSend); // Лог успешной валидации
             // Вызываем переданный колбэк с очищенными/преобразованными данными
-            // Обернем вызов onSubmit в try...catch, чтобы поймать ошибки из store actions,
-            // если они не обрабатываются внутри самого store action и пробрасываются наружу.
-            // Это позволит модалу остаться открытым и показать ошибку, если Layout не делает этого.
-            // Однако, стандартный паттерн: store action устанавливает ошибку в сторе, а Layout/страница отображает ее.
-            // Если onSubmit пробрасывает ошибку, ее должен поймать вызывающий код на странице.
-            // Давайте придерживаться стандартного паттерна и не ловить здесь.
             onSubmit(dataToSend); // <-- Вызываем переданную функцию (например, handleAddSubmit на странице)
 
-            // Важно: closeModal() не вызываем здесь!
-            // Закрытие модала должно происходить на странице (SpendingsPage.jsx)
-            // после успешного выполнения соответствующего store action (addSpending, updateSpending).
-            // Это дает гибкость: модал остается открытым при ошибке API.
+            // closeModal() не вызываем здесь. Закрытие происходит на странице после store action.
 
         } else {
             console.log('Modal: Validation failed. Errors:', newErrors); // Лог провала валидации
@@ -208,26 +191,30 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
 
     return (
         // Подложка модала: фикс позиция, по центру, высокий z-index, полупрозрачный фон
-        // Используем классы Tailwind
-        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] md:pt-[20vh]" // pt-[10vh] или pt-[20vh] для отступа сверху
-             style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }} // Полупрозрачный фон (черный 50%)
-        >
+        // Используем стили из твоей версии Modal.jsx
+        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[20vh]"
+             style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}> {/* Твой полупрозрачный фон */}
             {/* Контейнер содержимого модала: отступы, скругления, тень, фиксированная ширина, фон, рамка */}
-            {/* Используем классы Tailwind */}
-            <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-white border border-gray-300 relative max-h-[80vh] overflow-y-auto"> {/* bg-white - используем белый фон */}
+            {/* Используем стили из твоей версии Modal.jsx */}
+            <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto"> {/* Твой фон bg-green-100 */}
                 {/* Кнопка закрытия - абсолютное позиционирование */}
+                {/* Используем стили из твоей версии Modal.jsx */}
                 <IconButton
                     icon={XMarkIcon}
                     onClick={onClose}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" // Стилизация кнопки закрытия
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                     tooltip="Закрыть"
                 />
 
                 {/* Заголовок */}
-                <Text variant="h3" className="mb-6 text-center">{title}</Text> {/* Стилизация заголовка */}
+                {/* Используем стили из твоей версии Modal.jsx */}
+                <Text variant="h2" className="mb-4 text-center">
+                    {title}
+                </Text>
 
                 {/* Форма */}
-                <form onSubmit={handleSubmit} className="space-y-4"> {/* space-y-4 для отступов между полями */}
+                {/* Используем стили из твоей версии Modal.jsx */}
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Маппим массив полей для рендеринга компонентов Input */}
                     {fields.map((field) => (
                         <div key={field.name} className="relative"> {/* relative для позиционирования тултипа */}
@@ -250,9 +237,8 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
                                 // --- Конец ДОБАВЛЕННОГО ---
                             />
                             {/* Тултип: если определен в описании поля */}
-                            {/* Позиционируем тултип относительно родительского div.relative */}
                             {field.tooltip && (
-                                <Tooltip content={field.tooltip} className="absolute right-2 top-2"> {/* Стилизация тултипа */}
+                                <Tooltip content={field.tooltip} className="absolute right-2 top-2"> {/* Позиционирование и стили тултипа */}
                                     <span>?</span> {/* Или иконка вопроса */}
                                 </Tooltip>
                             )}
@@ -260,21 +246,32 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
                     ))}
 
                     {/* Контейнер для кнопок формы */}
-                    <div className="flex justify-end gap-3 mt-6"> {/* justify-end и gap для кнопок */}
-                        {/* Кнопка Отмена: при клике вызывает onClose (закрывает модал через useModalStore) */}
-                        {/* Используем классы Tailwind для стилизации кнопок */}
+                    {/* Используем стили из твоей версии Modal.jsx */}
+                    <div className="flex justify-end gap-2">
+                        {/* Кнопка Отмена: при клике вызывает onClose */}
+                        {/* Используем инлайн-стили из твоей версии Modal.jsx */}
                         <TextButton
                             onClick={onClose}
-                            type="button" // Указываем type="button", чтобы не сабмитило форму
-                            className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400"
+                            type="button" // Указываем type="button"
+                            style={{ // Инлайн стиль фона из твоей версии
+                                backgroundColor: `rgb(var(--color-secondary-500))`,
+                                color: 'white',
+                            }}
+                            // Добавляем классы из твоей версии Modal.jsx
+                            className="hover:[background-color:rgb(var(--color-secondary-800))] rounded-md px-4 py-2"
                         >
                             Отмена
                         </TextButton>
-                        {/* Кнопка Отправить: type="submit" вызывает handleSubmit формы */}
-                        {/* Используем классы Tailwind для стилизации кнопок */}
+                        {/* Кнопка Отправить: type="submit" вызывает handleSubmit */}
+                        {/* Используем инлайн-стили из твоей версии Modal.jsx */}
                         <TextButton
                             type="submit"
-                            className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700"
+                            style={{ // Инлайн стиль фона из твоей версии
+                                backgroundColor: `rgb(var(--color-primary-500))`,
+                                color: 'white',
+                            }}
+                            // Добавляем классы из твоей версии Modal.jsx
+                            className="hover:[background-color:rgb(var(--color-primary-600))] rounded-md px-4 py-2"
                         >
                             {submitText} {/* Текст на кнопке Отправить */}
                         </TextButton>
@@ -287,7 +284,7 @@ const Modal = ({ isOpen, onClose, title, fields, initialData = {}, onSubmit, sub
 
 // Определение PropTypes для валидации пропсов компонента Modal
 Modal.propTypes = {
-    isOpen: PropTypes.bool.isRequired, // Пропс isOpen теперь обязателен, т.к. он используется для показа/скрытия
+    isOpen: PropTypes.bool.isRequired, // Пропс isOpen обязателен
     onClose: PropTypes.func.isRequired, // Функция закрытия
     title: PropTypes.string.isRequired, // Заголовок модала
     // fields - массив объектов, описывающих поля формы
@@ -295,7 +292,7 @@ Modal.propTypes = {
         name: PropTypes.string.isRequired, // Имя поля
         label: PropTypes.string.isRequired, // Метка поля
         required: PropTypes.bool, // Обязательное поле?
-        type: PropTypes.string, // Тип поля ('text', 'number', 'checkbox', 'date', 'select' и т.д.)
+        type: PropTypes.string, // Тип поля ('text', 'number', 'checkbox', 'date', 'select')
         placeholder: PropTypes.string, // Плейсхолдер
         tooltip: PropTypes.string, // Текст тултипа
         disabled: PropTypes.bool, // Отключено ли поле?
@@ -303,18 +300,15 @@ Modal.propTypes = {
         // options - массив опций, обязателен, если type='select'
         options: (props, propName, componentName, location, propFullName) => {
             if (props.type === 'select') {
-                // Если тип select, проверяем, что options существует и является массивом
+                // Если тип select, проверяем, что options существует и является массивом объектов
                 if (!props[propName] || !Array.isArray(props[propName])) {
                     return new Error(
                         `Invalid prop \`${propFullName}\` supplied to \`${componentName}\`. ` +
                         `\`options\` is required and must be an array of objects when \`type\` is 'select'.`
                     );
                 }
-                // Опционально: можно добавить проверку формы объектов внутри массива options
-                const optionShapeChecker = PropTypes.shape({
-                    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-                    label: PropTypes.string.isRequired,
-                });
+                // Проверяем форму объектов внутри массива options
+                const optionShapeChecker = optionShape; // Используем определенный выше optionShape
                 for (let i = 0; i < props[propName].length; i++) {
                     const error = optionShapeChecker(props[propName], i, componentName, location, `${propFullName}[${i}]`);
                     if (error) return error;

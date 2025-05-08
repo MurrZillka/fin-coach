@@ -2,10 +2,9 @@
 import PropTypes from 'prop-types';
 import Text from './Text';
 
-// --- Добавляем propTypes для опций выпадающего списка ---
-// Определяем структуру объекта опции
+// --- Определяем propTypes для опций выпадающего списка ---
 const optionShape = PropTypes.shape({
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired, // Значение опции (может быть строкой или числом, как ID)
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired, // Значение опции
     label: PropTypes.string.isRequired, // Отображаемый текст опции
 });
 // --- Конец propTypes для опций ---
@@ -13,7 +12,7 @@ const optionShape = PropTypes.shape({
 
 export default function Input({
                                   label,
-                                  value, // value для text/number/date/select, булево для checkbox
+                                  value, // value для всех типов, булево для checkbox
                                   onChange,
                                   type = 'text',
                                   name,
@@ -31,7 +30,7 @@ export default function Input({
 
 
     // Обработчик изменения поля ввода
-    // Нормализует событие для разных типов полей, чтобы всегда возвращать { name: ..., value: ... }
+    // Используем логику из твоего предоставленного кода, добавляя обработку select
     const handleInputChange = (e) => {
         if (isCheckbox) {
             // Для чекбокса передаем булево значение checked
@@ -41,15 +40,18 @@ export default function Input({
                     value: e.target.checked, // <--- Используем e.target.checked
                 }
             });
-        } else {
-            // Для остальных типов (text, number, date, select) передаем стандартное значение из e.target.value
-            // Для select, e.target.value будет строкой (значением выбранной опции)
+        } else if (isSelect) { // <--- ДОБАВЛЕНО: обработка для select
+            // Для select передаем значение выбранной опции (это всегда строка)
             onChange({
-                target: { // Возвращаем объект, похожий на event.target, но нормализованный
+                target: {
                     name: e.target.name,
-                    value: e.target.value,
+                    value: e.target.value, // <--- e.target.value для select это строка
                 }
             });
+        }
+        else {
+            // Для остальных типов передаем стандартное строковое value
+            onChange(e); // <-- Возвращаем исходное событие, как было в твоем коде
         }
     };
 
@@ -67,42 +69,41 @@ export default function Input({
 
             {/* --- Условный рендеринг в зависимости от типа поля --- */}
             {isCheckbox ? (
-                // --- Рендеринг чекбокса ---
+                // --- Рендеринг чекбокса (из твоего кода) ---
                 <div className="flex items-center gap-2">
                     <input
                         id={name}
                         type="checkbox" // Всегда type="checkbox"
                         name={name}
-                        // Для чекбокса используем checked вместо value
-                        checked={!!value} // <--- Используем checked пропс и приводим value к булеву (!!value)
-                        onChange={handleInputChange} // <--- Используем наш модифицированный обработчик
+                        checked={!!value}
+                        onChange={handleInputChange}
                         disabled={disabled}
                         aria-invalid={!!error}
                         aria-describedby={error ? errorId : undefined}
-                        // Стили для чекбокса
-                        className={`form-checkbox h-5 w-5 text-primary-600 rounded ${ // Пример стилей для чекбокса
+                        // Сохраняем твои стили для чекбокса
+                        className={`form-checkbox h-5 w-5 text-primary-600 rounded ${
                             error ? 'border-form-error' : 'border-secondary-200'
                         } ${!disabled ? 'focus:ring-primary-500' : ''} ${
                             disabled ? 'bg-secondary-50 cursor-not-allowed opacity-60' : ''
                         }`}
                     />
-                    {/* Опционально: метка справа от чекбокса, если нужно. Если есть label выше, этот не нужен. */}
+                    {/* Опционально: метка справа от чекбокса, если нужно */}
                     {/* <Text variant="body" htmlFor={name}>{label}</Text> */}
                 </div>
-            ) : isSelect ? ( // <--- НОВЫЙ БЛОК: Рендеринг выпадающего списка (select)
+            ) : isSelect ? ( // <--- ДОБАВЛЕНО: Рендеринг выпадающего списка (select)
                 // --- Рендеринг select ---
                 <select
                     id={name}
                     name={name}
                     // Value должно быть строкой для HTML select.
                     // Преобразуем полученное value (которое может быть числом, например, ID категории) в строку.
-                    // Если value undefined или null, используем пустую строку, чтобы не было ошибки select с uncontrolled/controlled input.
+                    // Если value undefined или null, используем пустую строку.
                     value={value === undefined || value === null ? '' : String(value)} // Value для select, преобразуем в строку
                     onChange={handleInputChange}
                     disabled={disabled}
                     aria-invalid={!!error}
                     aria-describedby={error ? errorId : undefined}
-                    // Применяем стили, похожие на input поля
+                    // Применяем стили, похожие на input поля, из твоего кода Input.jsx
                     className={`border rounded-md px-3 py-2 text-base text-secondary-800 bg-background w-full transition-colors duration-300 ease-in-out ${
                         error ? 'border-form-error' : 'border-secondary-200'
                     } ${!disabled ? 'focus:ring-2 focus:ring-primary-500 focus:border-primary-500' : ''} ${
@@ -110,7 +111,7 @@ export default function Input({
                     }`}
                 >
                     {/* Опция по умолчанию (пустая) */}
-                    {/* Рендерим пустую опцию, только если она нужна (т.е. select не обязательный ИЛИ есть ошибка required) */}
+                    {/* Рендерим пустую опцию с value="", она будет выбрана по умолчанию если value='' */}
                     <option value="">-- Выберите категорию --</option> {/* Плейсхолдер/пустая опция */}
 
                     {/* Перебираем массив опций и рендерим элементы <option> */}
@@ -123,20 +124,21 @@ export default function Input({
                     ))}
                 </select>
             ) : (
-                // --- Рендеринг стандартного поля ввода (text, number, date и т.д.) ---
+                // --- Рендеринг стандартного поля ввода (text, number, date и т.д.) (из твоего кода) ---
                 <input
                     id={name}
                     type={type} // Используем переданный тип
                     name={name}
                     // Value для input, всегда преобразуем в строку
                     value={value === undefined || value === null ? '' : String(value)}
-                    onChange={handleInputChange} // <--- Используем наш модифицированный обработчик
+                    onChange={handleInputChange} // <-- Используем наш модифицированный обработчик
                     placeholder={placeholder}
                     disabled={disabled}
                     aria-invalid={!!error}
                     aria-describedby={error ? errorId : undefined}
-                    // Добавляем required пропс для input
-                    required={required} // Пропс required для Input
+                    // Добавляем required пропс для input (если он есть)
+                    required={required}
+                    // Сохраняем твои стили для input
                     className={`border rounded-md px-3 py-2 text-base text-secondary-800 bg-background w-full transition-colors duration-300 ease-in-out ${
                         error ? 'border-form-error' : 'border-secondary-200'
                     } ${!disabled ? 'focus:ring-2 focus:ring-primary-500 focus:border-primary-500' : ''} ${
@@ -165,9 +167,9 @@ export default function Input({
 // --- Обновленные propTypes ---
 Input.propTypes = {
     label: PropTypes.string,
-    // value теперь может быть строкой, числом, булевым, или null/undefined
-    // Правильный способ указать, что проп может быть одним из типов ИЛИ null/undefined - это не ставить .isRequired
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]), // <--- ИСПРАВЛЕНО: Убран null и undefined из массива. allow null/undefined by NOT using isRequired.
+    // value может быть строкой, числом, булевым, null или undefined.
+    // Убираем isRequired, чтобы разрешить null/undefined.
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]),
     onChange: PropTypes.func.isRequired,
     type: PropTypes.string, // Включает 'select' теперь
     name: PropTypes.string.isRequired,
@@ -175,7 +177,7 @@ Input.propTypes = {
     placeholder: PropTypes.string,
     disabled: PropTypes.bool,
     // Добавляем propType для массива опций, необходим при type='select'
-    options: PropTypes.arrayOf(optionShape), // <--- НОВЫЙ propType: массив опций
+    options: PropTypes.arrayOf(optionShape), // Массив опций
     required: PropTypes.bool, // Добавляем propType для required
 };
 // --- Конец обновленных propTypes ---
@@ -184,5 +186,5 @@ Input.propTypes = {
 Input.defaultProps = {
     type: 'text',
     disabled: false,
-    required: false,
+    required: false, // По умолчанию не обязательное
 };

@@ -1,234 +1,266 @@
 // src/stores/categoryStore.js
 import { create } from 'zustand';
-// Убедись, что путь к файлу categories/index.js корректный
-import * as categoriesAPI from '../api/categories/index';
+// Убедись, что путь к api/category корректен
+import * as categoryAPI from '../api/categories/index'; // Предполагаем, что тут есть addCategory, updateCategoryById, deleteCategoryById, getCategories
 // Импортируем authStore для получения токена
 import useAuthStore from './authStore';
+// Импортируем сторы баланса, расходов и доходов, если fetchInitialUserData в authStore
+// вызывает их фетчи из categoryStore (хотя это маловероятно, но для полноты импортов)
+// import useBalanceStore from './balanceStore'; // Маловероятно, но можно добавить, если нужно
+// import useSpendingsStore from './spendingsStore'; // Маловероятно
+// import useCreditStore from './creditStore'; // Маловероятно
+
 
 const useCategoryStore = create((set, get) => ({
-    // Состояние
-    categories: null, // <--- Инициализировано как null
-    loading: false,
-    error: null,
+    // --- Состояние (State) ---
+    categories: null, // Инициализируем как null (для индикации, что данные еще не загружены)
+    loading: false, // Индикатор загрузки (для общих операций fetch/CUD)
+    // Можно добавить отдельные loading для CUD операций, если нужно более детальное управление
+    // 예를 들어: adding: false, updating: false, deleting: false,
+    error: null, // Информация об ошибке
 
-    // Вспомогательная функция для получения токена и обработки ошибок аутентификации
+    // --- Вспомогательная функция: Получение токена ---
     getToken: () => {
         const token = useAuthStore.getState().user?.access_token;
+        console.log('categoryStore: getToken called. Token found:', !!token); // Лог наличия токена
         if (!token) {
-            const authError = { message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.' };
-            set({ error: authError, loading: false });
-            console.error('Ошибка аутентификации в categoryStore:', authError);
+            // Здесь не устанавливаем ошибку в этом сторе, т.к. authStore уже должен был ее установить.
+            console.error('categoryStore: Authentication error in getToken - No token available.'); // Лог ошибки
             return null;
         }
         return token;
     },
 
-    // Действия
+    // --- Действия (Actions) ---
 
-    // Загрузка списка категорий
+    // Действие для загрузки списка категорий
     fetchCategories: async () => {
-        console.log('categoryStore: fetchCategories started'); // Добавлен лог
-        // Проверка, нужно ли устанавливать loading в true.
-        // Не устанавливаем, если уже идет загрузка (например, CUD операция).
-        if (!get().loading) { // Проверяем именно loading из текущего стора
+        console.log('categoryStore: fetchCategories started'); // Лог начала действия
+
+        // --- ВОССТАНОВЛЕНО: Логика загрузки без сброса categories в null в начале ---
+        // Предполагаем, что в рабочей версии не было явного set({ categories: null, ... }) тут.
+        if (!get().loading) {
             set({ loading: true, error: null });
         } else {
             set({ error: null });
         }
+        console.log('categoryStore: State update before fetch (loading).'); // Лог обновления состояния
 
-
-        // Получаем токен перед вызовом API
         const token = get().getToken();
-
         if (!token) {
-            console.log('categoryStore: fetchCategories - No token, stopping fetch.'); // Добавлен лог
-            // Если getToken вернул null (нет токена), функция уже установила ошибку и статус loading=false (если не было CUD)
-            if (!get().loading) set({ loading: false }); // Устанавливаем loading=false только если не было активной CUD операции
-            return; // Прерываем выполнение
+            console.log('categoryStore: fetchCategories - No token, stopping fetch.'); // Лог остановки
+            // Если токен не получен, getToken уже логировал ошибку.
+            // loading уже установлен в true выше, но мы должны его сбросить, т.к. fetch не будет выполнен.
+            if (!get().loading) set({ loading: false }); // Убедимся, что loading сбрасывается, если fetch не пошел
+            return;
         }
-        console.log('categoryStore: fetchCategories - Token found, proceeding with API call.'); // Добавлен лог
-
+        console.log('categoryStore: fetchCategories - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию, передавая токен
-            const result = await categoriesAPI.getCategories(token);
-            console.log('categoryStore: API getCategories result:', result); // Добавлен лог
+            const result = await categoryAPI.getCategories(token);
+            console.log('categoryStore: API getCategories result:', result); // Лог результата API
 
-
-            // Обрабатываем ответ в формате { data, error }
             if (result.error) {
-                // Если API вернуло ошибку, устанавливаем ее в состояние
                 set({ error: result.error, loading: false });
-                console.error('Ошибка загрузки категорий от API:', result.error);
+                console.error('categoryStore: Error fetching categories from API:', result.error); // Лог ошибки
             } else {
-                // Если успешно, обновляем список категорий в состоянии
-                // Предполагаем, что result.data содержит { categories: [...] }
-                set({ categories: result.data.categories || [], loading: false }); // Учитываем случай пустого массива
-                console.log('categoryStore: Categories updated successfully.'); // Добавлен лог
+                // Если успешно, обновляем список категорий.
+                // Если API вернуло null или undefined для Categories, используем пустой массив.
+                const categoriesArray = result.data?.Categories || []; // Берем массив под ключом "Categories"
+                set({ categories: categoriesArray, loading: false, error: null }); // Устанавливаем новые категории
+                console.log('categoryStore: Categories updated successfully.', categoriesArray.length, 'items.'); // Лог успеха
             }
 
         } catch (error) {
-            // Ловим непредвиденные ошибки (например, проблемы с сетью)
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке категорий.' };
+            const unexpectedError = {
+                message: error.message || 'Произошла непредвиденная ошибка при загрузке категорий.',
+                status: error.status,
+            };
+            if (error.response && error.response.data && error.response.data.message) {
+                unexpectedError.message = error.response.data.message;
+            } else if (error.message === "Failed to fetch") {
+                unexpectedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
+            }
+            console.error('categoryStore: Unexpected error in fetchCategories:', error); // Лог непредвиденной ошибки или ошибки API
+
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка fetchCategories:', error);
+            // Не пробрасываем ошибку дальше, если ее не нужно обрабатывать в компоненте
+            // throw error;
+        } finally {
+            console.log('categoryStore: fetchCategories finished.'); // Лог завершения
         }
-        console.log('categoryStore: fetchCategories finished.'); // Добавлен лог
-
     },
 
-    // Добавление новой категории
+    // --- ВОССТАНОВЛЕНО: Действие для добавления новой категории ---
     addCategory: async (categoryData) => {
-        console.log('categoryStore: addCategory started', categoryData); // Добавлен лог
-        set({ loading: true, error: null });
+        console.log('categoryStore: addCategory started with data:', categoryData); // Лог начала действия с данными
+        set({ loading: true, error: null }); // Устанавливаем loading
 
-        const token = get().getToken();
+        const token = get().getToken(); // Получаем токен
         if (!token) {
-            set({ loading: false }); // Устанавливаем loading=false
-            throw new Error('Пользователь не аутентифицирован'); // Пробрасываем ошибку дальше
+            set({ loading: false });
+            throw new Error('Пользователь не аутентифицирован'); // Пробрасываем ошибку, т.к. вызывающий код может ее ожидать (Modal)
         }
-        console.log('categoryStore: addCategory - Token found, proceeding with API call.'); // Добавлен лог
-
+        console.log('categoryStore: addCategory - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию, передавая данные и токен
-            const result = await categoriesAPI.addCategory(categoryData, token);
-            console.log('categoryStore: API addCategory result:', result); // Добавлен лог
+            // Вызываем API функцию для добавления категории
+            const result = await categoryAPI.addCategory(categoryData, token);
+            console.log('categoryStore: API addCategory result:', result); // Лог результата API
 
-
-            // Обрабатываем ответ в формате { data, error }
             if (result.error) {
                 set({ error: result.error, loading: false });
-                console.error('Ошибка добавления категории от API:', result.error);
+                console.error('categoryStore: Error adding category from API:', result.error); // Лог ошибки
                 throw result.error; // Пробрасываем ошибку API дальше
             } else {
-                // Если успешно (API вернуло сообщение об успехе), перезагружаем список
-                // Это гарантирует, что новая категория появится в списке в сторе
-                await get().fetchCategories(); // fetchCategories сам установит loading=false
+                // Если успешно: перезагружаем список категорий
+                console.log('categoryStore: Category added successfully. Triggering fetchCategories...'); // Лог успеха
+                await get().fetchCategories(); // fetchCategories сам установит loading=false и обновит categories
+                // Здесь не нужно обновлять баланс, т.к. категории не влияют на баланс напрямую
 
-                console.log('categoryStore: addCategory success, fetching categories.'); // Добавлен лог
-                return result.data; // result.data содержит { message: "..." }
+                return result.data; // Возвращаем ответ от API
             }
 
         } catch (error) {
-            // Ловим непредвиденные ошибки
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при добавлении категории.' };
+            const unexpectedError = {
+                message: error.message || 'Произошла непредвиденная ошибка при добавлении категории.',
+                status: error.status,
+            };
+            if (error.response && error.response.data && error.response.data.message) {
+                unexpectedError.message = error.response.data.message;
+            } else if (error.message === "Failed to fetch") {
+                unexpectedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
+            }
+            console.error('categoryStore: Error in addCategory:', error); // Лог ошибки
+
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка addCategory:', error);
             throw error; // Пробрасываем ошибку дальше
         } finally {
-            console.log('categoryStore: addCategory finished.'); // Добавлен лог
+            console.log('categoryStore: addCategory finished.'); // Лог завершения
         }
     },
 
-    // Обновление категории по ID
+    // --- ВОССТАНОВЛЕНО: Действие для обновления категории по ID ---
     updateCategory: async (id, categoryData) => {
-        console.log('categoryStore: updateCategory started', id, categoryData); // Добавлен лог
-        set({ loading: true, error: null });
+        console.log(`categoryStore: updateCategory started for ID: ${id} with data:`, categoryData); // Лог начала действия
+        set({ loading: true, error: null }); // Устанавливаем loading
 
-        const token = get().getToken();
+        const token = get().getToken(); // Получаем токен
         if (!token) {
             set({ loading: false });
             throw new Error('Пользователь не аутентифицирован');
         }
-        console.log('categoryStore: updateCategory - Token found, proceeding with API call.'); // Добавлен лог
-
+        console.log('categoryStore: updateCategory - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию, передавая ID, данные и токен
-            const result = await categoriesAPI.updateCategoryById(id, categoryData, token);
-            console.log('categoryStore: API updateCategory result:', result); // Добавлен лог
+            // Вызываем API функцию для обновления категории
+            const result = await categoryAPI.updateCategoryById(id, categoryData, token);
+            console.log(`categoryStore: API updateCategoryById result for ID ${id}:`, result); // Лог результата API
 
-
-            // Обрабатываем ответ в формате { data, error }
             if (result.error) {
                 set({ error: result.error, loading: false });
-                console.error('Ошибка обновления категории от API:', result.error);
-                throw result.error;
+                console.error(`categoryStore: Error updating category ID ${id} from API:`, result.error); // Лог ошибки
+                throw result.error; // Пробрасываем ошибку API дальше
             } else {
                 // Если успешно, перезагружаем список
-                await get().fetchCategories(); // fetchCategories сам установит loading=false
+                console.log(`categoryStore: Category ID ${id} updated successfully. Triggering fetchCategories...`); // Лог успеха
+                await get().fetchCategories(); // fetchCategories сам установит loading=false и обновит categories
+                // Не нужно обновлять баланс
 
-                console.log('categoryStore: updateCategory success, fetching categories.'); // Добавлен лог
-                return result.data; // result.data содержит { message: "..." }
+                return result.data; // Возвращаем ответ от API
             }
 
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при обновлении категории.' };
+            const unexpectedError = {
+                message: error.message || 'Произошла непредвиденная ошибка при обновлении категории.',
+                status: error.status,
+            };
+            if (error.response && error.response.data && error.response.data.message) {
+                unexpectedError.message = error.response.data.message;
+            } else if (error.message === "Failed to fetch") {
+                unexpectedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
+            }
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка updateCategory:', error);
-            throw error;
+            console.error(`categoryStore: Error in updateCategory ID ${id}:`, error); // Лог ошибки
+            throw error; // Пробрасываем ошибку дальше
         } finally {
-            console.log('categoryStore: updateCategory finished.'); // Добавлен лог
+            console.log(`categoryStore: updateCategory finished for ID: ${id}.`); // Лог завершения
         }
     },
 
-    // Удаление категории по ID
+    // --- ВОССТАНОВЛЕНО: Действие для удаления категории по ID ---
     deleteCategory: async (id) => {
-        console.log('categoryStore: deleteCategory started', id); // Добавлен лог
-        set({ loading: true, error: null });
+        console.log(`categoryStore: deleteCategory started for ID: ${id}`); // Лог начала действия
+        set({ loading: true, error: null }); // Устанавливаем loading
 
-        const token = get().getToken();
+        const token = get().getToken(); // Получаем токен
         if (!token) {
             set({ loading: false });
             throw new Error('Пользователь не аутентифицирован');
         }
-        console.log('categoryStore: deleteCategory - Token found, proceeding with API call.'); // Добавлен лог
-
+        console.log('categoryStore: deleteCategory - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию, передавая ID и токен
-            const result = await categoriesAPI.deleteCategoryById(id, token);
-            console.log('categoryStore: API deleteCategory result:', result); // Добавлен лог
+            // Вызываем API функцию для удаления категории
+            const result = await categoryAPI.deleteCategoryById(id, token);
+            console.log(`categoryStore: API deleteCategoryById result for ID ${id}:`, result); // Лог результата API
 
-
-            // Обрабатываем ответ в формате { data, error }
             if (result.error) {
                 set({ error: result.error, loading: false });
-                console.error('Ошибка удаления категории от API:', result.error);
-                throw result.error;
+                // --- ИСПРАВЛЕНО: Синтаксис строки в console.error ---
+                console.error(`categoryStore: Error deleting category ID ${id} from API:`, result.error); // Лог ошибки
+                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+                throw result.error; // Пробрасываем ошибку API дальше
             } else {
                 // Если успешно, перезагружаем список
-                // Это самый простой способ убедиться, что категория удалена из списка в сторе
-                await get().fetchCategories(); // fetchCategories сам установит loading=false
+                console.log(`categoryStore: Category ID ${id} deleted successfully. Triggering fetchCategories...`); // Лог успеха
+                await get().fetchCategories(); // fetchCategories сам установит loading=false и обновит categories
+                // Не нужно обновлять баланс
 
-                console.log(`categoryStore: Категория ${id} успешно удалена, fetching categories.`); // Добавлен лог
-                return result.data; // result.data содержит { message: "..." }
+                return result.data; // Возвращаем ответ от API
             }
 
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при удалении категории.' };
+            const unexpectedError = {
+                message: error.message || 'Произошла непредвиденная ошибка при удалении категории.',
+                status: error.status,
+            };
+            if (error.response && error.response.data && error.response.data.message) {
+                unexpectedError.message = error.response.data.message;
+            } else if (error.message === "Failed to fetch") {
+                unexpectedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
+            }
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка deleteCategory:', error);
-            throw error;
+            console.error(`categoryStore: Error in deleteCategory ID ${id}:`, error); // Лог ошибки
+            throw error; // Пробрасываем ошибку дальше
         } finally {
-            console.log('categoryStore: deleteCategory finished.'); // Добавлен лог
+            console.log(`categoryStore: deleteCategory finished for ID: ${id}.`); // Лог завершения
         }
     },
 
-    // --- Добавлено: Действие для сброса состояния стора категорий ---
+
+    // Действие для сброса состояния стора категорий (используется при выходе пользователя или смене)
+    // Эта функция вызывается из authStore
     resetCategories: () => {
-        console.log('categoryStore: resetCategories called.'); // Добавлен лог
-        set({ categories: null, loading: false, error: null }); // <--- Сброс к null
+        console.log('categoryStore: resetCategories called.'); // Лог вызова сброса
+        set({ categories: null, loading: false, error: null }); // Сбрасываем к начальному состоянию null
     },
-    // --- Конец добавления ---
 
-
-    // Сброс ошибки
+    // Действие для сброса только ошибки
     clearError: () => {
-        console.log('categoryStore: clearError called.'); // Добавлен лог
+        console.log('categoryStore: clearError called.'); // Лог вызова сброса ошибки
         set({ error: null });
     }
 }));

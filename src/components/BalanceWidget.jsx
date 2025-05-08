@@ -57,7 +57,7 @@ export default function BalanceWidget() {
                         <Text
                             className={`text-2xl ${balanceCustomColorClass}`}> {/* Используем только размер и кастомный класс */}
                             {/* Добавляем знак "-" если баланс отрицательный */}
-                            {balance < 0 && '-'}
+                            {/*{balance < 0 && '-'}*/}
                             {formattedBalanceValue} ₽ {/* Форматированное значение и символ валюты */}
                         </Text>
                     )}
