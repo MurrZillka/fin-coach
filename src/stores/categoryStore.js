@@ -3,7 +3,23 @@ import { create } from 'zustand';
 // Убедись, что путь к файлу categories/index.js корректный
 import * as categoriesAPI from '../api/categories/index';
 // Импортируем authStore для получения токена
-import useAuthStore from './authStore';
+import useAuthStore from './authStore'; // Этот импорт остаётся, так как getToken его использует
+
+
+// --- УДАЛЕНО: Подписка на изменения в authStore (Теперь эта подписка находится в файле storeInitializer.js) ---
+// useAuthStore.subscribe(
+//     (authState) => {
+//         console.log('categoryStore: Auth state changed detected by subscription.', authState);
+//         const categoryStoreState = useCategoryStore.getState();
+//         if (!authState.isAuthenticated && categoryStoreState.categories !== null) {
+//             console.log('categoryStore: User became unauthenticated, triggering resetCategories...');
+//             categoryStoreState.resetCategories();
+//         }
+//     },
+//     (state) => ({ isAuthenticated: state.isAuthenticated })
+// );
+// --- Конец УДАЛЕНИЯ ---
+
 
 const useCategoryStore = create((set, get) => ({
     // Состояние
@@ -219,6 +235,7 @@ const useCategoryStore = create((set, get) => ({
     },
 
     // --- Добавлено: Действие для сброса состояния стора категорий ---
+    // Эта функция будет вызываться подпиской из storeInitializer.js
     resetCategories: () => {
         console.log('categoryStore: resetCategories called.'); // Добавлен лог
         set({ categories: null, loading: false, error: null }); // <--- Сброс к null

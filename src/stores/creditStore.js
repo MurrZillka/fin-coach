@@ -2,10 +2,25 @@
 import { create } from 'zustand';
 // Убедись, что путь к файлу credit/index.js корректный
 import * as creditAPI from '../api/credit/index';
-// Импортируем authStore для получения токена
-import useAuthStore from './authStore';
+// Импортируем authStore для получения токена и подписки
+import useAuthStore from './authStore'; // Этот импорт остаётся, так как getToken его использует
 // Импортируем стор баланса (нужен для обновления баланса после операций)
 import useBalanceStore from './balanceStore';
+
+
+// --- УДАЛЕНО: Подписка на изменения в authStore (Теперь эта подписка находится в файле storeInitializer.js) ---
+// useAuthStore.subscribe(
+//     (authState) => {
+//         console.log('creditStore: Auth state changed detected by subscription.', authState);
+//         const creditStoreState = useCreditStore.getState();
+//         if (!authState.isAuthenticated && creditStoreState.credits !== null) {
+//             console.log('creditStore: User became unauthenticated, triggering resetCredits...');
+//             creditStoreState.resetCredits();
+//         }
+//     },
+//     (state) => ({ isAuthenticated: state.isAuthenticated })
+// );
+// --- Конец УДАЛЕНИЯ ---
 
 
 const useCreditStore = create((set, get) => ({
@@ -203,6 +218,7 @@ const useCreditStore = create((set, get) => ({
     },
 
     // Действие для сброса состояния стора доходов (используется при выходе пользователя)
+    // Эта функция будет вызываться подпиской из storeInitializer.js
     resetCredits: () => {
         console.log('creditStore: resetCredits called.'); // Диагностический лог
         set({ credits: null, loading: false, error: null }); // Сбрасываем к начальному состоянию null

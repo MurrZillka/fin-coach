@@ -1,11 +1,26 @@
-// src/stores/spendingStore.js
+// src/stores/spendingsStore.js
 import { create } from 'zustand';
 // Убедись, что путь к файлу spendings/index.js корректный
 import * as spendingsAPI from '../api/spendings/index'; // Предполагаем, что тут есть addSpending, updateSpendingById, deleteSpendingById, getSpendings
 // Импортируем authStore для получения токена
-import useAuthStore from './authStore';
+import useAuthStore from './authStore'; // Этот импорт остаётся, так как getToken его использует
 // Импортируем balanceStore, чтобы обновить баланс после операций с расходами
 import useBalanceStore from './balanceStore';
+
+
+// --- УДАЛЕНО: Подписка на изменения в authStore (Теперь эта подписка находится в файле storeInitializer.js) ---
+// useAuthStore.subscribe(
+//     (authState) => {
+//         console.log('spendingsStore: Auth state changed detected by subscription.', authState);
+//         const spendingsStoreState = useSpendingsStore.getState();
+//         if (!authState.isAuthenticated && spendingsStoreState.spendings !== null) {
+//             console.log('spendingsStore: User became unauthenticated, triggering resetSpendings...');
+//             spendingsStoreState.resetSpendings();
+//         }
+//     },
+//     (state) => ({ isAuthenticated: state.isAuthenticated })
+// );
+// --- Конец УДАЛЕНИЯ ---
 
 
 const useSpendingsStore = create((set, get) => ({
@@ -73,8 +88,6 @@ const useSpendingsStore = create((set, get) => ({
             } else if (error.message === "Failed to fetch") {
                 unexpectedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
             }
-            console.error('useSpendingsStore: Unexpected error in fetchSpendings:', error); // Лог непредвиденной ошибки или ошибки API
-
             set({
                 error: unexpectedError,
                 loading: false
@@ -275,6 +288,7 @@ const useSpendingsStore = create((set, get) => ({
 
 
     // Действие для сброса состояния стора расходов (например, при выходе пользователя)
+    // Эта функция будет вызываться подпиской из storeInitializer.js
     resetSpendings: () => {
         console.log('useSpendingsStore: resetSpendings called.'); // Лог вызова сброса
         set({ spendings: null, loading: false, error: null }); // Сбрасываем к начальному состоянию (null)
