@@ -1,134 +1,139 @@
 // src/stores/spendingStore.js
 import { create } from 'zustand';
-// Убедись, что путь к spending/index.js корректный
+// Убедись, что путь к файлу spendings/index.js корректен
 import * as spendingsAPI from '../api/spendings/index';
 // Импортируем authStore для получения токена
 import useAuthStore from './authStore';
-// Импортируем стор баланса (нужен для обновления баланса после операций)
+// Импортируем balanceStore, чтобы обновить баланс после операций с расходами
 import useBalanceStore from './balanceStore';
 
-const useSpendingStore = create((set, get) => ({
+
+// --- Переименовано: useSpendingStore -> useSpendingsStore ---
+const useSpendingsStore = create((set, get) => ({
+// --- Конец переименования ---
+
     // --- Состояние (State) ---
-    spendings: null, // Список расходов, null по умолчанию, пока не загружен
+    // spendings: Массив объектов расходов.
+    // null - начальное состояние (данные еще не загружены).
+    // [] - данные загружены, но список пуст.
+    // [...] - данные загружены, список не пуст.
+    spendings: null, // Инициализируем как null
     loading: false, // Индикатор загрузки
     error: null, // Информация об ошибке
 
-    // --- Вспомогательная функция: Получение токена ---
-    // Централизует получение токена из authStore и обработку его отсутствия
+    // --- Вспомогательная функция ---
+    // Для получения токена и обработки ошибок аутентификации внутри действий стора
     getToken: () => {
-        // Получаем токен из состояния authStore через getState()
         const token = useAuthStore.getState().user?.access_token;
+        console.log('useSpendingsStore: getToken called. Token found:', !!token); // Лог наличия токена
         if (!token) {
-            // Если токена нет, устанавливаем ошибку в текущем сторе
-            const authError = { message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.' };
+            const authError = { message: 'Аутентификация не пройдена. Пожалуйста, войдите снова.' };
             set({ error: authError, loading: false });
-            console.error('Ошибка аутентификации в spendingStore:', authError);
+            console.error('useSpendingsStore: Authentication error in getToken.', authError); // Лог ошибки
             return null;
         }
         return token;
     },
 
+
     // --- Действия (Actions) ---
 
-    // Действие для загрузки списка расходов пользователя
-    // Вызывает API getSpendings
+    // Действие для загрузки списка расходов
     fetchSpendings: async () => {
-        console.log('spendingStore: fetchSpendings started');
-        // Не устанавливаем loading=true, если другая загрузка уже идет
+        console.log('useSpendingsStore: fetchSpendings started'); // Лог начала действия
+
         if (!get().loading) {
             set({ loading: true, error: null });
         } else {
-            set({ error: null }); // Просто сбрасываем ошибку
+            set({ error: null });
         }
 
-        // Получаем токен перед вызовом API
         const token = get().getToken();
         if (!token) {
-            console.log('spendingStore: fetchSpendings - No token, stopping fetch.');
-            // ЕслиgetToken вернул null, он уже установил ошибку/loading=false (если не было CUD)
-            if (!get().loading) set({ loading: false });
+            console.log('useSpendingsStore: fetchSpendings - No token, stopping fetch.'); // Лог остановки
+            if (!get().loading) set({loading: false});
             return;
         }
-        console.log('spendingStore: fetchSpendings - Token found, proceeding with API call.');
+        console.log('useSpendingsStore: fetchSpendings - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию для получения расходов
             const result = await spendingsAPI.getSpendings(token);
-            console.log('spendingStore: API getSpendings result:', result);
+            console.log('useSpendingsStore: API getSpendings result:', result); // Лог результата API
 
             if (result.error) {
-                // Если API вернуло ошибку
                 set({ error: result.error, loading: false });
-                console.error('Ошибка загрузки расходов от API:', result.error);
+                console.error('useSpendingsStore: Error fetching spendings from API:', result.error); // Лог ошибки
             } else {
-                // Если успешно: обновляем список расходов в состоянии
-                // API возвращает объект с ключом "Spendings", содержащим массив
-                set({ spendings: result.data.Spendings || [], loading: false });
+                const spendingsArray = result.data?.Spendings || []; // Берем массив под ключом "Spendings"
+                set({ spendings: spendingsArray, loading: false, error: null });
+                console.log('useSpendingsStore: Spendings updated successfully.', spendingsArray.length, 'items.'); // Лог успеха
             }
 
         } catch (error) {
-            // Обработка непредвиденных ошибок (например, проблемы сети)
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке расходов.' };
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка fetchSpendings:', error);
-        } finally {
-            console.log('spendingStore: fetchSpendings finished.');
+            console.error('useSpendingsStore: Unexpected error in fetchSpendings:', error); // Лог непредвиденной ошибки
         }
+        console.log('useSpendingsStore: fetchSpendings finished.'); // Лог завершения
     },
 
+
     // Действие для добавления нового расхода
-    // Принимает объект spendingData: { amount, description, is_permanent, category_id, date }
     addSpending: async (spendingData) => {
-        console.log('spendingStore: addSpending started', spendingData);
+        console.log('useSpendingsStore: addSpending started with data:', spendingData); // Лог начала действия с данными
+
         set({ loading: true, error: null });
 
         const token = get().getToken();
         if (!token) {
             set({ loading: false });
-            // Пробрасываем ошибку дальше, чтобы UI мог ее обработать (например, модальное окно)
             throw new Error('Пользователь не аутентифицирован');
         }
+        console.log('useSpendingsStore: addSpending - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию для добавления расхода
-            const result = await spendingsAPI.addSpending(spendingData, token);
-            console.log('spendingStore: API addSpending result:', result);
+            const dataToSend = {
+                ...spendingData,
+                date: spendingData.date ? new Date(spendingData.date).toISOString() : undefined,
+            };
+            console.log('useSpendingsStore: addSpending - Data sent to API:', dataToSend); // Лог данных для отправки
+
+            const result = await spendingsAPI.addSpending(dataToSend, token);
+            console.log('useSpendingsStore: API addSpending result:', result); // Лог результата API
 
             if (result.error) {
-                // Если API вернуло ошибку
                 set({ error: result.error, loading: false });
-                console.error('Ошибка добавления расхода от API:', result.error);
-                throw result.error; // Пробрасываем ошибку дальше
+                console.error('useSpendingsStore: Error adding spending from API:', result.error); // Лог ошибки
+                throw result.error;
             } else {
-                // Если успешно: перезагружаем список расходов И ОБНОВЛЯЕМ БАЛАНС
-                await get().fetchSpendings(); // Вызываем fetchSpendings из этого же стора, чтобы обновить список
-                // Инициируем обновление баланса через balanceStore
-                useBalanceStore.getState().fetchBalance(token);
-                console.log('spendingStore: addSpending success, fetching spendings and balance.');
-                return result.data; // Возвращаем данные от API (например, сообщение об успехе)
+                console.log('useSpendingsStore: Spending added successfully. Triggering fetchSpendings...'); // Лог успеха
+                await get().fetchSpendings();
+                useBalanceStore.getState().fetchBalance(token); // Обновляем баланс
+                console.log('useSpendingsStore: Balance fetch triggered after adding spending.'); // Лог триггера баланса
+
+                return result.data;
             }
 
         } catch (error) {
-            // Обработка непредвиденных ошибок
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при добавлении расхода.' };
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка addSpending:', error);
-            throw error; // Пробрасываем ошибку дальше
+            console.error('useSpendingsStore: Unexpected error in addSpending:', error); // Лог непредвиденной ошибки
+            throw error;
         } finally {
-            console.log('spendingStore: addSpending finished.');
+            console.log('useSpendingsStore: addSpending finished.'); // Лог завершения
         }
     },
 
     // Действие для обновления расхода по ID
-    // Принимает id расхода и объект spendingData: { amount, description, is_permanent, category_id, date }
     updateSpending: async (id, spendingData) => {
-        console.log('spendingStore: updateSpending started', id, spendingData);
+        console.log(`useSpendingsStore: updateSpending started for ID: ${id} with data:`, spendingData); // Лог начала действия с ID и данными
+
         set({ loading: true, error: null });
 
         const token = get().getToken();
@@ -136,44 +141,49 @@ const useSpendingStore = create((set, get) => ({
             set({ loading: false });
             throw new Error('Пользователь не аутентифицирован');
         }
+        console.log('useSpendingsStore: updateSpending - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию для обновления расхода
-            const result = await spendingsAPI.updateSpendingById(id, spendingData, token);
-            console.log('spendingStore: API updateSpending result:', result);
+            const dataToSend = {
+                ...spendingData,
+                date: spendingData.date ? new Date(spendingData.date).toISOString() : undefined,
+            };
+            console.log(`useSpendingsStore: updateSpending - Data sent to API for ID ${id}:`, dataToSend); // Лог данных для отправки
+
+            const result = await spendingsAPI.updateSpendingById(id, dataToSend, token);
+            console.log(`useSpendingsStore: API updateSpendingById result for ID ${id}:`, result); // Лог результата API
 
             if (result.error) {
-                // Если API вернуло ошибку
                 set({ error: result.error, loading: false });
-                console.error('Ошибка обновления расхода от API:', result.error);
-                throw result.error; // Пробрасываем ошибку дальше
+                console.error(`useSpendingsStore: Error updating spending ID ${id} from API:`, result.error); // Лог ошибки
+                throw result.error;
             } else {
-                // Если успешно: перезагружаем список и ОБНОВЛЯЕМ БАЛАНС
-                await get().fetchSpendings(); // Вызываем fetchSpendings из этого же стора
-                // Инициируем обновление баланса через balanceStore
-                useBalanceStore.getState().fetchBalance(token);
-                console.log('spendingStore: updateSpending success, fetching spendings and balance.');
-                return result.data; // Возвращаем данные от API
+                console.log(`useSpendingsStore: Spending ID ${id} updated successfully. Triggering fetchSpendings...`); // Лог успеха
+                await get().fetchSpendings();
+                useBalanceStore.getState().fetchBalance(token); // Обновляем баланс
+                console.log('useSpendingsStore: Balance fetch triggered after updating spending.'); // Лог триггера баланса
+
+
+                return result.data;
             }
 
         } catch (error) {
-            // Обработка непредвиденных ошибок
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при обновлении расхода.' };
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка updateSpending:', error);
-            throw error; // Пробрасываем ошибку дальше
+            console.error(`useSpendingsStore: Unexpected error in updateSpending ID ${id}:`, error); // Лог непредвиденной ошибки
+            throw error;
         } finally {
-            console.log('spendingStore: updateSpending finished.');
+            console.log(`useSpendingsStore: updateSpending finished for ID: ${id}.`); // Лог завершения
         }
     },
 
     // Действие для удаления расхода по ID
-    // Принимает id расхода
     deleteSpending: async (id) => {
-        console.log('spendingStore: deleteSpending started', id);
+        console.log(`useSpendingsStore: deleteSpending started for ID: ${id}`); // Лог начала действия с ID
+
         set({ loading: true, error: null });
 
         const token = get().getToken();
@@ -181,51 +191,53 @@ const useSpendingStore = create((set, get) => ({
             set({ loading: false });
             throw new Error('Пользователь не аутентифицирован');
         }
+        console.log('useSpendingsStore: deleteSpending - Token found, proceeding with API call.'); // Лог вызова API
 
         try {
-            // Вызываем API функцию для удаления расхода
             const result = await spendingsAPI.deleteSpendingById(id, token);
-            console.log('spendingStore: API deleteSpending result:', result);
+            console.log(`useSpendingsStore: API deleteSpendingById result for ID ${id}:`, result); // Лог результата API
 
             if (result.error) {
-                // Если API вернуло ошибку
                 set({ error: result.error, loading: false });
-                console.error('Ошибка удаления расхода от API:', result.error);
-                throw result.error; // Пробрасываем ошибку дальше
+                console.error(`useSpendingsStore: Error deleting spending ID ${id} from API:`, result.error); // Лог ошибки
+                throw result.error;
             } else {
-                // Если успешно: перезагружаем список и ОБНОВЛЯЕМ БАЛАНС
-                await get().fetchSpendings(); // Вызываем fetchSpendings из этого же стора
-                // Инициируем обновление баланса через balanceStore
-                useBalanceStore.getState().fetchBalance(token);
-                console.log(`spendingStore: Расход ${id} успешно удален, fetching spendings and balance.`);
-                return result.data; // Возвращаем данные от API
+                console.log(`useSpendingsStore: Spending ID ${id} deleted successfully. Triggering fetchSpendings...`); // Лог успеха
+                await get().fetchSpendings();
+                useBalanceStore.getState().fetchBalance(token); // Обновляем баланс
+                console.log('useSpendingsStore: Balance fetch triggered after deleting spending.'); // Лог триггера баланса
+
+
+                return result.data;
             }
 
         } catch (error) {
-            // Обработка непредвиденных ошибок
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при удалении расхода.' };
             set({
                 error: unexpectedError,
                 loading: false
             });
-            console.error('Непредвиденная ошибка deleteSpending:', error);
-            throw error; // Пробрасываем ошибку дальше
+            console.error(`useSpendingsStore: Unexpected error in deleteSpending ID ${id}:`, error); // Лог непредвиденной ошибки
+            throw error;
         } finally {
-            console.log('spendingStore: deleteSpending finished.');
+            console.log(`useSpendingsStore: deleteSpending finished for ID: ${id}.`); // Лог завершения
         }
     },
 
-    // Действие для сброса состояния стора расходов (используется при выходе пользователя)
+
+    // Действие для сброса состояния стора расходов (например, при выходе пользователя)
     resetSpendings: () => {
-        console.log('spendingStore: resetSpendings called.');
-        set({ spendings: null, loading: false, error: null }); // Сбрасываем к начальному состоянию null
+        console.log('useSpendingsStore: resetSpendings called.'); // Лог вызова сброса
+        set({ spendings: null, loading: false, error: null }); // Сбрасываем к начальному состоянию (null)
     },
 
-    // Действие для сброса только ошибки
+    // Действие для сброса ошибки
     clearError: () => {
-        console.log('spendingStore: clearError called.');
+        console.log('useSpendingsStore: clearError called.'); // Лог вызова сброса ошибки
         set({ error: null });
-    }
+    },
 }));
 
-export default useSpendingStore;
+// --- Переименовано: export default useSpendingStore -> export default useSpendingsStore ---
+export default useSpendingsStore;
+// --- Конец переименования ---
