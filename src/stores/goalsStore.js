@@ -257,26 +257,37 @@ const useGoalsStore = create((set, get) => ({
             const result = await goalsAPI.getCurrentGoal(token);
             console.log('goalsStore: API getCurrentGoal result:', result);
 
+            // --- ИСПРАВЛЕНО: Специальная обработка для ошибки "no current goal found" ---
             if (result.error) {
-                // Если нет текущей цели или ошибка, сбрасываем currentGoal в null
-                set({ currentGoal: null, currentGoalError: result.error, currentGoalLoading: false });
-                console.error('goalsStore: Error fetching current goal from API:', result.error);
+                if (result.error.message === "no current goal found") {
+                    console.log('goalsStore: No current goal found (handled as successful empty state).');
+                    // Если нет текущей цели, это не ошибка, а просто отсутствие данных.
+                    // Сбрасываем currentGoal в null и очищаем флаг ошибки.
+                    set({ currentGoal: null, currentGoalError: null, currentGoalLoading: false });
+                } else {
+                    // Если это другая ошибка, обрабатываем как обычную ошибку загрузки
+                    console.error('goalsStore: Error fetching current goal from API:', result.error);
+                    set({ currentGoal: null, currentGoalError: result.error, currentGoalLoading: false });
+                }
             } else {
-                // API возвращает { Goal: {...} } или { Goal: null }
-                set({ currentGoal: result.data.Goal || null, currentGoalLoading: false, currentGoalError: null }); // Обновляем текущую цель
+                // Успешное получение цели (даже если data.Goal === null, если сервер так возвращает)
                 console.log('goalsStore: Current goal fetched successfully.');
+                set({ currentGoal: result.data.Goal || null, currentGoalLoading: false, currentGoalError: null }); // Устанавливаем полученную цель или null
             }
+            // --- Конец ИСПРАВЛЕНИЯ ---
 
         } catch (error) {
+            // Обработка непредвиденных ошибок (например, сеть)
             const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке текущей цели.' };
+            console.error('goalsStore: Unexpected error in getCurrentGoal:', error);
             set({
+                currentGoal: null, // Убедимся, что цель null при непредвиденной ошибке
                 currentGoalError: unexpectedError,
                 currentGoalLoading: false
             });
-            console.error('goalsStore: Unexpected error in getCurrentGoal:', error);
-        } finally {
-            console.log('goalsStore: getCurrentGoal finished.');
         }
+        // В блоке finally уже нет необходимости сбрасывать loading в false, т.к. это сделано в try/catch/if
+        console.log('goalsStore: getCurrentGoal finished.');
     },
 
 
