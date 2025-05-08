@@ -157,7 +157,7 @@ export default function GoalProgressWidget() {
 
     // Если текущая цель достигнута
     if (currentGoal.is_achieved || percentage >= 100) {
-        let achievedText = 'Цель достигнута! 🎉';
+        let achievedText = 'Установленная Вами цель достигнута! Поздравляем! 🎉';
         // Добавляем дату достижения, если она есть и корректна
         if (currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z") {
             try {
