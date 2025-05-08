@@ -102,15 +102,17 @@ export default function LayoutWithHeader() {
             {/* Условно рендерим компонент модала на основе значения modalType из стора */}
             {modalType && ( // Если modalType не null (т.е., какой-то модал должен быть открыт)
                 // Проверяем, какой тип модала открыт, и рендерим соответствующий компонент
-                // --- ИСПРАВЛЕНО: ДОБАВЛЕНЫ ТИПЫ 'addSpending' и 'editSpending' ---
-                ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending'].includes(modalType) ? ( // Если тип - один из типов форм (для Modal.jsx)
+                // --- ИСПРАВЛЕНО: ДОБАВЛЕНЫ ТИПЫ 'addGoal' и 'editGoal' для рендеринга Modal ---
+                ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'].includes(modalType) ? ( // Если тип - один из типов форм (для Modal.jsx)
                     // --- Конец ИСПРАВЛЕНИЯ ---
                     <Modal // Рендерим компонент Modal
                         isOpen={true} // Всегда передаем true, т.к. условный рендеринг выше уже определяет его видимость
                         onClose={closeModal} // Передаем функцию закрытия из стора
                         {...modalProps} // Передаем все пропсы из modalProps стора (title, fields, initialData, onSubmit и т.д.)
                     />
-                ) : modalType === 'confirmDelete' ? ( // Если тип - модал подтверждения удаления
+                    // --- ИСПРАВЛЕНО: ДОБАВЛЕНЫ ТИПЫ 'confirmDeleteGoal' и 'confirmSetCurrentGoal' для рендеринга ConfirmModal ---
+                ) : ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? ( // Если тип - модал подтверждения
+                    // --- Конец ИСПРАВЛЕНИЯ ---
                     <ConfirmModal // Рендерим компонент ConfirmModal
                         isOpen={true} // Всегда передаем true
                         onClose={closeModal} // Передаем функцию закрытия

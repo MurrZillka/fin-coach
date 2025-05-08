@@ -276,7 +276,7 @@ export default function GoalsPage() {
 
                 {/* Header section: Title and Add Button */}
                 <div className="flex justify-between items-center mb-4">
-                    <Text variant="h2">Мои Цели</Text>
+                    <Text variant="h2">Мои цели</Text>
                     <TextButton onClick={handleAddClick}>
                         Добавить цель
                     </TextButton>
@@ -291,11 +291,11 @@ export default function GoalsPage() {
 
                 {/* Section for Current Goal */}
                 <div className="mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
-                    <Text variant="h3" className="mb-2 text-blue-800">Текущая цель</Text>
+                    <Text variant="h3" className="mb-2 text-blue-800">Текущая цель:</Text>
                     {currentGoalLoading ? (
                         <div className="text-blue-700"><Text variant="body">Загрузка текущей цели...</Text></div>
                     ) : currentGoal ? (
-                        <div>
+                        <div className="flex items-center flex-wrap gap-x-4">
                             <Text variant="body" className="font-semibold">{currentGoal.description}</Text>
                             <Text variant="body">Сумма: {typeof currentGoal.amount === 'number'
                                 ? currentGoal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
