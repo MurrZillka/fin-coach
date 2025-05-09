@@ -1,49 +1,57 @@
 // src/pages/CreditsPage.jsx
-import React, {useEffect} from 'react';
-// Import necessary components and stores
+import React, { useEffect } from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-// Import icons
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
-
-// --- Use Credit Store ---
 import useCreditStore from '../stores/creditStore';
-// --- Use Modal Store ---
 import useModalStore from '../stores/modalStore.js';
 
+// Динамическое формирование полей
+function getCreditFields(formData) {
+    const isPermanent = !!formData.is_permanent;
+    const isExhausted = !!formData.is_exhausted;
 
-// Define fields for the Credit form (similar to categoryFields but for Credits)
-const creditFields = [
-    {name: 'amount', label: 'Сумма', required: true, type: 'number', placeholder: 'Например: 50000'},
-    {name: 'description', label: 'Описание', required: false, type: 'text', placeholder: 'Например: Зарплата за месяц'},
-    {name: 'is_permanent', label: 'Постоянный доход?', required: false, type: 'checkbox'},
-    {name: 'date', label: 'Дата начала получения дохода', required: true, type: 'date'},
-    {name: 'end_date', label: 'Дата окончания (для постоянных)', required: false, type: 'date'},
-];
+    const fields = [
+        { name: 'amount', label: 'Сумма', required: true, type: 'number', placeholder: 'Например: 50000' },
+        { name: 'description', label: 'Описание', required: false, type: 'text', placeholder: 'Например: Зарплата за месяц' },
+        { name: 'is_permanent', label: 'Постоянный доход?', required: false, type: 'checkbox' },
+        { name: 'date', label: isPermanent ? 'Дата начала получения дохода' : 'Дата получения дохода', required: true, type: 'date' },
+    ];
 
+    if (isPermanent) {
+        fields.push({
+            name: 'is_exhausted',
+            label: 'Этот источник иссяк?',
+            required: false,
+            type: 'checkbox',
+        });
+        fields.push({
+            name: 'end_date',
+            label: 'Дата окончания доходов из этого источника',
+            required: false,
+            type: 'date',
+            disabled: !isExhausted, // disabled если чекбокс не отмечен
+        });
+    }
+
+    return fields;
+}
 
 export default function CreditsPage() {
-    // Get state and actions from the Credit store
-    const {credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError} = useCreditStore();
-    // Get actions from the Modal store
-    const {openModal, closeModal} = useModalStore();
+    const { credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
+    const { openModal, closeModal } = useModalStore();
 
-    // --- useEffect for initial data fetching ---
     useEffect(() => {
         if (!loading && credits === null && !error) {
-            console.log('CreditsPage: Triggering fetchCredits...');
             fetchCredits();
         }
-
         return () => {
             clearError();
         };
     }, [fetchCredits, loading, credits, error, clearError]);
 
-
-    // --- Вспомогательная функция для клиентской валидации дат ---
     const validateCreditDates = (formData) => {
         if (formData.is_permanent) {
             const startDate = new Date(formData.date);
@@ -55,46 +63,62 @@ export default function CreditsPage() {
             }
         }
     };
-    // --- КОНЕЦ Вспомогательной функции ---
 
-
-    // --- Handlers for UI actions (opening modals) ---
     const handleAddClick = () => {
         clearError();
+        const initialData = { is_permanent: false, is_exhausted: false };
         openModal('addCredit', {
             title: 'Добавить доход',
-            fields: creditFields,
-            initialData: { is_permanent: false },
+            fields: getCreditFields(initialData),
+            initialData,
             onSubmit: handleAddSubmit,
             submitText: 'Добавить',
+            onFieldChange: (name, value, prevFormData) => {
+                const newFormData = { ...prevFormData, [name]: value };
+                if (name === 'is_exhausted' && !value) newFormData.end_date = '';
+                if (name === 'is_permanent' && !value) {
+                    newFormData.is_exhausted = false;
+                    newFormData.end_date = '';
+                }
+                return getCreditFields(newFormData);
+            }
         });
     };
 
     const handleEditClick = (credit) => {
         clearError();
+        const initialData = {
+            ...credit,
+            date: credit.date ? new Date(credit.date).toISOString().split('T')[0] : '',
+            end_date: (credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z')
+                ? new Date(credit.end_date).toISOString().split('T')[0]
+                : '',
+            is_exhausted: !!credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z',
+        };
         openModal('editCredit', {
             title: 'Редактировать доход',
-            fields: creditFields,
-            initialData: {
-                ...credit,
-                date: credit.date ? new Date(credit.date).toISOString().split('T')[0] : '',
-                end_date: (credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z')
-                    ? new Date(credit.end_date).toISOString().split('T')[0]
-                    : '',
-            },
+            fields: getCreditFields(initialData),
+            initialData,
             onSubmit: (formData) => handleEditSubmit(credit.id, formData),
             submitText: 'Сохранить изменения',
+            onFieldChange: (name, value, prevFormData) => {
+                const newFormData = { ...prevFormData, [name]: value };
+                if (name === 'is_exhausted' && !value) newFormData.end_date = '';
+                if (name === 'is_permanent' && !value) {
+                    newFormData.is_exhausted = false;
+                    newFormData.end_date = '';
+                }
+                return getCreditFields(newFormData);
+            }
         });
     };
 
     const handleDeleteClick = (credit) => {
         clearError();
-
         const creditDescription = credit.description || `с ID ${credit.id}`;
         const amountToFormat = credit.is_permanent && typeof credit.full_amount === 'number'
             ? credit.full_amount
             : credit.amount;
-
         const formattedAmount = typeof amountToFormat === 'number'
             ? amountToFormat.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             : amountToFormat;
@@ -102,19 +126,15 @@ export default function CreditsPage() {
 
         openModal('confirmDelete', {
             title: 'Подтверждение удаления',
-            message: message,
+            message,
             onConfirm: () => handleDeleteConfirm(credit.id),
             confirmText: 'Удалить',
         });
     };
-    // --- End Handlers for UI actions ---
 
-
-    // --- Logic functions called by Modal/ConfirmModal components after user interaction ---
     const handleAddSubmit = async (formData) => {
         try {
             validateCreditDates(formData);
-
             await addCredit(formData);
             closeModal();
         } catch (err) {
@@ -130,20 +150,13 @@ export default function CreditsPage() {
 
     const handleEditSubmit = async (id, formData) => {
         try {
-            console.log(`CreditsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData);
-
             validateCreditDates(formData);
-
             const dataToUpdate = { ...formData };
-
             if (dataToUpdate.is_permanent && dataToUpdate.end_date === '') {
                 dataToUpdate.end_date = '0001-01-01T00:00:00Z';
             }
-
             await updateCredit(id, dataToUpdate);
             closeModal();
-            console.log('CreditsPage Logic: handleEditSubmit successful, modal closed.');
-
         } catch (err) {
             if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
                 useCreditStore.getState().set({ error: { message: err.message } });
@@ -154,31 +167,23 @@ export default function CreditsPage() {
         }
     };
 
-
     const handleDeleteConfirm = async (id) => {
         try {
             await deleteCredit(id);
-            console.log(`Logic: Credit ${id} успешно удален.`);
             closeModal();
-
         } catch (err) {
             console.error('Error during delete credit (after confirmation):', err);
             closeModal();
             throw err;
         }
     };
-    // --- End Logic functions ---
-
 
     const displayError = error;
-
 
     // --- Rendering ---
     return (
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
-
-                {/* Header section: Title and Add Button */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Мои Доходы</Text>
                     <TextButton onClick={handleAddClick}>
@@ -186,26 +191,21 @@ export default function CreditsPage() {
                     </TextButton>
                 </div>
 
-                {/* Display general error message from the store */}
                 {displayError && (
-                    <div
-                        className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
+                    <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
                     </div>
                 )}
 
-                {/* Conditional Rendering based on Loading State, Errors, and Data availability */}
                 {loading && credits === null ? (
                     <div className="text-center p-4">
                         <Text variant="body">Загрузка доходов...</Text>
                     </div>
                 ) : (
-                    <div
-                        className="bg-background shadow-md rounded-md overflow-hidden">
+                    <div className="bg-background shadow-md rounded-md overflow-hidden">
                         {credits !== null && credits.length === 0 ? (
                             <div className="p-4 text-center">
-                                <Text variant="body">У вас пока нет добавленных
-                                    доходов.</Text>
+                                <Text variant="body">У вас пока нет добавленных доходов.</Text>
                             </div>
                         ) : (
                             credits !== null && credits.length > 0 && (
@@ -258,9 +258,7 @@ export default function CreditsPage() {
                                             <td className="p-4">
                                                 {credit.is_permanent ? (
                                                     <div className="flex items-center gap-1">
-                                                        {/* Проверяем, закончились ли выплаты */}
                                                         {credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && new Date(credit.end_date) < new Date() ? (
-                                                            // Завершенные платежи (серая галочка)
                                                             <>
                                                                 <CheckCircleIcon className="h-5 w-5 text-gray-400" />
                                                                 <Text variant="tdSecondary" className="text-gray-600">
@@ -268,7 +266,6 @@ export default function CreditsPage() {
                                                                 </Text>
                                                             </>
                                                         ) : (
-                                                            // Текущие или бессрочные платежи (синяя галочка)
                                                             <>
                                                                 <CheckCircleIcon className="h-5 w-5 text-blue-500" />
                                                                 <Text variant="tdSecondary" className="text-blue-700">
@@ -278,12 +275,10 @@ export default function CreditsPage() {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    // --- ИЗМЕНЕНИЕ: Бледно-красная иконка для разовых доходов ---
                                                     <div className="flex items-center gap-1">
-                                                        <XCircleIcon className="h-5 w-5 text-red-300" /> {/* ИЗМЕНЕНО: text-red-500 на text-red-300 */}
+                                                        <XCircleIcon className="h-5 w-5 text-red-300" />
                                                         <Text variant="tdSecondary">Разовый</Text>
                                                     </div>
-                                                    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
                                                 )}
                                             </td>
                                             <td className="p-4 flex gap-2">
@@ -313,7 +308,6 @@ export default function CreditsPage() {
                         )}
                     </div>
                 )}
-
             </main>
         </div>
     );

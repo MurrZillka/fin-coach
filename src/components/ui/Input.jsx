@@ -9,7 +9,6 @@ const optionShape = PropTypes.shape({
 });
 // --- Конец propTypes для опций ---
 
-
 export default function Input({
                                   label,
                                   value, // value для всех типов, булево для checkbox
@@ -28,33 +27,36 @@ export default function Input({
     const isCheckbox = type === 'checkbox';
     const isSelect = type === 'select'; // <--- НОВАЯ проверка для типа 'select'
 
-
     // Обработчик изменения поля ввода
-    // Используем логику из твоего предоставленного кода, добавляя обработку select
+    // Используем логику, которая поддерживает разные форматы onChange
     const handleInputChange = (e) => {
+        // Проверяем, ожидает ли родительский компонент прямые параметры name и value
+        // Для этого можно проверить, если onChange был вызван с несколькими аргументами в других местах
+        // Но для простоты будем передавать событие напрямую для большинства случаев
+        // и обрабатывать прямой вызов для Modal
         if (isCheckbox) {
             // Для чекбокса передаем булево значение checked
-            onChange({
-                target: {
-                    name: e.target.name,
-                    value: e.target.checked, // <--- Используем e.target.checked
-                }
-            });
+            try {
+                onChange(name, e.target.checked);
+                //eslint-disable-next-line no-unused-vars
+            } catch (err) {
+                // Если родительский компонент ожидает событие
+                onChange(e);
+            }
         } else if (isSelect) { // <--- ДОБАВЛЕНО: обработка для select
             // Для select передаем значение выбранной опции (это всегда строка)
-            onChange({
-                target: {
-                    name: e.target.name,
-                    value: e.target.value, // <--- e.target.value для select это строка
-                }
-            });
-        }
-        else {
-            // Для остальных типов передаем стандартное строковое value
-            onChange(e); // <-- Возвращаем исходное событие, как было в твоем коде
+            try {
+                onChange(name, e.target.value);
+                //eslint-disable-next-line no-unused-vars
+            } catch (err) {
+                // Если родительский компонент ожидает событие
+                onChange(e);
+            }
+        } else {
+            // Для остальных типов передаем стандартное событие
+            onChange(e);
         }
     };
-
 
     return (
         // Используем gap-1, как и было
@@ -148,7 +150,6 @@ export default function Input({
             )}
             {/* --- Конец Условного рендеринга --- */}
 
-
             {/* Контейнер для сообщения об ошибке (фиксированная высота и скрытие overflow) */}
             <div className="h-[20px] overflow-hidden"> {/* Фиксированная высота, чтобы не прыгало */}
                 {/* Текст ошибки, управляемый классами видимости error-visible/error-hidden */}
@@ -159,7 +160,6 @@ export default function Input({
             </div>
 
             {/* Тултип рендерится в Modal.jsx */}
-
         </div>
     );
 }
@@ -181,7 +181,6 @@ Input.propTypes = {
     required: PropTypes.bool, // Добавляем propType для required
 };
 // --- Конец обновленных propTypes ---
-
 
 Input.defaultProps = {
     type: 'text',
