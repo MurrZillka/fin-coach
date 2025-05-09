@@ -269,7 +269,7 @@ export default function GoalsPage() {
 
     // --- Rendering ---
     return (
-        <div className="bg-secondary-50 min-h-screen"> {/* Light grey background */}
+        <div className="bg-secondary-50"> {/* Light grey background */}
             <main className="max-w-7xl mx-auto p-4"> {/* Centered container с padding */}
 
                 {/* Header section: Title and Add Button */}
