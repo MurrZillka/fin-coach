@@ -1,3 +1,4 @@
+//src/api/credit/index.js
 import axios from 'axios';
 import { getUseMocks, API_BASE_URL } from '../config';
 import { mockCredit } from './mocks';
