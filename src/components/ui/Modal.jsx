@@ -83,14 +83,17 @@ const Modal = ({
     }, [initialData, fields]); // Зависимости: initialData и fields
 
 
-    // --- Эффект для обработки submissionError и установки локальных ошибок полей (без изменений) ---
+    // --- ЭФФЕКТ ДЛЯ ОБРАБОТКИ submissionError И УСТАНОВКИ ЛОКАЛЬНЫХ ОШИБОК ПОЛЕЙ ---
     useEffect(() => {
-        // Точное сообщение об ошибке валидации дат, которое приходит с сервера
-        const dateValidationError = 'Дата окончания кредита должна быть больше или равна дате начала.';
+        // Точные сообщения об ошибке валидации дат, которые мы ожидаем от сторов (уже на русском)
+        const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.'; // Для расходов
+        const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.'; // Для доходов
+
 
         if (submissionError) {
-            // Если есть submissionError, проверяем, является ли он ошибкой валидации дат
-            if (submissionError === dateValidationError) {
+            // --- ИЗМЕНЕНИЕ: Проверяем, является ли submissionError одним из ожидаемых сообщений об ошибке дат ---
+            if (submissionError === dateValidationErrorRussianSpending || submissionError === dateValidationErrorCreditRussian) {
+                // --- Конец ИЗМЕНЕНИЯ ---
                 // Если да, устанавливаем ошибки для полей даты в локальном состоянии errors
                 setErrors(prevErrors => ({
                     ...prevErrors,
@@ -99,17 +102,16 @@ const Modal = ({
                 }));
             } else {
                 // Если это какая-то другая submissionError, убедимся, что предыдущие ошибки дат сброшены
+                // (те, которые были установлены этим эффектом)
                 setErrors(prevErrors => {
                     const newErrors = { ...prevErrors };
-                    // Удаляем ошибки для полей даты, если они были установлены этим эффектом
-                    // Проверяем по тексту сообщения, чтобы не удалить ошибки обязательных полей
                     if (newErrors.date === 'Проверьте даты') delete newErrors.date;
                     if (newErrors.end_date === 'Проверьте даты') delete newErrors.end_date;
                     return newErrors;
                 });
             }
         } else {
-            // Если submissionError стал null (например, модалка закрылась или успешный сабмит),
+            // Если submissionError стал null (успешный сабмит, закрытие модалки),
             // очищаем ошибки для полей даты, если они были установлены этим эффектом.
             setErrors(prevErrors => {
                 const newErrors = { ...prevErrors };
@@ -119,13 +121,13 @@ const Modal = ({
             });
         }
     }, [submissionError]); // Запускать эффект при изменении submissionError
-    // --- Конец эффекта ---
+    // --- КОНЕЦ ЭФФЕКТА ---
 
 
     if (!isOpen) return null;
 
     // Универсальный обработчик для всех Input (ожидает name, value)
-    // --- ИСПРАВЛЕНИЕ: Убеждаемся, что здесь нет параметра 'e' ---
+    // --- Убеждаемся, что здесь нет параметра 'e' ---
     const handleChange = (name, value) => { // --- ИСПРАВЛЕННАЯ СИГНАТУРА ---
         // console.log(`Modal: handleChange - Field "${name}" changed to value:`, value); // Можно оставить для отладки
 
@@ -187,20 +189,57 @@ const Modal = ({
             const fieldValue = dataToSend[fieldName]; // Берем значение уже из dataToSend
 
 
-            // Required (без изменений)
+            // --- Локальная Валидация ---
+
+            // 1. Required Check (работает для Категории, если required: true, и других обязательных полей)
             if (field.required) {
-                // Simplified check for required fields
-                if (fieldValue === undefined || fieldValue === null || String(fieldValue).trim() === '') {
-                    // For date type, fieldValue is set to today if empty in handleChange,
-                    // so this specific check might not be needed for date fields after handleChange.
-                    // But keep it generic for all types based on field.required prop.
-                    newErrors[fieldName] = `${field.label} обязателен`;
+                let isMissing = false;
+                if (fieldValue === undefined || fieldValue === null) {
+                    isMissing = true;
+                } else if (fieldType === 'checkbox') {
+                    if (fieldValue !== true) isMissing = true;
+                } else { // text, number, date, select
+                    if (String(fieldValue).trim() === '') isMissing = true;
+                    // Для обязательного поля даты, '0001-01-01' также считается отсутствующим значением локально
+                    // (Хотя Modal.jsx старается подставить сегодня для обязательной даты, это перестраховка)
+                    if (fieldType === 'date' && String(fieldValue) === '0001-01-01') {
+                        isMissing = true;
+                    }
+                }
+                if (isMissing) {
+                    // Важно: Если поле amount обязательно И равно 0 или отрицательное,
+                    // мы хотим показать ошибку "больше нуля", а не "обязателен".
+                    // Поэтому сначала проверим специфичную ошибку суммы, а потом обязательность.
+                    // Или добавим обязательность только если специфичная ошибка суммы не сработала.
+                    // Давайте сделаем так: специфичная ошибка суммы ПЕРЕЗАПИСЫВАЕТ ошибку обязательности для поля amount.
+                    newErrors[fieldName] = `${field.label} обязателен`; // Сначала ставим ошибку обязательности, если есть
                 }
             }
 
+            // --- НОВОЕ: 2. Валидация для поля 'amount' (должно быть > 0) ---
+            if (fieldName === 'amount') {
+                // Проверяем только если поле не пустое. Если обязательное, пустое уже поймает required validation.
+                // Если необязательное, пустое - это валидный случай. Проверяем только если есть значение.
+                // Проверка на required уже выше. Здесь только специфичное правило "> 0".
+                const valueAsString = String(fieldValue).trim();
+                if (valueAsString !== '') { // Проверяем только если в поле что-то введено
+                    const amountValue = parseFloat(valueAsString); // Парсим значение в число
+                    // Проверяем, является ли результат парсинга числом И меньше или равно 0
+                    if (isNaN(amountValue) || amountValue <= 0) {
+                        // Если это поле amount, и оно <= 0, устанавливаем специфичное сообщение.
+                        // Это сообщение ПЕРЕЗАПИШЕТ ошибку "обязателен", если поле было пустым или 0.
+                        newErrors[fieldName] = 'Сумма должна быть больше нуля';
+                    }
+                }
+                // Если valueAsString === '', то parseFloat будет NaN. required проверка поймает это как пустое.
+                // Если поле необязательное и пустое, ошибок нет, valueAsString === '', проверка не сработает. Корректно.
+            }
+            // --- Конец НОВОГО ---
 
-            // Преобразование типов (выполняется всегда для подготовки данных к отправке)
-            // --- Корректировка логики форматирования дат для отправки ---
+            // --- Конец Локальной Валидации ---
+
+
+            // --- Преобразование типов (для данных, отправляемых в onSubmit) ---
             if (fieldType === 'number') {
                 const valueAsString = String(fieldValue);
                 if (valueAsString.trim() !== '') {
@@ -219,7 +258,7 @@ const Modal = ({
                     dataToSend[fieldName] = isNaN(parsedValue) ? String(fieldValue) : parsedValue;
                 }
             } else if (fieldType === 'date') {
-                // Значение fieldValue уже либо "YYYY-MM-DD", либо "0001-01-01" (из handleChange или инициализации)
+                // Значение fieldValue уже либо "YYYY-MM-DD", либо "0001-01-01" из handleChange/инициализации
                 // Если оно "0001-01-01", оставляем его как есть. Если "YYYY-MM-DD", оставляем как есть.
                 // Если вдруг сюда пришло пустая строка "" (что не должно происходить после handleChange),
                 // то на сервер все равно нужно отправить "0001-01-01".
@@ -234,7 +273,7 @@ const Modal = ({
                     dataToSend[fieldName] = String(fieldValue);
                 }
             }
-            // --- Конец ИЗМЕНЕНИЯ ---
+            // --- Конец Преобразования типов ---
         });
 
 
@@ -258,25 +297,27 @@ const Modal = ({
     return (
         <div className="fixed inset-0 flex justify-center z-50 items-start pt-[20vh]"
              style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}>
+            {/* Классы из предоставленного тобой "рабочего" кода */}
             <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto">
+                {/* Кнопка закрытия позиционируется абсолютно */}
                 <IconButton
                     icon={XMarkIcon}
                     onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
                     className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                     tooltip="Закрыть"
                 />
+                {/* Заголовок */}
                 <Text variant="h2" className="mb-4 text-center">
                     {title}
                 </Text>
+                {/* Блок общей ошибки с сервера */}
+                {submissionError && (
+                    <div className="mb-4 p-3 bg-red-100 border rounded-md text-[var(--color-form-error)] border-[var(--color-form-error)]">
+                        {submissionError}
+                    </div>
+                )}
+                {/* Форма */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* --- Место для отображения общей ошибки отправки, используем цвета из темы --- */}
-                    {submissionError && (
-                        <div className="mb-4 p-3 bg-red-100 border rounded-md text-[var(--color-form-error)] border-[var(--color-form-error)]">
-                            {submissionError}
-                        </div>
-                    )}
-                    {/* --- Конец блока ошибки --- */}
-
                     {currentFields.map((field) => (
                         <div key={field.name} className="relative">
                             <Input
