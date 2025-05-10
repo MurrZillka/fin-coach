@@ -30,14 +30,20 @@ export default function SignupPage() {
         confirmPassword: '',
     });
 
-    const handleChange = (e) => {
-        const {name, value} = e.target;
+    // --- ИЗМЕНЕНИЕ: Обработчик изменения полей формы теперь принимает name и value ---
+    const handleChange = (name, value) => { // --- ИЗМЕНЕНА СИГНАТУРА ---
+        // --- ИЗМЕНЕНИЕ: Удалена деструктуризация e.target, т.к. name и value приходят аргументами ---
+        // const {name, value} = e.target; // ЭТО УДАЛЕНО
+
+        // Остальной код функции остается таким же, используя переданные name и value
         setFormData({...formData, [name]: value});
         setErrors({...errors, [name]: ''}); // Сбрасываем ошибку валидации для этого поля
 
         // Сбрасываем локальную ошибку API при изменении формы
         if (localError) setLocalError(null);
     };
+    // --- Конец ИЗМЕНЕНИЯ ---
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -164,7 +170,7 @@ export default function SignupPage() {
                             name="user_name"
                             type="text" // Указал явно тип
                             value={formData.user_name}
-                            onChange={handleChange}
+                            onChange={handleChange} // <-- Input вызовет ее с (name, value)
                             error={errors.user_name}
                             placeholder="Введите имя пользователя"
                             // errorClass={errors.user_name ? 'error-visible' : 'error-hidden'} // Если Input принимает этот проп
@@ -174,7 +180,7 @@ export default function SignupPage() {
                             name="login"
                             type="text" // Указал явно тип
                             value={formData.login}
-                            onChange={handleChange}
+                            onChange={handleChange} // <-- Input вызовет ее с (name, value)
                             error={errors.login}
                             placeholder="Введите логин (минимум 5 символов)"
                             // errorClass={errors.login ? 'error-visible' : 'error-hidden'} // Если Input принимает этот проп
@@ -184,7 +190,7 @@ export default function SignupPage() {
                             name="password"
                             type="password"
                             value={formData.password}
-                            onChange={handleChange}
+                            onChange={handleChange} // <-- Input вызовет ее с (name, value)
                             error={errors.password}
                             placeholder="Введите пароль (минимум 5 символов)"
                             // errorClass={errors.password ? 'error-visible' : 'error-hidden'} // Если Input принимает этот проп
@@ -194,7 +200,7 @@ export default function SignupPage() {
                             name="confirmPassword"
                             type="password"
                             value={formData.confirmPassword}
-                            onChange={handleChange}
+                            onChange={handleChange} // <-- Input вызовет ее с (name, value)
                             error={errors.confirmPassword}
                             placeholder="Повторите пароль"
                             // errorClass={errors.confirmPassword ? 'error-visible' : 'error-hidden'} // Если Input принимает этот проп

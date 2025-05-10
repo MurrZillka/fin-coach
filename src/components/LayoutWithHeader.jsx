@@ -5,6 +5,7 @@ import HeaderAuth from './HeaderAuth.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import routes from '../routes';
 import useAuthStore from '../stores/authStore.js';
+// --- ИЗМЕНЕНИЕ: Получаем submissionError из useModalStore ---
 import useModalStore from '../stores/modalStore.js';
 import Modal from './ui/Modal.jsx';
 import ConfirmModal from './ui/ConfirmModal.jsx';
@@ -19,7 +20,8 @@ export default function LayoutWithHeader() {
     const showAuthHeader = isAuthPage;
     const showRegularHeader = isAuthenticated && !isAuthPage;
 
-    const { modalType, modalProps, closeModal } = useModalStore();
+    // --- ИЗМЕНЕНИЕ: Получаем submissionError из useModalStore ---
+    const { modalType, modalProps, closeModal, submissionError } = useModalStore();
 
     return (
         <div className="flex flex-col min-h-screen bg-secondary-50">
@@ -56,8 +58,10 @@ export default function LayoutWithHeader() {
                 ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'].includes(modalType) ? (
                     <Modal
                         isOpen={true}
-                        onClose={closeModal}
+                        onClose={closeModal} // closeModal из useModalStore, он сбрасывает и submissionError
                         {...modalProps}
+                        // --- НОВОЕ: Передаем submissionError из стора в компонент Modal ---
+                        submissionError={submissionError}
                     />
                 ) : ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? (
                     <ConfirmModal

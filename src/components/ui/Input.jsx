@@ -18,44 +18,36 @@ export default function Input({
                                   error,
                                   placeholder, // Используется не для всех типов
                                   disabled = false,
-                                  options, // <--- НОВЫЙ prop: массив опций для типа 'select'
-                                  required = false, // Добавляем пропс required
+                                  options, // <--- prop: массив опций для типа 'select'
+                                  required = false, // пропс required
                               }) {
     const errorId = `${name}-error`;
 
     // --- Проверяем тип поля ---
     const isCheckbox = type === 'checkbox';
-    const isSelect = type === 'select'; // <--- НОВАЯ проверка для типа 'select'
+    const isSelect = type === 'select'; // проверка для типа 'select'
 
     // Обработчик изменения поля ввода
-    // Используем логику, которая поддерживает разные форматы onChange
     const handleInputChange = (e) => {
-        // Проверяем, ожидает ли родительский компонент прямые параметры name и value
-        // Для этого можно проверить, если onChange был вызван с несколькими аргументами в других местах
-        // Но для простоты будем передавать событие напрямую для большинства случаев
-        // и обрабатывать прямой вызов для Modal
-        if (isCheckbox) {
-            // Для чекбокса передаем булево значение checked
-            try {
-                onChange(name, e.target.checked);
-                //eslint-disable-next-line no-unused-vars
-            } catch (err) {
-                // Если родительский компонент ожидает событие
-                onChange(e);
-            }
-        } else if (isSelect) { // <--- ДОБАВЛЕНО: обработка для select
-            // Для select передаем значение выбранной опции (это всегда строка)
-            try {
-                onChange(name, e.target.value);
-                //eslint-disable-next-line no-unused-vars
-            } catch (err) {
-                // Если родительский компонент ожидает событие
-                onChange(e);
-            }
-        } else {
-            // Для остальных типов передаем стандартное событие
-            onChange(e);
+        const { name, type } = e.target; // Получаем name и type из e.target
+
+        let fieldValue; // Переменная для хранения актуального значения поля
+
+        // Определяем значение поля в зависимости от его типа
+        if (type === 'checkbox') {
+            fieldValue = e.target.checked; // Для чекбокса значение - это булево checked
+        } else if (type === 'number') {
+            // Для числового поля берем value как строку. Парсинг в число происходит в Modal.jsx (в handleSubmit).
+            fieldValue = e.target.value;
+        } else if (type === 'select') {
+            fieldValue = e.target.value; // Для select берем value как строку
+        } else { // text, date и другие
+            fieldValue = e.target.value; // Для остальных берем value как строку
         }
+
+        // --- ИЗМЕНЕНИЕ: Вызываем onChange с name и определенным fieldValue для ВСЕХ типов ---
+        onChange(name, fieldValue);
+        // --- Конец ИЗМЕНЕНИЯ ---
     };
 
     return (
@@ -71,14 +63,14 @@ export default function Input({
 
             {/* --- Условный рендеринг в зависимости от типа поля --- */}
             {isCheckbox ? (
-                // --- Рендеринг чекбокса (из твоего кода) ---
+                // --- Рендеринг чекбокса ---
                 <div className="flex items-center gap-2">
                     <input
                         id={name}
                         type="checkbox" // Всегда type="checkbox"
                         name={name}
-                        checked={!!value}
-                        onChange={handleInputChange}
+                        checked={!!value} // Привязываем к пропу value (который должен быть булевым)
+                        onChange={handleInputChange} // <-- Используем наш модифицированный обработчик
                         disabled={disabled}
                         aria-invalid={!!error}
                         aria-describedby={error ? errorId : undefined}
@@ -92,7 +84,7 @@ export default function Input({
                     {/* Опционально: метка справа от чекбокса, если нужно */}
                     {/* <Text variant="body" htmlFor={name}>{label}</Text> */}
                 </div>
-            ) : isSelect ? ( // <--- ДОБАВЛЕНО: Рендеринг выпадающего списка (select)
+            ) : isSelect ? ( // --- Рендеринг выпадающего списка (select) ---
                 // --- Рендеринг select ---
                 <select
                     id={name}
@@ -101,11 +93,11 @@ export default function Input({
                     // Преобразуем полученное value (которое может быть числом, например, ID категории) в строку.
                     // Если value undefined или null, используем пустую строку.
                     value={value === undefined || value === null ? '' : String(value)} // Value для select, преобразуем в строку
-                    onChange={handleInputChange}
+                    onChange={handleInputChange} // <-- Используем наш модифицированный обработчик
                     disabled={disabled}
                     aria-invalid={!!error}
                     aria-describedby={error ? errorId : undefined}
-                    // Применяем стили, похожие на input поля, из твоего кода Input.jsx
+                    // Применяем стили, похожие на input поля
                     className={`border rounded-md px-3 py-2 text-base text-secondary-800 bg-background w-full transition-colors duration-300 ease-in-out ${
                         error ? 'border-form-error' : 'border-secondary-200'
                     } ${!disabled ? 'focus:ring-2 focus:ring-primary-500 focus:border-primary-500' : ''} ${
@@ -126,7 +118,7 @@ export default function Input({
                     ))}
                 </select>
             ) : (
-                // --- Рендеринг стандартного поля ввода (text, number, date и т.д.) (из твоего кода) ---
+                // --- Рендеринг стандартного поля ввода (text, number, date и т.д.) ---
                 <input
                     id={name}
                     type={type} // Используем переданный тип
@@ -164,7 +156,7 @@ export default function Input({
     );
 }
 
-// --- Обновленные propTypes ---
+// --- Обновленные propTypes (без изменений) ---
 Input.propTypes = {
     label: PropTypes.string,
     // value может быть строкой, числом, булевым, null или undefined.

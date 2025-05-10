@@ -1,11 +1,12 @@
 // src/pages/CreditsPage.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'; // --- ИЗМЕНЕНИЕ: Удален useState ---
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import useCreditStore from '../stores/creditStore';
+// --- ИЗМЕНЕНИЕ: Добавлен setModalSubmissionError в деструктуризацию ---
 import useModalStore from '../stores/modalStore.js';
 
 // Динамическое формирование полей
@@ -41,31 +42,26 @@ function getCreditFields(formData) {
 
 export default function CreditsPage() {
     const { credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
-    const { openModal, closeModal } = useModalStore();
+    // --- ИЗМЕНЕНИЕ: Получаем setModalSubmissionError из modalStore ---
+    const { openModal, closeModal, setModalSubmissionError } = useModalStore();
+    // --- ИЗМЕНЕНИЕ: Удалено локальное состояние submissionError ---
+    // const [submissionError, setSubmissionError] = useState(null);
+
 
     useEffect(() => {
         if (!loading && credits === null && !error) {
             fetchCredits();
         }
+        // Cleanup function to clear the main page error when component unmounts or dependencies change
         return () => {
             clearError();
         };
     }, [fetchCredits, loading, credits, error, clearError]);
 
-    const validateCreditDates = (formData) => {
-        if (formData.is_permanent) {
-            const startDate = new Date(formData.date);
-            if (formData.end_date && formData.end_date !== '0001-01-01' && formData.end_date !== '0001-01-01T00:00:00Z') {
-                const endDate = new Date(formData.end_date);
-                if (endDate < startDate) {
-                    throw new Error('Дата окончания должна быть больше или равна дате начала.');
-                }
-            }
-        }
-    };
-
     const handleAddClick = () => {
-        clearError();
+        clearError(); // Очищаем общую ошибку стора при открытии модалки
+        // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); - теперь этим занимается openModal в сторе ---
+
         const initialData = { is_permanent: false, is_exhausted: false };
         openModal('addCredit', {
             title: 'Добавить доход',
@@ -81,12 +77,22 @@ export default function CreditsPage() {
                     newFormData.end_date = '';
                 }
                 return getCreditFields(newFormData);
+            },
+            // --- ИЗМЕНЕНИЕ: Удалена передача submissionError: submissionError - теперь его читает LayoutWithHeader напрямую из стора ---
+            // --- ИЗМЕНЕНИЕ: Упрощен обработчик закрытия модалки пользователем ---
+            onClose: () => {
+                closeModal();
+                // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); ---
+                useCreditStore.getState().clearError(); // Также очищаем общую ошибку стора на всякий случай
             }
+            // --- Конец ИЗМЕНЕНИЙ ---
         });
     };
 
     const handleEditClick = (credit) => {
-        clearError();
+        clearError(); // Очищаем общую ошибку стора при открытии модалки
+        // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); - теперь этим занимается openModal в сторе ---
+
         const initialData = {
             ...credit,
             date: credit.date ? new Date(credit.date).toISOString().split('T')[0] : '',
@@ -109,12 +115,22 @@ export default function CreditsPage() {
                     newFormData.end_date = '';
                 }
                 return getCreditFields(newFormData);
+            },
+            // --- ИЗМЕНЕНИЕ: Удалена передача submissionError: submissionError ---
+            // --- ИЗМЕНЕНИЕ: Упрощен обработчик закрытия модалки пользователем ---
+            onClose: () => {
+                closeModal();
+                // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); ---
+                useCreditStore.getState().clearError(); // Также очищаем общую ошибку стора на всякий случай
             }
+            // --- Конец ИЗМЕНЕНИЙ ---
         });
     };
 
     const handleDeleteClick = (credit) => {
-        clearError();
+        clearError(); // Очищаем общую ошибку стора при открытии модалки
+        // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); ---
+
         const creditDescription = credit.description || `с ID ${credit.id}`;
         const amountToFormat = credit.is_permanent && typeof credit.full_amount === 'number'
             ? credit.full_amount
@@ -129,57 +145,73 @@ export default function CreditsPage() {
             message,
             onConfirm: () => handleDeleteConfirm(credit.id),
             confirmText: 'Удалить',
+            // Для модалки подтверждения удаления submissionError не нужен, и onClose может быть другим или отсутствовать,
+            // если эта модалка не управляет ошибками так же, как форма.
         });
     };
 
     const handleAddSubmit = async (formData) => {
+        // --- ИЗМЕНЕНИЕ: Удален вызов локальной валидации или убеждаемся, что она не выбрасывает ошибку ---
+        // validateCreditDates(formData); // Убираем или убеждаемся, что не выбрасывает
+
+        const dataToSend = { ...formData };
+        if (dataToSend.is_permanent) {
+            if (!dataToSend.is_exhausted) {
+                dataToSend.end_date = '0001-01-01';
+            } else if (!dataToSend.end_date) {
+                dataToSend.end_date = '0001-01-01';
+            }
+        }
+
         try {
-            validateCreditDates(formData);
-            const dataToSend = { ...formData };
-            if (dataToSend.is_permanent) {
-                // Если чекбокс "иссяк" снят, всегда отправляем нулевую дату
-                if (!dataToSend.is_exhausted) {
-                    dataToSend.end_date = '0001-01-01';
-                } else if (!dataToSend.end_date) {
-                    // Если чекбокс отмечен, но дата не выбрана - тоже отправляем нулевую дату
-                    dataToSend.end_date = '0001-01-01';
-                }
-            }
-            await addCredit(dataToSend);
-            closeModal();
+            await addCredit(dataToSend); // Вызываем action стора
+            closeModal(); // Закрываем модалку только в случае УСПЕХА
+            // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); - теперь этим занимается closeModal в сторе ---
         } catch (err) {
-            if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
-                useCreditStore.getState().set({ error: { message: err.message } });
-            } else {
-                console.error('Error during add credit (after form submit):', err);
-            }
-            closeModal();
-            throw err;
+            console.error('Error during add credit (after form submit):', err);
+            // --- ИЗМЕНЕНИЕ: Используем setModalSubmissionError из useModalStore ---
+            setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при добавлении дохода.');
+            // --- Конец ИЗМЕНЕНИЯ ---
+
+            // --- ИЗМЕНЕНИЕ: Очищаем общую ошибку стора (creditStore) ---
+            // Убеждаемся, что ошибка формы не отображается на главной странице.
+            useCreditStore.getState().clearError();
+            // --- Конец ИЗМЕНЕНИЯ ---
+
+            // Модалка остается открытой, чтобы показать ошибку.
+            // throw err; // Больше не выбрасываем ошибку дальше после ее обработки здесь
         }
     };
 
     const handleEditSubmit = async (id, formData) => {
+        // --- ИЗМЕНЕНИЕ: Удален вызов локальной валидации или убеждаемся, что она не выбрасывает ошибку ---
+        // validateCreditDates(formData); // Убираем или убеждаемся, что не выбрасывает
+
+        const dataToUpdate = { ...formData };
+        if (dataToUpdate.is_permanent) {
+            if (!dataToUpdate.is_exhausted) {
+                dataToUpdate.end_date = '0001-01-01';
+            } else if (!dataToUpdate.end_date) {
+                dataToUpdate.end_date = '0001-01-01';
+            }
+        }
+
         try {
-            validateCreditDates(formData);
-            const dataToUpdate = { ...formData };
-            if (dataToUpdate.is_permanent) {
-                // Если чекбокс "иссяк" снят, всегда отправляем нулевую дату
-                if (!dataToUpdate.is_exhausted) {
-                    dataToUpdate.end_date = '0001-01-01';
-                } else if (!dataToUpdate.end_date) {
-                    // Если чекбокс отмечен, но дата не выбрана - тоже отправляем нулевую дату
-                    dataToUpdate.end_date = '0001-01-01';
-                }
-            }
-            await updateCredit(id, dataToUpdate);
-            closeModal();
+            await updateCredit(id, dataToUpdate); // Вызываем action стора
+            closeModal(); // Закрываем модалку только в случае УСПЕХА
+            // --- ИЗМЕНЕНИЕ: Удалено setSubmissionError(null); - теперь этим занимается closeModal в сторе ---
         } catch (err) {
-            if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
-                useCreditStore.getState().set({ error: { message: err.message } });
-            } else {
-                console.error('CreditsPage Logic: Error during edit credit (after form submit):', err);
-            }
-            closeModal();
+            console.error('CreditsPage Logic: Error during edit credit (after form submit):', err);
+            // --- ИЗМЕНЕНИЕ: Используем setModalSubmissionError из useModalStore ---
+            setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при сохранении изменений.');
+            // --- Конец ИЗМЕНЕНИЯ ---
+
+            // --- ИЗМЕНЕНИЕ: Очищаем общую ошибку стора (creditStore) ---
+            useCreditStore.getState().clearError();
+            // --- Конец ИЗМЕНЕНИЯ ---
+
+            // Модалка остается открытой, чтобы показать ошибку.
+            // throw err; // Больше не выбрасываем ошибку дальше после ее обработки здесь
         }
     };
 
@@ -189,11 +221,16 @@ export default function CreditsPage() {
             closeModal();
         } catch (err) {
             console.error('Error during delete credit (after confirmation):', err);
-            closeModal();
-            throw err;
+            closeModal(); // Модалка подтверждения закрывается и при ошибке удаления
+            // Ошибка удаления покажет на главной странице через store.error
+            // Явно устанавливаем store error, так как модалка закрывается.
+            useCreditStore.getState().set({ error: { message: err.message || 'Произошла ошибка при удалении.' } });
+            // throw err; // Убираем для простоты, полагаемся на отображение store.error на главной.
         }
     };
 
+
+    // Ошибка для отображения на главной странице (из стора creditStore)
     const displayError = error;
 
     // --- Rendering ---
@@ -207,6 +244,7 @@ export default function CreditsPage() {
                     </TextButton>
                 </div>
 
+                {/* Этот блок показывает общие ошибки из стора (например, ошибка загрузки) */}
                 {displayError && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}

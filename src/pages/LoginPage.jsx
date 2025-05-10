@@ -37,15 +37,19 @@ export default function LoginPage() {
     }, [location.state]);
 
 
-    // Обработчик изменения полей формы
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+    // --- ИЗМЕНЕНИЕ: Обработчик изменения полей формы теперь принимает name и value ---
+    const handleChange = (name, value) => { // --- ИЗМЕНЕНА СИГНАТУРА ---
+        // --- ИЗМЕНЕНИЕ: Удалена деструктуризация e.target, т.к. name и value приходят аргументами ---
+        // const { name, value } = e.target; // ЭТО УДАЛЕНО
+
+        // Остальной код функции остается таким же, используя переданные name и value
         setFormData({ ...formData, [name]: value });
         setErrors({ ...errors, [name]: '' });
 
         // Сбрасываем локальную ошибку API при изменении формы
         if (localError) setLocalError(null);
     };
+    // --- Конец ИЗМЕНЕНИЯ ---
 
     // Обработчик отправки формы логина
     const handleSubmit = async (e) => {
@@ -129,7 +133,7 @@ export default function LoginPage() {
                         name="login"
                         type="text"
                         value={formData.login}
-                        onChange={handleChange}
+                        onChange={handleChange} // <-- Теперь Input вызывает ее с (name, value)
                         error={errors.login}
                         placeholder="Введите ваш логин"
                     />
@@ -139,7 +143,7 @@ export default function LoginPage() {
                         name="password"
                         type="password"
                         value={formData.password}
-                        onChange={handleChange}
+                        onChange={handleChange} // <-- Теперь Input вызывает ее с (name, value)
                         error={errors.password}
                         placeholder="Введите ваш пароль"
                     />
