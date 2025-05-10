@@ -6,7 +6,7 @@ import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
-import useModalStore from '../stores/modalStore.js';
+import useModalStore from '../stores/modalStore.js'; // Импортируем useModalStore
 
 // Формируем динамические поля для модалки расходов
 function getSpendingFields(formData, categories) {
@@ -23,20 +23,20 @@ function getSpendingFields(formData, categories) {
         { name: 'description', label: 'Описание', required: false, type: 'text', placeholder: 'Например: Продукты из магазина' },
         { name: 'category_id', label: 'Категория', required: true, type: 'select', options: categoryOptions },
         { name: 'is_permanent', label: 'Регулярный расход?', required: false, type: 'checkbox' },
-        { name: 'date', label: isPermanent ? 'Дата начала расхода' : 'Дата расхода', required: true, type: 'date' },
+        { name: 'date', label: isPermanent ? 'Дата начала расхода' : 'Дата расхода', required: true, type: 'date' }, // date всегда required: true
     ];
 
     if (isPermanent) {
         fields.push({
             name: 'is_finished',
             label: 'Этот расход завершён?',
-            required: false,
+            required: false, // is_finished не обязателен
             type: 'checkbox',
         });
         fields.push({
             name: 'end_date',
             label: 'Дата окончания расхода',
-            required: false,
+            required: false, // end_date не обязателен
             type: 'date',
             disabled: !isFinished,
         });
@@ -47,46 +47,46 @@ function getSpendingFields(formData, categories) {
 
 export default function SpendingsPage() {
     const {
-        spendings, loading, error,
+        spendings, loading, error, // loading и error теперь для состояния страницы
         fetchSpendings, addSpending, updateSpending, deleteSpending, clearError
     } = useSpendingsStore();
     const {
         categories, loading: categoriesLoading, error: categoriesError,
         fetchCategories, clearError: clearCategoriesError
     } = useCategoryStore();
-    const { openModal, closeModal } = useModalStore();
+    // --- ИЗМЕНЕНИЕ: Получаем submissionError и setModalSubmissionError из modalStore ---
+    const { openModal, closeModal, submissionError, setModalSubmissionError } = useModalStore();
+    // --- Конец ИЗМЕНЕНИЯ ---
+
 
     useEffect(() => {
         if (!loading && spendings === null && !error) fetchSpendings();
         if (!categoriesLoading && categories === null && !categoriesError) fetchCategories();
         return () => {
-            clearError();
-            clearCategoriesError();
+            clearError(); // Очищаем ошибку стора расходов при размонтировании
+            clearCategoriesError(); // Очищаем ошибку стора категорий при размонтировании
+            // --- ИЗМЕНЕНИЕ: Очищаем ошибку модалки при размонтировании страницы ---
+            setModalSubmissionError(null);
+            // --- Конец ИЗМЕНЕНИЯ ---
         };
     }, [
         fetchSpendings, loading, spendings, error,
         fetchCategories, categoriesLoading, categories, categoriesError,
-        clearError, clearCategoriesError
+        clearError, clearCategoriesError,
+        setModalSubmissionError // Добавляем в зависимости
     ]);
 
-    // Валидация дат
-    const validateSpendingDates = (formData) => {
-        if (formData.is_permanent) {
-            const startDate = new Date(formData.date);
-            if (formData.end_date && formData.end_date !== '0001-01-01' && formData.end_date !== '0001-01-01T00:00:00Z') {
-                const endDate = new Date(formData.end_date);
-                if (endDate < startDate) {
-                    throw new Error('Дата окончания должна быть больше или равна дате начала.');
-                }
-            }
-        }
-    };
+    // --- ИЗМЕНЕНИЕ: Удалена локальная функция validateSpendingDates ---
+    // const validateSpendingDates = (formData) => { ... };
+    // --- Конец ИЗМЕНЕНИЯ ---
+
 
     // --- Модалка: добавление ---
     const handleAddClick = () => {
-        clearError();
-        clearCategoriesError();
-        const initialData = { is_permanent: false, is_finished: false };
+        clearError(); // Очищаем общую ошибку стора расходов
+        clearCategoriesError(); // Очищаем общую ошибку стора категорий
+        // openModal теперь сбрасывает submissionError в modalStore
+        const initialData = { is_permanent: false, is_finished: false, date: '', end_date: '' }; // Убедимся, что даты инициализированы
         openModal('addSpending', {
             title: 'Добавить расход',
             fields: getSpendingFields(initialData, categories),
@@ -95,27 +95,43 @@ export default function SpendingsPage() {
             submitText: 'Добавить',
             onFieldChange: (name, value, prevFormData) => {
                 const newFormData = { ...prevFormData, [name]: value };
-                if (name === 'is_finished' && !value) newFormData.end_date = '';
-                if (name === 'is_permanent' && !value) {
-                    newFormData.is_finished = false;
-                    newFormData.end_date = '';
+                // Логика для is_finished и end_date при изменении чекбоксов или is_permanent
+                if (name === 'is_permanent') {
+                    if (!value) { // Если стало не постоянным
+                        newFormData.is_finished = false; // Сбрасываем завершённый статус
+                        newFormData.end_date = ''; // Сбрасываем дату окончания
+                    }
+                    // Если стало постоянным, is_finished и end_date сохраняют свои текущие значения или ""
+                } else if (name === 'is_finished' && !value) { // Если is_finished стал false
+                    newFormData.end_date = ''; // Сбрасываем дату окончания
                 }
-                return getSpendingFields(newFormData, categories);
+                return getSpendingFields(newFormData, categories); // Обновляем поля, включая disabled состояние end_date
+            },
+            // --- ИЗМЕНЕНИЕ: Передаем submissionError из modalStore и добавляем onClose ---
+            submissionError: submissionError, // Передаем ошибку модалки
+            onClose: () => {
+                closeModal(); // Закрывает модалку и сбрасывает submissionError в modalStore
+                useSpendingsStore.getState().clearError(); // Очищаем общую ошибку стора расходов на всякий случай
             }
+            // --- Конец ИЗМЕНЕНИЯ ---
         });
     };
 
     // --- Модалка: редактирование ---
     const handleEditClick = (spending) => {
-        clearError();
-        clearCategoriesError();
+        clearError(); // Очищаем общую ошибку стора расходов
+        clearCategoriesError(); // Очищаем общую ошибку стора категорий
+        // openModal теперь сбрасывает submissionError в modalStore
         const initialData = {
             ...spending,
-            date: spending.date ? new Date(spending.date).toISOString().split('T')[0] : '',
-            end_date: (spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01')
+            // Приводим даты из API к формату "YYYY-MM-DD" или "" для модалки
+            date: (spending.date && spending.date !== '0001-01-01' && spending.date !== '0001-01-01T00:00:00Z')
+                ? new Date(spending.date).toISOString().split('T')[0]
+                : '', // "" для 0001-01-01 или null/undefined
+            end_date: (spending.end_date && spending.end_date !== '0001-01-01' && spending.end_date !== '0001-01-01T00:00:00Z')
                 ? new Date(spending.end_date).toISOString().split('T')[0]
-                : '',
-            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01',
+                : '', // "" для 0001-01-01 или null/undefined
+            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01', // Чекбокс завершён от даты
         };
         openModal('editSpending', {
             title: 'Редактировать расход',
@@ -125,20 +141,32 @@ export default function SpendingsPage() {
             submitText: 'Сохранить изменения',
             onFieldChange: (name, value, prevFormData) => {
                 const newFormData = { ...prevFormData, [name]: value };
-                if (name === 'is_finished' && !value) newFormData.end_date = '';
-                if (name === 'is_permanent' && !value) {
-                    newFormData.is_finished = false;
-                    newFormData.end_date = '';
+                // Логика для is_finished и end_date при изменении чекбоксов или is_permanent
+                if (name === 'is_permanent') {
+                    if (!value) { // Если стало не постоянным
+                        newFormData.is_finished = false; // Сбрасываем завершённый статус
+                        newFormData.end_date = ''; // Сбрасываем дату окончания
+                    }
+                    // Если стало постоянным, is_finished и end_date сохраняют свои текущие значения или ""
+                } else if (name === 'is_finished' && !value) { // Если is_finished стал false
+                    newFormData.end_date = ''; // Сбрасываем дату окончания
                 }
-                return getSpendingFields(newFormData, categories);
+                return getSpendingFields(newFormData, categories); // Обновляем поля
+            },
+            // --- ИЗМЕНЕНИЕ: Передаем submissionError из modalStore и добавляем onClose ---
+            submissionError: submissionError, // Передаем ошибку модалки
+            onClose: () => {
+                closeModal(); // Закрывает модалку и сбрасывает submissionError в modalStore
+                useSpendingsStore.getState().clearError(); // Очищаем общую ошибку стора расходов на всякий случай
             }
+            // --- Конец ИЗМЕНЕНИЯ ---
         });
     };
 
     // --- Модалка: удаление ---
     const handleDeleteClick = (spending) => {
-        clearError();
-        clearCategoriesError();
+        clearError(); // Очищаем общую ошибку стора расходов
+        clearCategoriesError(); // Очищаем общую ошибку стора категорий
         const spendingDescription = spending.description || `с ID ${spending.id}`;
         const formattedAmount = typeof spending.amount === 'number'
             ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -150,68 +178,95 @@ export default function SpendingsPage() {
             message,
             onConfirm: () => handleDeleteConfirm(spending.id),
             confirmText: 'Удалить',
+            // Для модалки подтверждения удаления submissionError не нужен, onClose может быть другим
+            onClose: () => {
+                closeModal(); // Закрывает модалку
+                // Ошибка стора расходов остается, если она была до открытия модалки
+            }
         });
     };
 
     // --- Сабмит: добавление ---
     const handleAddSubmit = async (formData) => {
-        try {
-            validateSpendingDates(formData);
-            const dataToSend = { ...formData };
-            if (dataToSend.is_permanent) {
-                if (!dataToSend.is_finished) {
-                    dataToSend.end_date = '0001-01-01';
-                } else if (!dataToSend.end_date) {
-                    dataToSend.end_date = '0001-01-01';
-                }
+        // --- ИЗМЕНЕНИЕ: Убираем локальную валидацию и добавляем try...catch для обработки ошибок стора ---
+        // validateSpendingDates(formData); // Убираем
+        const dataToSend = { ...formData };
+        // Логика обработки end_date в зависимости от is_permanent/is_finished остается здесь
+        if (dataToSend.is_permanent) {
+            if (!dataToSend.is_finished) {
+                dataToSend.end_date = '0001-01-01'; // Сервер ждет 0001-01-01 для "нет даты"
             }
-            await addSpending(dataToSend);
-            closeModal();
-        } catch (err) {
-            if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
-                useSpendingsStore.getState().set({ error: { message: err.message } });
-            } else {
-                console.error('Error during add spending (after form submit):', err);
-            }
-            closeModal();
-            throw err;
+        } else {
+            dataToSend.end_date = '0001-01-01'; // Если не постоянный, end_date всегда 0001-01-01
         }
+        // date поле required, модалка подставит сегодня если пустое. Придет YYYY-MM-DD или 0001-01-01.
+
+        try {
+            await addSpending(dataToSend); // Вызываем action стора (который выбрасывает ошибку при API ошибке)
+            closeModal(); // Закрываем модалку только в случае УСПЕХА
+            // closeModal сбрасывает submissionError в modalStore
+        } catch (err) {
+            console.error('Error during add spending (after form submit):', err);
+            // При ошибке отображаем ее в модалке через submissionError
+            // setModalSubmissionError из useModalStore
+            setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при добавлении расхода.');
+            // Очищаем общую ошибку на странице расходов, если она была установлена стором до этого
+            useSpendingsStore.getState().clearError();
+            // Модалка НЕ закрывается, чтобы показать ошибку.
+        } finally {
+            // Можно добавить логику скрытия индикатора загрузки, если loading управляется страницей
+        }
+        // --- Конец ИЗМЕНЕНИЯ ---
     };
 
     // --- Сабмит: редактирование ---
     const handleEditSubmit = async (id, formData) => {
-        try {
-            validateSpendingDates(formData);
-            const dataToUpdate = { ...formData };
-            if (dataToUpdate.is_permanent) {
-                if (!dataToUpdate.is_finished) {
-                    dataToUpdate.end_date = '0001-01-01';
-                } else if (!dataToUpdate.end_date) {
-                    dataToUpdate.end_date = '0001-01-01';
-                }
+        // --- ИЗМЕНЕНИЕ: Убираем локальную валидацию и добавляем try...catch для обработки ошибок стора ---
+        // validateSpendingDates(formData); // Убираем
+        const dataToUpdate = { ...formData };
+        // Логика обработки end_date в зависимости от is_permanent/is_finished остается здесь
+        if (dataToUpdate.is_permanent) {
+            if (!dataToUpdate.is_finished) {
+                dataToUpdate.end_date = '0001-01-01'; // Сервер ждет 0001-01-01 для "нет даты"
             }
-            await updateSpending(id, dataToUpdate);
-            closeModal();
-        } catch (err) {
-            if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
-                useSpendingsStore.getState().set({ error: { message: err.message } });
-            } else {
-                console.error('Error during edit spending (after form submit):', err);
-            }
-            closeModal();
+        } else {
+            dataToUpdate.end_date = '0001-01-01'; // Если не постоянный, end_date всегда 0001-01-01
         }
+        // date поле required, модалка подставит сегодня если пустое. Придет YYYY-MM-DD или 0001-01-01.
+
+        try {
+            await updateSpending(id, dataToUpdate); // Вызываем action стора (который выбрасывает ошибку при API ошибке)
+            closeModal(); // Закрываем модалку только в случае УСПЕХА
+            // closeModal сбрасывает submissionError в modalStore
+        } catch (err) {
+            console.error('Error during edit spending (after form submit):', err);
+            // При ошибке отображаем ее в модалке через submissionError
+            setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при сохранении изменений.');
+            // Очищаем общую ошибку на странице расходов
+            useSpendingsStore.getState().clearError();
+            // Модалка НЕ закрывается.
+        } finally {
+            // Можно добавить логику скрытия индикатора загрузки
+        }
+        // --- Конец ИЗМЕНЕНИЯ ---
     };
 
     // --- Сабмит: удаление ---
     const handleDeleteConfirm = async (id) => {
+        // --- ИЗМЕНЕНИЕ: Добавляем try...catch для обработки ошибок стора ---
         try {
-            await deleteSpending(id);
-            closeModal();
-        } catch {
-            closeModal();
+            await deleteSpending(id); // Вызываем action стора (который выбрасывает ошибку)
+            closeModal(); // Закрываем модалку только в случае УСПЕХА
+        } catch (err) {
+            console.error('Error during delete spending (after confirmation):', err);
+            closeModal(); // Модалка подтверждения закрывается и при ошибке удаления
+            // При ошибке удаления устанавливаем общую ошибку стора расходов (на странице)
+            useSpendingsStore.getState().set({ error: { message: err.message || 'Произошла ошибка при удалении расхода.' } });
         }
+        // --- Конец ИЗМЕНЕНИЯ ---
     };
 
+    // Общая ошибка для отображения на главной странице (из сторов)
     const displayError = error || categoriesError;
 
     return (
@@ -224,6 +279,7 @@ export default function SpendingsPage() {
                     </TextButton>
                 </div>
 
+                {/* Этот блок показывает общие ошибки из сторов (например, ошибка загрузки) */}
                 {displayError && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
@@ -236,6 +292,7 @@ export default function SpendingsPage() {
                     </div>
                 ) : (
                     <div className="bg-background shadow-md rounded-md overflow-hidden">
+                        {/* Убедимся, что категории загружены для отображения таблицы */}
                         {spendings !== null && spendings.length === 0 && categories !== null ? (
                             <div className="p-4 text-center">
                                 <Text variant="body">У вас пока нет добавленных расходов.</Text>
