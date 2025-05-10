@@ -69,11 +69,24 @@ export default function SpendingsPage() {
         clearError, clearCategoriesError
     ]);
 
+    // Валидация дат
+    const validateSpendingDates = (formData) => {
+        if (formData.is_permanent) {
+            const startDate = new Date(formData.date);
+            if (formData.end_date && formData.end_date !== '0001-01-01' && formData.end_date !== '0001-01-01T00:00:00Z') {
+                const endDate = new Date(formData.end_date);
+                if (endDate < startDate) {
+                    throw new Error('Дата окончания должна быть больше или равна дате начала.');
+                }
+            }
+        }
+    };
+
     // --- Модалка: добавление ---
     const handleAddClick = () => {
         clearError();
         clearCategoriesError();
-        const initialData = { is_permanent: false, is_finished: false }; // Явно добавляем is_finished
+        const initialData = { is_permanent: false, is_finished: false };
         openModal('addSpending', {
             title: 'Добавить расход',
             fields: getSpendingFields(initialData, categories),
@@ -102,7 +115,7 @@ export default function SpendingsPage() {
             end_date: (spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01')
                 ? new Date(spending.end_date).toISOString().split('T')[0]
                 : '',
-            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01', // Явно вычисляем
+            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01',
         };
         openModal('editSpending', {
             title: 'Редактировать расход',
@@ -143,32 +156,48 @@ export default function SpendingsPage() {
     // --- Сабмит: добавление ---
     const handleAddSubmit = async (formData) => {
         try {
+            validateSpendingDates(formData);
             const dataToSend = { ...formData };
-            // Гарантируем, что end_date всегда есть для регулярных расходов
             if (dataToSend.is_permanent) {
-                if (!('is_finished' in dataToSend) || !dataToSend.is_finished || !dataToSend.end_date) {
+                if (!dataToSend.is_finished) {
+                    dataToSend.end_date = '0001-01-01';
+                } else if (!dataToSend.end_date) {
                     dataToSend.end_date = '0001-01-01';
                 }
             }
             await addSpending(dataToSend);
             closeModal();
-        } catch {
+        } catch (err) {
+            if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
+                useSpendingsStore.getState().set({ error: { message: err.message } });
+            } else {
+                console.error('Error during add spending (after form submit):', err);
+            }
             closeModal();
+            throw err;
         }
     };
 
     // --- Сабмит: редактирование ---
     const handleEditSubmit = async (id, formData) => {
         try {
+            validateSpendingDates(formData);
             const dataToUpdate = { ...formData };
             if (dataToUpdate.is_permanent) {
-                if (!('is_finished' in dataToUpdate) || !dataToUpdate.is_finished || !dataToUpdate.end_date) {
+                if (!dataToUpdate.is_finished) {
+                    dataToUpdate.end_date = '0001-01-01';
+                } else if (!dataToUpdate.end_date) {
                     dataToUpdate.end_date = '0001-01-01';
                 }
             }
             await updateSpending(id, dataToUpdate);
             closeModal();
-        } catch {
+        } catch (err) {
+            if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
+                useSpendingsStore.getState().set({ error: { message: err.message } });
+            } else {
+                console.error('Error during edit spending (after form submit):', err);
+            }
             closeModal();
         }
     };
