@@ -1,259 +1,176 @@
-// src/pages/SpendingsPage.jsx
-import React, {useEffect, useMemo} from 'react';
-// Import necessary components and stores
+import React, { useEffect } from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-// Import icons
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import useSpendingsStore from '../stores/spendingsStore';
+import useCategoryStore from '../stores/categoryStore';
+import useModalStore from '../stores/modalStore.js';
 
-// --- Import Stores ---
-import useSpendingsStore from '../stores/spendingsStore'; // Убедись, что путь корректен
-import useCategoryStore from '../stores/categoryStore'; // Убедись, что путь корректен
-// --- ИСПРАВЛЕНО: Корректный путь к modalStore.js ---
-import useModalStore from '../stores/modalStore.js'; // Убедись, что путь корректен
-// --- Конец ИМПОРТОВ ---
+function getSpendingFields(formData, categories) {
+    const isPermanent = !!formData.is_permanent;
+    const isFinished = !!formData.is_finished;
 
-// --- УДАЛЕНО: Импорт PropTypes и определение optionShape (для исправления ESLint ошибки) ---
-// import PropTypes from 'prop-types';
-// const optionShape = PropTypes.shape({
-//     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-//     label: PropTypes.string.isRequired,
-// });
-// --- Конец УДАЛЕНИЯ ---
+    const categoryOptions = (categories || []).map(category => ({
+        value: category.id,
+        label: category.name,
+    }));
 
-// Define fields for the Spending form (similar to Credit fields structure)
-// Based on API spec examples and UI needs
-const spendingFields = [
-    { name: 'amount', label: 'Сумма', required: true, type: 'number', placeholder: 'Например: 1500' },
-    { name: 'description', label: 'Описание', required: false, type: 'text', placeholder: 'Например: Продукты из магазина' },
-    // is_permanent is a boolean, might need a checkbox input type
-    { name: 'is_permanent', label: 'Постоянный расход?', required: false, type: 'checkbox' },
-    // category_id needs a select input type with options from categories
-    // The options will be generated dynamically in the component
-    { name: 'category_id', label: 'Категория', required: true, type: 'select', options: [] }, // options will be filled dynamically
-    // Date field - using type="date"
-    { name: 'date', label: 'Дата расхода', required: true, type: 'date' }, // Дата расхода, по API UpdateSpending ожидает
-];
+    const fields = [
+        { name: 'amount', label: 'Сумма', required: true, type: 'number', placeholder: 'Например: 1500' },
+        { name: 'description', label: 'Описание', required: false, type: 'text', placeholder: 'Например: Продукты из магазина' },
+        { name: 'category_id', label: 'Категория', required: true, type: 'select', options: categoryOptions },
+        { name: 'is_permanent', label: 'Регулярный расход?', required: false, type: 'checkbox' },
+        { name: 'date', label: isPermanent ? 'Дата начала расхода' : 'Дата расхода', required: true, type: 'date' },
+    ];
 
+    if (isPermanent) {
+        fields.push({
+            name: 'is_finished',
+            label: 'Этот расход завершён?',
+            required: false,
+            type: 'checkbox',
+        });
+        fields.push({
+            name: 'end_date',
+            label: 'Дата окончания расхода',
+            required: false,
+            type: 'date',
+            disabled: !isFinished,
+        });
+    }
+
+    return fields;
+}
 
 export default function SpendingsPage() {
-    // Get state and actions from the stores
     const { spendings, loading, error, fetchSpendings, addSpending, updateSpending, deleteSpending, clearError } = useSpendingsStore();
-    const { categories, categoriesLoading, categoriesError, fetchCategories, clearError: clearCategoriesError } = useCategoryStore(); // Используем другое имя для clearError стора категорий
+    const { categories, loading: categoriesLoading, error: categoriesError, fetchCategories, clearError: clearCategoriesError } = useCategoryStore();
     const { openModal, closeModal } = useModalStore();
 
-
-    // --- useEffect for initial data fetching ---
     useEffect(() => {
-        console.log('SpendingsPage: useEffect triggered.'); // Лог триггера useEffect
-
-        // Fetch spendings if not loading and data hasn't been loaded yet and no error
-        if (!loading && spendings === null && !error) {
-            console.log('SpendingsPage: Triggering fetchSpendings...'); // Лог вызова fetchSpendings
-            fetchSpendings();
-        } else {
-            console.log('SpendingsPage: fetchSpendings skipped. Loading:', loading, 'spendings:', spendings ? 'loaded' : null, 'error:', !!error); // Лог пропуска
-        }
-
-        // Fetch categories if not loading and data hasn't been loaded yet and no error
-        if (!categoriesLoading && categories === null && !categoriesError) {
-            console.log('SpendingsPage: Triggering fetchCategories...'); // Лог вызова fetchCategories
-            fetchCategories();
-        } else {
-            console.log('SpendingsPage: fetchCategories skipped. categoriesLoading:', categoriesLoading, 'categories:', categories ? 'loaded' : null); // Лог пропуска
-        }
-
-
-        // Cleanup effect: clear error states in stores when unmounts
+        if (!loading && spendings === null && !error) fetchSpendings();
+        if (!categoriesLoading && categories === null && !categoriesError) fetchCategories();
         return () => {
-            console.log('SpendingsPage: useEffect cleanup.'); // Лог cleanup
-            clearError(); // Clear spending store error
-            clearCategoriesError(); // Clear category store error
+            clearError();
+            clearCategoriesError();
         };
-        // Dependencies: fetch actions and state variables that determine fetching necessity
     }, [fetchSpendings, loading, spendings, error, fetchCategories, categoriesLoading, categories, categoriesError, clearError, clearCategoriesError]);
 
-
-    // --- Prepare category options for the select input ---
-    // Use useMemo to re-calculate only when categories data changes
-    const fieldsWithCategoryOptions = useMemo(() => {
-        console.log('SpendingsPage: Recalculating fieldsWithCategoryOptions based on categories.'); // Лог пересчета
-        // Find the category field definition by name
-        const categoryFieldDefinition = spendingFields.find(field => field.name === 'category_id');
-
-        // If categories are loaded and the category field exists
-        if (categories !== null && categoryFieldDefinition) {
-            // Map categories data to the required format for select options { value, label }
-            const categoryOptions = categories.map(category => ({
-                value: category.id, // API expects numeric category_id
-                label: category.name,
-            }));
-
-            console.log('SpendingsPage: Category options prepared:', categoryOptions.length); // Лог готовности опций
-
-            // Create a new array of fields, replacing the category field with options
-            return spendingFields.map(field =>
-                field.name === 'category_id' ? { ...field, options: categoryOptions } : field
-            );
-        }
-
-        // If categories are not loaded or category field not found, return original fields
-        console.log('SpendingsPage: Category options not prepared. Categories loaded:', categories !== null, 'Category field exists:', !!categoryFieldDefinition); // Лог, почему опции не готовы
-        return spendingFields;
-
-    }, [categories]); // Recalculate only when 'categories' array changes
-
-
-    // --- Handlers for UI actions (opening modals) ---
-
     const handleAddClick = () => {
-        clearError(); // Clear store error before opening modal (spending store)
-        clearCategoriesError(); // Clear category store error too
-        // Open the generic Modal component
-        openModal('addSpending', { // 'addSpending' is a type string
+        clearError();
+        clearCategoriesError();
+        const initialData = { is_permanent: false, is_finished: false };
+        openModal('addSpending', {
             title: 'Добавить расход',
-            fields: fieldsWithCategoryOptions, // Pass fields including dynamic category options
-            initialData: {}, // Empty object for add form
-            onSubmit: handleAddSubmit, // Function to call on modal form submission
+            fields: getSpendingFields(initialData, categories),
+            initialData,
+            onSubmit: handleAddSubmit,
             submitText: 'Добавить',
+            onFieldChange: (name, value, prevFormData) => {
+                const newFormData = { ...prevFormData, [name]: value };
+                if (name === 'is_finished' && !value) newFormData.end_date = '';
+                if (name === 'is_permanent' && !value) {
+                    newFormData.is_finished = false;
+                    newFormData.end_date = '';
+                }
+                return getSpendingFields(newFormData, categories);
+            }
         });
-        console.log('SpendingsPage: Add Spending button clicked'); // Лог клика
-        console.log('SpendingsPage: Calling openModal for Add Spending...'); // Лог вызова модала
     };
 
-    // Handle click on "Edit" icon button for a specific spending
     const handleEditClick = (spending) => {
-        clearError(); // Clear store error
-        clearCategoriesError(); // Clear category store error
-
-        console.log('SpendingsPage: Edit button clicked for spending:', spending); // Лог клика
-        // Open the generic Modal component for editing
-        openModal('editSpending', { // 'editSpending' is a type string
+        clearError();
+        clearCategoriesError();
+        const initialData = {
+            ...spending,
+            date: spending.date ? new Date(spending.date).toISOString().split('T')[0] : '',
+            end_date: (spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01')
+                ? new Date(spending.end_date).toISOString().split('T')[0]
+                : '',
+            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01',
+        };
+        openModal('editSpending', {
             title: 'Редактировать расход',
-            fields: fieldsWithCategoryOptions, // Pass fields with options
-            // Prepare initialData, formatting date for the input type="date"
-            initialData: {
-                ...spending, // Include all other fields from the spending object
-                // Format date: ISO string from API -> Date object -> ISO string -> "YYYY-MM-DD" for input
-                date: spending.date ? new Date(spending.date).toISOString().split('T')[0] : '',
-                // Ensure category_id is number or null if necessary, though Modal handles number conversion
-                category_id: spending.category_id === null || spending.category_id === undefined ? '' : spending.category_id,
-            },
-            // onSubmit handler that captures the spending.id
+            fields: getSpendingFields(initialData, categories),
+            initialData,
             onSubmit: (formData) => handleEditSubmit(spending.id, formData),
             submitText: 'Сохранить изменения',
+            onFieldChange: (name, value, prevFormData) => {
+                const newFormData = { ...prevFormData, [name]: value };
+                if (name === 'is_finished' && !value) newFormData.end_date = '';
+                if (name === 'is_permanent' && !value) {
+                    newFormData.is_finished = false;
+                    newFormData.end_date = '';
+                }
+                return getSpendingFields(newFormData, categories);
+            }
         });
-        console.log('SpendingsPage: Calling openModal for Edit Spending...'); // Лог вызова модала
     };
 
-    // Handle click on "Delete" icon button for a specific spending
     const handleDeleteClick = (spending) => {
-        clearError(); // Clear store error
-        clearCategoriesError(); // Clear category store error
-
-        console.log(`SpendingsPage: Delete button clicked for spending ID: ${spending.id}`); // Лог клика
-
-        // Formulate confirmation message
+        clearError();
+        clearCategoriesError();
         const spendingDescription = spending.description || `с ID ${spending.id}`;
         const formattedAmount = typeof spending.amount === 'number'
             ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             : spending.amount;
         const message = `Вы уверены, что хотите удалить расход "${spendingDescription}" на сумму ${formattedAmount} ₽?`;
 
-        // Open the ConfirmModal component
-        openModal('confirmDelete', { // 'confirmDelete' is a type string
+        openModal('confirmDelete', {
             title: 'Подтверждение удаления',
-            message: message,
-            // onConfirm handler that captures the spending.id
+            message,
             onConfirm: () => handleDeleteConfirm(spending.id),
             confirmText: 'Удалить',
         });
-        console.log('SpendingsPage: Calling openModal for Delete Spending...'); // Лог вызова модала
     };
 
-    // --- Logic functions called by Modal/ConfirmModal components after user interaction ---
-
-    // Logic for adding a spending (called by Modal component via onSubmit)
     const handleAddSubmit = async (formData) => {
-        console.log('SpendingsPage Logic: handleAddSubmit called with data:', formData); // Лог вызова с данными
         try {
-            // Call the addSpending action from the store
-            console.log('SpendingsPage Logic: Calling addSpending store action with data:', formData); // Лог вызова стора
-            await addSpending(formData); // formData contains date as "YYYY-MM-DD" string
-            // If successful, close the modal
-            closeModal(); // <-- ЭТОТ closeModal должен сработать при успехе
-            console.log('SpendingsPage Logic: addSpending store action finished successfully.'); // Лог успеха стора
-
+            const dataToSend = { ...formData };
+            // Гарантируем, что end_date всегда присутствует для регулярных расходов
+            if (dataToSend.is_permanent) {
+                if (!('end_date' in dataToSend) || !dataToSend.end_date) {
+                    dataToSend.end_date = '0001-01-01';
+                }
+            }
+            await addSpending(dataToSend);
+            closeModal();
         } catch (err) {
-            // If an error occurred during addSpending (handled and set in store.error),
-            // the error message will be displayed by LayoutWithHeader.
-            console.error('SpendingsPage Logic: Error during add spending (after form submit):', err); // Лог ошибки
-            closeModal(); // <-- ЭТОТ closeModal должен сработать при ошибке
-            // --- ИСПРАВЛЕНО: УДАЛИЛИ throw err; чтобы не вызывать неперехваченное исключение ---
-            // throw err;
-            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+            closeModal();
         }
-        console.log('SpendingsPage Logic: handleAddSubmit finished.'); // Лог завершения
     };
 
-    // Logic for editing a spending (called by Modal component via onSubmit)
     const handleEditSubmit = async (id, formData) => {
-        console.log(`SpendingsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData); // Лог вызова с ID и данными
         try {
-            // formData contains date as "YYYY-MM-DD" string or null
-            // We pass it directly to the store action, which sends YYYY-MM-DD or null to API
-            console.log(`SpendingsPage Logic: Calling updateSpending store action for ID: ${id} with data:`, formData); // Лог вызова стора
-            await updateSpending(id, formData); // formData contains date as "YYYY-MM-DD" string or null
-            closeModal(); // <-- ЭТОТ closeModal должен сработать при успехе
-            console.log(`SpendingsPage Logic: updateSpending store action finished successfully for ID: ${id}.`); // Лог успеха стора
-
+            const dataToUpdate = { ...formData };
+            if (dataToUpdate.is_permanent) {
+                if (!('end_date' in dataToUpdate) || !dataToUpdate.end_date) {
+                    dataToUpdate.end_date = '0001-01-01';
+                }
+            }
+            await updateSpending(id, dataToUpdate);
+            closeModal();
         } catch (err) {
-            console.error(`SpendingsPage Logic: Error during edit spending ID ${id} (after form submit):`, err); // Лог ошибки
-            closeModal(); // <-- ЭТОТ closeModal должен сработать при ошибке
-            // --- ИСПРАВЛЕНО: УДАЛИЛИ throw err; ---
-            // throw err;
-            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+            closeModal();
         }
-        console.log(`SpendingsPage Logic: handleEditSubmit finished for ID: ${id}.`); // Лог завершения
     };
 
-
-    // Logic for confirming deletion of a spending (called by ConfirmModal component via onConfirm)
     const handleDeleteConfirm = async (id) => {
-        console.log(`SpendingsPage Logic: handleDeleteConfirm called for ID: ${id}`); // Лог вызова с ID
         try {
-            // Call the deleteSpending action from the store
-            console.log(`SpendingsPage Logic: Calling deleteSpending store action for ID: ${id}`); // Лог вызова стора
             await deleteSpending(id);
-            // If successful, close the modal
-            console.log(`SpendingsPage Logic: deleteSpending store action finished for ID: ${id}.`); // Лог успеха стора
-            closeModal(); // <-- ЭТОТ closeModal должен сработать при успехе
-            console.log(`SpendingsPage Logic: handleDeleteConfirm finished.`); // Лог завершения
-
-
+            closeModal();
         } catch (err) {
-            console.error(`SpendingsPage Logic: Error during delete spending ID ${id} (after confirmation):`, err); // Лог ошибки
-            closeModal(); // <-- ЭТОТ closeModal должен сработать при ошибке
-            // --- ИСПРАВЛЕНО: УДАЛИЛИ throw err; ---
-            // throw err;
-            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+            closeModal();
         }
     };
-    // --- End Logic functions ---
 
-
-    // Determine if a general error message should be displayed
-    // Show error if there is an error in spendings or categories store
     const displayError = error || categoriesError;
 
-
-    // --- Rendering ---
     return (
-        <div className="bg-secondary-50"> {/* Light grey background */}
-            <main className="max-w-7xl mx-auto p-4"> {/* Centered container with padding */}
-
-                {/* Header section: Title and Add Button */}
+        <div className="bg-secondary-50">
+            <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Мои Расходы</Text>
                     <TextButton onClick={handleAddClick}>
@@ -261,33 +178,24 @@ export default function SpendingsPage() {
                     </TextButton>
                 </div>
 
-                {/* Display general error message from the store */}
                 {displayError && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
                     </div>
                 )}
 
-                {/* Conditional Rendering based on Loading State, Errors, and Data availability */}
                 {(loading && spendings === null) || (categoriesLoading && categories === null) ? (
-                    // Show initial loading spinner if either spendings or categories are loading for the first time
                     <div className="text-center p-4">
-                        <Text variant="body">Загрузка данных...</Text> {/* Универсальное сообщение загрузки */}
+                        <Text variant="body">Загрузка данных...</Text>
                     </div>
                 ) : (
-                    // Content container
                     <div className="bg-background shadow-md rounded-md overflow-hidden">
-                        {/* If not loading, no error, and data is loaded but empty */}
-                        {spendings !== null && spendings.length === 0 ? (
-                            // Message when the list is empty (only if categories are also loaded or not required for display logic)
-                            categories !== null && ( // Убедимся, что категории загружены для полной картины
-                                <div className="p-4 text-center">
-                                    <Text variant="body">У вас пока нет добавленных расходов.</Text>
-                                </div>
-                            )
+                        {spendings !== null && spendings.length === 0 && categories !== null ? (
+                            <div className="p-4 text-center">
+                                <Text variant="body">У вас пока нет добавленных расходов.</Text>
+                            </div>
                         ) : (
-                            // If data is loaded and not empty
-                            spendings !== null && spendings.length > 0 && categories !== null && ( // Убедимся, что все нужные данные загружены
+                            spendings !== null && spendings.length > 0 && categories !== null && (
                                 <table className="min-w-full">
                                     <thead className="bg-secondary-200">
                                     <tr>
@@ -295,36 +203,82 @@ export default function SpendingsPage() {
                                         <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Описание</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Категория</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Дата</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Постоянный</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Дата начала</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Регулярный</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Действия</Text></th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {spendings.map((spending, index) => {
-                                        // Находим объект категории по category_id расхода
                                         const category = categories.find(cat => cat.id === spending.category_id);
-                                        const categoryName = category ? category.name : 'Неизвестно'; // Если категория не найдена
+                                        const categoryName = category ? category.name : 'Неизвестно';
 
                                         return (
                                             <tr key={spending.id}
                                                 className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
                                                 <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                                                <td className="p-4"><Text variant="tdPrimary" className="text-accent-error font-semibold"> {/* Красный цвет для расходов */}
-                                                    {typeof spending.amount === 'number'
-                                                        ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                                        : spending.amount} ₽
-                                                </Text></td>
+                                                <td className="p-4">
+                                                    {spending.is_permanent ? (
+                                                        <>
+                                                            <div className="flex items-center mb-1">
+                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Периодическая:</Text>
+                                                                <Text variant="tdPrimary" className="text-accent-error font-semibold">
+                                                                    {typeof spending.amount === 'number'
+                                                                        ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                                        : spending.amount} ₽
+                                                                </Text>
+                                                            </div>
+                                                            <div className="flex items-center">
+                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Общая:</Text>
+                                                                <Text variant="tdPrimary" className="text-accent-error font-semibold">
+                                                                    {typeof spending.full_amount === 'number'
+                                                                        ? spending.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                                        : spending.full_amount} ₽
+                                                                </Text>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex items-center">
+                                                            <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text>
+                                                            <Text variant="tdPrimary" className="text-accent-error font-semibold">
+                                                                {typeof spending.amount === 'number'
+                                                                    ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                                    : spending.amount} ₽
+                                                            </Text>
+                                                        </div>
+                                                    )}
+                                                </td>
                                                 <td className="p-4"><Text variant="tdSecondary">{spending.description || '-'}</Text></td>
-                                                {/* Отображение названия категории */}
                                                 <td className="p-4"><Text variant="tdSecondary">{categoryName}</Text></td>
                                                 <td className="p-4"><Text variant="tdSecondary">
-                                                    {/* Форматирование даты для отображения */}
-                                                    {spending.date ? new Date(spending.date).toLocaleDateString() : '-'}
+                                                    {spending.date ? new Date(spending.date).toLocaleDateString('ru-RU') : '-'}
                                                 </Text></td>
-                                                <td className="p-4"><Text variant="tdSecondary">
-                                                    {spending.is_permanent ? 'Да' : 'Нет'}
-                                                </Text></td>
+                                                <td className="p-4">
+                                                    {spending.is_permanent ? (
+                                                        <div className="flex items-center gap-1">
+                                                            {spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01' && new Date(spending.end_date) < new Date() ? (
+                                                                <>
+                                                                    <CheckCircleIcon className="h-5 w-5 text-gray-400" />
+                                                                    <Text variant="tdSecondary" className="text-gray-600">
+                                                                        до {new Date(spending.end_date).toLocaleDateString('ru-RU')}
+                                                                    </Text>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <CheckCircleIcon className="h-5 w-5 text-blue-500" />
+                                                                    <Text variant="tdSecondary" className="text-blue-700">
+                                                                        расходы продолжаются
+                                                                    </Text>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1">
+                                                            <XCircleIcon className="h-5 w-5 text-red-300" />
+                                                            <Text variant="tdSecondary">Разовый</Text>
+                                                        </div>
+                                                    )}
+                                                </td>
                                                 <td className="p-4 flex gap-2">
                                                     <IconButton
                                                         icon={PencilIcon}
@@ -346,17 +300,13 @@ export default function SpendingsPage() {
                                 </table>
                             )
                         )}
-                        {/* Show a general loading/updating indicator if loading but we already have data */}
                         {(loading && spendings !== null) || (categoriesLoading && categories !== null) ? (
                             <div className="text-center p-4">
                                 <Text variant="body">Обновление данных...</Text>
                             </div>
-                        ) : null /* Nothing to show if not in initial load and not updating */}
+                        ) : null}
                     </div>
                 )}
-
-                {/* Modal components are rendered by LayoutWithHeader */}
-
             </main>
         </div>
     );
