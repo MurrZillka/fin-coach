@@ -34,13 +34,45 @@ const Modal = ({
 
     // Эффект для сброса formData, errors и currentFields при изменении initialData, fields или при открытии модала
     useEffect(() => {
+        // --- Получаем сегодняшнюю дату в формате veritable-MM-DD ---
+        const today = new Date();
+        const fullYear = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, add 1
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${fullYear}-${month}-${day}`;
+        // --- Конец получения даты ---
+
+
         const initialFormData = fields.reduce((acc, field) => {
             const initialValue = initialData[field.name];
             if (field.type === 'checkbox') {
                 acc[field.name] = initialValue === undefined || initialValue === null ? false : !!initialValue;
             } else if (field.type === 'select') {
                 acc[field.name] = initialValue === undefined || initialValue === null ? '' : String(initialValue);
-            } else {
+            } else if (field.type === 'date') { // --- Обработка начального значения для полей даты ---
+                // Если начальное значение пустое ('', null, undefined) или '0001-01-01'/'0001-01-01T00:00:00Z',
+                // устанавливаем его как сегодняшнюю дату. Иначе используем текущее значение.
+                if (initialValue === '' || initialValue === null || initialValue === undefined || initialValue === '0001-01-01' || initialValue === '0001-01-01T00:00:00Z') {
+                    acc[field.name] = todayString; // Устанавливаем сегодняшнюю дату
+                } else {
+                    // Убедимся, что это строка в нужном формате, если пришло из API (может быть ISO)
+                    try {
+                        // Попробуем распарсить как дату, если это не очевидноY-MM-DD
+                        const date = new Date(initialValue);
+                        if (!isNaN(date.getTime())) {
+                            const y = date.getFullYear();
+                            const m = String(date.getMonth() + 1).padStart(2, '0');
+                            const d = String(date.getDate()).padStart(2, '0');
+                            acc[field.name] = `${y}-${m}-${d}`; // Преобразуем вY-MM-DD
+                        } else {
+                            acc[field.name] = String(initialValue); // Если не удалось распарсить, используем как есть (возможно, ужеY-MM-DD)
+                        }
+                    } catch (e) {
+                        acc[field.name] = String(initialValue); // В случае ошибки парсинга, используем как есть
+                    }
+                }
+            }
+            else { // Other types
                 acc[field.name] = initialValue === undefined || initialValue === null ? '' : initialValue;
             }
             return acc;
@@ -48,10 +80,10 @@ const Modal = ({
         setFormData(initialFormData);
         setErrors({}); // Сбрасываем локальные ошибки при инициализации или открытии
         setCurrentFields(fields); // Сбрасываем поля
-    }, [initialData, fields]);
+    }, [initialData, fields]); // Зависимости: initialData и fields
 
 
-    // --- Эффект для обработки submissionError и установки локальных ошибок полей ---
+    // --- Эффект для обработки submissionError и установки локальных ошибок полей (без изменений) ---
     useEffect(() => {
         // Точное сообщение об ошибке валидации дат, которое приходит с сервера
         const dateValidationError = 'Дата окончания кредита должна быть больше или равна дате начала.';
@@ -93,19 +125,39 @@ const Modal = ({
     if (!isOpen) return null;
 
     // Универсальный обработчик для всех Input (ожидает name, value)
+    // --- ИСПРАВЛЕНИЕ: Убеждаемся, что здесь нет параметра 'e' ---
     const handleChange = (name, value) => { // --- ИСПРАВЛЕННАЯ СИГНАТУРА ---
         // console.log(`Modal: handleChange - Field "${name}" changed to value:`, value); // Можно оставить для отладки
 
+        // --- Обработка для полей даты - установка сегодняшней даты при очистке ---
+        let fieldValue = value; // Начинаем с полученного значения
+        const fieldDefinition = currentFields.find(f => f.name === name); // Находим определение поля
+
+        // Если это поле даты и значение стало пустой строкой (пользователь очистил его)
+        if (fieldDefinition && fieldDefinition.type === 'date' && value === '') {
+            // Генерируем строку с сегодняшней датой в формате veritable-MM-DD
+            const today = new Date();
+            const fullYear = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            fieldValue = `${fullYear}-${month}-${day}`; // Устанавливаем сегодняшнюю дату как новое значение
+        }
+        // Если это не поле даты ИЛИ значение не стало пустой строкой, fieldValue остается value
+        // --- Конец обработки даты при изменении ---
+
+
         setFormData(prev => {
-            const newFormData = { ...prev, [name]: value };
+            // Используем fieldValue (которое может быть скорректировано для дат)
+            const newFormData = { ...prev, [name]: fieldValue };
             if (onFieldChange) {
-                // onFieldChange ожидает name, value и весь объект formData
-                const newFields = onFieldChange(name, value, newFormData);
+                // onFieldChange ожидает name, value (оригинальное value от Input), и весь объект formData
+                // Здесь мы передаем оригинальное value из Input, т.к. onFieldChange может зависеть от него (как is_exhausted меняет end_date)
+                const newFields = onFieldChange(name, value, newFormData); // Передаем оригинальное `value` из Input!
                 if (newFields && Array.isArray(newFields)) {
                     setCurrentFields(newFields);
                 }
             }
-            return newFormData;
+            return newFormData; // Обновляем formData с fieldValue
         });
 
         setErrors(prev => {
@@ -114,12 +166,11 @@ const Modal = ({
             return newErrors;
         });
 
-        // --- ИСПРАВЛЕНИЕ: Откладываем сброс submissionError в сторе ---
-        // Используем queueMicrotask, чтобы избежать ошибки "Cannot update... while rendering"
+        // --- Откладываем сброс submissionError в сторе ---
         queueMicrotask(() => {
             useModalStore.getState().setModalSubmissionError(null);
         });
-        // --- Конец ИСПРАВЛЕНИЯ ---
+        // --- Конец ---
 
     };
 
@@ -127,51 +178,40 @@ const Modal = ({
     const handleSubmit = (e) => {
         e.preventDefault();
         const newErrors = {};
-        const dataToSend = { ...formData };
+        const dataToSend = { ...formData }; // Берем данные из состояния formData
 
         // Преобразование и локальная валидация
         currentFields.forEach((field) => {
             const fieldName = field.name;
             const fieldType = field.type || 'text';
-            const fieldValue = dataToSend[fieldName];
+            const fieldValue = dataToSend[fieldName]; // Берем значение уже из dataToSend
 
-            // Required
+
+            // Required (без изменений)
             if (field.required) {
-                let isFieldMissing = false;
-                if (fieldValue === undefined || fieldValue === null) {
-                    isFieldMissing = true;
-                } else if (fieldType === 'checkbox') {
-                    if (fieldValue === false) isFieldMissing = true;
-                } else if (fieldType === 'number' || fieldType === 'text' || fieldType === 'date') {
-                    if (String(fieldValue).trim() === '') isFieldMissing = true;
-                } else if (fieldType === 'select') {
-                    if (String(fieldValue) === '') isFieldMissing = true;
-                }
-                if (isFieldMissing) {
+                // Simplified check for required fields
+                if (fieldValue === undefined || fieldValue === null || String(fieldValue).trim() === '') {
+                    // For date type, fieldValue is set to today if empty in handleChange,
+                    // so this specific check might not be needed for date fields after handleChange.
+                    // But keep it generic for all types based on field.required prop.
                     newErrors[fieldName] = `${field.label} обязателен`;
                 }
             }
 
+
             // Преобразование типов (выполняется всегда для подготовки данных к отправке)
-            // Важно: преобразование типов происходит независимо от локальной валидации обязательности.
-            // Локальные ошибки добавляются в newErrors, но данные в dataToSend все равно преобразуются,
-            // чтобы onSubmit получил данные в ожидаемом формате (числа, булевы, строки/null).
+            // --- Корректировка логики форматирования дат для отправки ---
             if (fieldType === 'number') {
                 const valueAsString = String(fieldValue);
-                // Если строка пустая или только пробелы, отправляем null или 0?
-                // Договорились в прошлый раз отправлять 0 для числовых, если поле не обязательное и пустое.
-                // Если обязательное и пустое, оно попадет в newErrors, но dataToSend все равно получит 0.
                 if (valueAsString.trim() !== '') {
                     const parsedAmount = parseFloat(valueAsString);
-                    dataToSend[fieldName] = isNaN(parsedAmount) ? 0 : parsedAmount; // Отправляем 0 если не парсится или парсим
+                    dataToSend[fieldName] = isNaN(parsedAmount) ? 0 : parsedAmount;
                 } else {
-                    dataToSend[fieldName] = 0; // Пустое/пробелы -> 0
+                    dataToSend[fieldName] = 0;
                 }
             } else if (fieldType === 'checkbox') {
-                dataToSend[fieldName] = !!fieldValue; // Всегда булево
+                dataToSend[fieldName] = !!fieldValue;
             } else if (fieldType === 'select') {
-                // Если value пустая строка, null или undefined, отправляем null.
-                // Иначе, отправляем строку. API разберется.
                 if (String(fieldValue).trim() === '' || fieldValue === null || fieldValue === undefined) {
                     dataToSend[fieldName] = null;
                 } else {
@@ -179,14 +219,13 @@ const Modal = ({
                     dataToSend[fieldName] = isNaN(parsedValue) ? String(fieldValue) : parsedValue;
                 }
             } else if (fieldType === 'date') {
-                // Если поле необязательное и пустое, отправляем null.
-                if (String(fieldValue).trim() === '' || fieldValue === null || fieldValue === undefined) {
-                    dataToSend[fieldName] = null;
-                } else {
-                    // dataToSend[fieldName] уже "YYYY-MM-DD". Оставляем как есть.
-                    // Конвертация в формат API (ISO) должна происходить в сторе перед отправкой.
-                    dataToSend[fieldName] = String(fieldValue);
-                }
+                // Значение fieldValue уже либо "YYYY-MM-DD", либо "0001-01-01" (из handleChange или инициализации)
+                // Если оно "0001-01-01", оставляем его как есть. Если "YYYY-MM-DD", оставляем как есть.
+                // Если вдруг сюда пришло пустая строка "" (что не должно происходить после handleChange),
+                // то на сервер все равно нужно отправить "0001-01-01".
+                const dateValue = String(fieldValue).trim();
+                dataToSend[fieldName] = dateValue === '' ? '0001-01-01' : dateValue;
+
             } else {
                 // Для text и других - всегда строка. Если необязательное и пустое, отправляем null.
                 if (String(fieldValue).trim() === '' || fieldValue === null || fieldValue === undefined) {
@@ -195,6 +234,7 @@ const Modal = ({
                     dataToSend[fieldName] = String(fieldValue);
                 }
             }
+            // --- Конец ИЗМЕНЕНИЯ ---
         });
 
 
@@ -245,6 +285,7 @@ const Modal = ({
                                 type={field.type || 'text'}
                                 // Для чекбокса передаем value как булево, для остальных - value как строку/число/null
                                 // Input.jsx теперь ожидает value как булево для checkbox в пропе value
+                                // Value для полей даты теперь всегдаY-MM-DD или 0001-01-01 из состояния formData
                                 value={field.type === 'checkbox' ? !!formData[field.name] : formData[field.name] || ''} // Передаем булево для чекбокса
                                 // checked проп в Input.jsx больше не нужен или используется внутренне
                                 onChange={handleChange} // <-- Input вызовет ее с (name, value)
@@ -304,9 +345,9 @@ Modal.propTypes = {
                         `\`options\` is required and must be an array of objects when \`type\` is 'select'.`
                     );
                 }
-                const optionShapeChecker = optionShape;
                 for (let i = 0; i < props[propName].length; i++) {
-                    const error = optionShapeChecker(props[propName], i, componentName, location, `${propFullName}[${i}]`);
+                    // Use optionShape directly
+                    const error = optionShape(props[propName], i, componentName, location, `${propFullName}[${i}]`);
                     if (error) return error;
                 }
             }
