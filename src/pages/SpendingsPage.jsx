@@ -8,6 +8,7 @@ import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
 
+// Формируем динамические поля для модалки расходов
 function getSpendingFields(formData, categories) {
     const isPermanent = !!formData.is_permanent;
     const isFinished = !!formData.is_finished;
@@ -45,8 +46,14 @@ function getSpendingFields(formData, categories) {
 }
 
 export default function SpendingsPage() {
-    const { spendings, loading, error, fetchSpendings, addSpending, updateSpending, deleteSpending, clearError } = useSpendingsStore();
-    const { categories, loading: categoriesLoading, error: categoriesError, fetchCategories, clearError: clearCategoriesError } = useCategoryStore();
+    const {
+        spendings, loading, error,
+        fetchSpendings, addSpending, updateSpending, deleteSpending, clearError
+    } = useSpendingsStore();
+    const {
+        categories, loading: categoriesLoading, error: categoriesError,
+        fetchCategories, clearError: clearCategoriesError
+    } = useCategoryStore();
     const { openModal, closeModal } = useModalStore();
 
     useEffect(() => {
@@ -56,12 +63,17 @@ export default function SpendingsPage() {
             clearError();
             clearCategoriesError();
         };
-    }, [fetchSpendings, loading, spendings, error, fetchCategories, categoriesLoading, categories, categoriesError, clearError, clearCategoriesError]);
+    }, [
+        fetchSpendings, loading, spendings, error,
+        fetchCategories, categoriesLoading, categories, categoriesError,
+        clearError, clearCategoriesError
+    ]);
 
+    // --- Модалка: добавление ---
     const handleAddClick = () => {
         clearError();
         clearCategoriesError();
-        const initialData = { is_permanent: false, is_finished: false };
+        const initialData = { is_permanent: false, is_finished: false }; // Явно добавляем is_finished
         openModal('addSpending', {
             title: 'Добавить расход',
             fields: getSpendingFields(initialData, categories),
@@ -80,6 +92,7 @@ export default function SpendingsPage() {
         });
     };
 
+    // --- Модалка: редактирование ---
     const handleEditClick = (spending) => {
         clearError();
         clearCategoriesError();
@@ -89,7 +102,7 @@ export default function SpendingsPage() {
             end_date: (spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01')
                 ? new Date(spending.end_date).toISOString().split('T')[0]
                 : '',
-            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01',
+            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01', // Явно вычисляем
         };
         openModal('editSpending', {
             title: 'Редактировать расход',
@@ -109,6 +122,7 @@ export default function SpendingsPage() {
         });
     };
 
+    // --- Модалка: удаление ---
     const handleDeleteClick = (spending) => {
         clearError();
         clearCategoriesError();
@@ -126,42 +140,45 @@ export default function SpendingsPage() {
         });
     };
 
+    // --- Сабмит: добавление ---
     const handleAddSubmit = async (formData) => {
         try {
             const dataToSend = { ...formData };
-            // Гарантируем, что end_date всегда присутствует для регулярных расходов
+            // Гарантируем, что end_date всегда есть для регулярных расходов
             if (dataToSend.is_permanent) {
-                if (!('end_date' in dataToSend) || !dataToSend.end_date) {
+                if (!('is_finished' in dataToSend) || !dataToSend.is_finished || !dataToSend.end_date) {
                     dataToSend.end_date = '0001-01-01';
                 }
             }
             await addSpending(dataToSend);
             closeModal();
-        } catch (err) {
+        } catch {
             closeModal();
         }
     };
 
+    // --- Сабмит: редактирование ---
     const handleEditSubmit = async (id, formData) => {
         try {
             const dataToUpdate = { ...formData };
             if (dataToUpdate.is_permanent) {
-                if (!('end_date' in dataToUpdate) || !dataToUpdate.end_date) {
+                if (!('is_finished' in dataToUpdate) || !dataToUpdate.is_finished || !dataToUpdate.end_date) {
                     dataToUpdate.end_date = '0001-01-01';
                 }
             }
             await updateSpending(id, dataToUpdate);
             closeModal();
-        } catch (err) {
+        } catch {
             closeModal();
         }
     };
 
+    // --- Сабмит: удаление ---
     const handleDeleteConfirm = async (id) => {
         try {
             await deleteSpending(id);
             closeModal();
-        } catch (err) {
+        } catch {
             closeModal();
         }
     };
