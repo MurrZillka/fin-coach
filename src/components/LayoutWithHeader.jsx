@@ -8,6 +8,7 @@ import BalanceWidget from './BalanceWidget';
 import ErrorBoundary from './ErrorBoundary';
 import routes from '../routes';
 import useAuthStore from '../stores/authStore';
+import useBalanceStore from '../stores/balanceStore';
 
 /**
  * Основной layout приложения: рендерит хедер, маршруты, футер с BalanceWidget и модалки.
@@ -15,6 +16,7 @@ import useAuthStore from '../stores/authStore';
 export default function LayoutWithHeader() {
     const location = useLocation();
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const balanceLoading = useBalanceStore((state) => state.loading); // Проверка загрузки баланса
     const isAuthPage = ['/login', '/signup', '/demo'].includes(location.pathname);
     const header = isAuthPage ? <HeaderAuth /> : isAuthenticated ? <Header /> : null;
 
@@ -38,7 +40,7 @@ export default function LayoutWithHeader() {
                     ))}
                 </Routes>
             </div>
-            {isAuthenticated && (
+            {isAuthenticated && !balanceLoading && ( // Показываем футер только после загрузки баланса
                 <div className="fixed bottom-2 left-0 right-0 z-10 sm:bottom-4">
                     <div className="max-w-7xl mx-auto px-4">
                         <BalanceWidget />
