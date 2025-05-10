@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import IconButton from './IconButton';
 
-// --- Определяем propTypes для опций выпадающего списка (такое же определение, как в Input.jsx) ---
 const optionShape = PropTypes.shape({
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     label: PropTypes.string.isRequired,
@@ -47,7 +46,7 @@ const Modal = ({
 
     if (!isOpen) return null;
 
-    // Универсальный обработчик для всех Input (ожидает e.target)
+    // Ожидает e.target с name/value
     const handleChange = (e) => {
         const { name, value, checked, type } = e.target;
         const fieldValue = type === 'checkbox' ? checked : value;
@@ -75,11 +74,10 @@ const Modal = ({
         const newErrors = {};
         const dataToSend = { ...formData };
 
-        // Преобразование и валидация
         currentFields.forEach((field) => {
             const fieldName = field.name;
             const fieldType = field.type || 'text';
-            const fieldValue = dataToSend[fieldName];
+            let fieldValue = dataToSend[fieldName];
 
             // Required
             if (field.required) {
@@ -125,6 +123,18 @@ const Modal = ({
                         } else {
                             dataToSend[fieldName] = null;
                         }
+                    }
+                } else if (fieldType === 'date') {
+                    // ГАРАНТИРУЕМ СТРОКУ "YYYY-MM-DD"
+                    if (typeof fieldValue === 'string') {
+                        dataToSend[fieldName] = fieldValue;
+                    } else if (fieldValue instanceof Date) {
+                        const y = fieldValue.getFullYear();
+                        const m = String(fieldValue.getMonth() + 1).padStart(2, '0');
+                        const d = String(fieldValue.getDate()).padStart(2, '0');
+                        dataToSend[fieldName] = `${y}-${m}-${d}`;
+                    } else {
+                        dataToSend[fieldName] = '';
                     }
                 }
             }

@@ -1,80 +1,36 @@
 // src/components/LayoutWithHeader.jsx
-// Удалены импорты useEffect и useBalanceStore, т.к. логика загрузки перенесена в App.jsx
-// Импортируем компоненты и хуки React Router
-import { useLocation, Routes, Route } from 'react-router-dom'; // useEffect удален из импорта
-// Импортируем компоненты хедера
-import Header from './Header.jsx'; // Убедись, что путь корректен
-import HeaderAuth from './HeaderAuth.jsx'; // Убедись, что путь корректен
-// Импортируем компонент ProtectedRoute для защиты маршрутов
-import ProtectedRoute from './ProtectedRoute.jsx'; // Убедись, что путь корректен
-// Импортируем массив с определениями маршрутов
-import routes from '../routes'; // Убедись, что путь корректен
-// Импортируем стор авторизации (нужен для isAuthenticated)
-import useAuthStore from '../stores/authStore.js'; // Убедись, что путь корректен
+import { useLocation, Routes, Route } from 'react-router-dom';
+import Header from './Header';
+import HeaderAuth from './HeaderAuth';
+import ProtectedRoute from './ProtectedRoute';
+import ModalManager from './ModalManager';
+import BalanceWidget from './BalanceWidget';
+import ErrorBoundary from './ErrorBoundary';
+import routes from '../routes';
+import useAuthStore from '../stores/authStore';
 
-// --- ИМПОРТЫ МОДАЛОК И ВИДЖЕТА БАЛАНСА ---
-// Импортируем стор модальных окон
-import useModalStore from '../stores/modalStore.js'; // Убедись, что путь корректен
-// Импортируем компоненты модальных окон
-import Modal from './ui/Modal.jsx'; // Убедись, что путь корректен
-import ConfirmModal from './ui/ConfirmModal.jsx'; // Убедись, что путь корректен
-// Импортируем компонент виджета Баланса
-// Убедись, что путь к BalanceWidget корректный
-import BalanceWidget from './BalanceWidget.jsx'; // Убедись, что путь корректен
-// --- Конец ИМПОРТОВ ---
-
-
+/**
+ * Основной layout приложения: рендерит хедер, маршруты, футер с BalanceWidget и модалки.
+ */
 export default function LayoutWithHeader() {
-    // Получаем объект location для определения текущего пути
     const location = useLocation();
-    // useBalanceStore больше не используется напрямую здесь, fetch вызывается из App.jsx
-    // Получаем только isAuthenticated из стора авторизации
-    const { isAuthenticated } = useAuthStore();
-
-    // Определяем, нужно ли показывать хедер для страниц без авторизации
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     const isAuthPage = ['/login', '/signup', '/demo'].includes(location.pathname);
-    const showAuthHeader = isAuthPage;
-    // Определяем, нужно ли показывать обычный хедер (для авторизованных пользователей на защищенных страницах)
-    const showRegularHeader = isAuthenticated && !isAuthPage;
-
-    // Получаем состояние модалов и действие закрытия из стора модальных окон
-    const { modalType, modalProps, closeModal } = useModalStore();
-
-    // useEffect для первичной загрузки Баланса находится в App.jsx!
-    // Здесь его нет.
+    const header = isAuthPage ? <HeaderAuth /> : isAuthenticated ? <Header /> : null;
 
     return (
-        // Главный контейнер лейаута: flex-колонка, занимает мин. высоту экрана, фон светло-серый
         <div className="flex flex-col min-h-screen bg-secondary-50">
-            {/* Header: рендерим один из хедеров в зависимости от условий */}
-            {showAuthHeader && <HeaderAuth />}
-            {showRegularHeader && <Header />}
-
-            {/* Основная область контента страницы, которая прокручивается */}
-            {/* flex-grow: занимает всё доступное пространство по вертикали, прижимая футер вниз */}
-            {/* overflow-y-auto: позволяет прокручивать контент, если он не помещается */}
-            {/* relative z-0: для позиционирования и z-index */}
-            {/* max-w-7xl mx-auto: центрирует контент и ограничивает его ширину */}
-            {/* px-4 py-4: внутренние горизонтальные и вертикальные отступы */}
-            {/* w-full: занимает всю ширину родителя */}
-            {/* pb-20: нижний отступ, чтобы контент не перекрывался фиксированным футером */}
-            <div className="flex-grow overflow-y-auto relative z-0 max-w-7xl mx-auto px-4 py-4 w-full pb-20"> {/* pb-20 */}
-                {/* Виджет Баланса удален из этой области */}
-
-                {/* Здесь рендерятся маршруты приложения с использованием Routes и Route */}
+            {header}
+            <div className="flex-grow overflow-y-auto relative z-0 max-w-7xl mx-auto px-4 py-4 w-full pb-20">
                 <Routes>
-                    {/* Маппим массив маршрутов из src/routes/index.jsx в компоненты Route */}
                     {routes.map((route, index) => (
                         <Route
-                            key={index} // Ключ для React
-                            path={route.path} // Путь маршрута (например, '/credits', '/categories')
+                            key={index}
+                            path={route.path}
                             element={
-                                // Если маршрут защищен (isProtected === true)
                                 route.isProtected ? (
-                                    // Оборачиваем компонент страницы в ProtectedRoute
                                     <ProtectedRoute>{route.element}</ProtectedRoute>
                                 ) : (
-                                    // Если маршрут не защищен, рендерим компонент напрямую
                                     route.element
                                 )
                             }
@@ -82,46 +38,16 @@ export default function LayoutWithHeader() {
                     ))}
                 </Routes>
             </div>
-
-            {/* --- ФИКСИРОВАННЫЙ ФУТЕР С ВИДЖЕТОМ БАЛАНСА --- */}
-            {/* Рендерим футер только если пользователь авторизован */}
-            {/* fixed bottom-2 left-0 right-0 z-10: делает футер фиксированным внизу экрана */}
-            {isAuthenticated && ( // Условие рендеринга футера по isAuthenticated
-                <div className="fixed bottom-2 left-0 right-0 z-10"> {/* bottom-2: отступ 2 единицы от нижнего края */}
-                    {/* Внутренний контейнер для центрирования и горизонтальных отступов виджета внутри футера */}
+            {isAuthenticated && (
+                <div className="fixed bottom-2 left-0 right-0 z-10 sm:bottom-4">
                     <div className="max-w-7xl mx-auto px-4">
-                        {/* Сам компонент виджета Баланса */}
                         <BalanceWidget />
                     </div>
                 </div>
             )}
-            {/* --- Конец ФИКСИРОВАННОГО ФУТЕРА --- */}
-
-
-            {/* --- Область Рендеринга Модальных Окон --- */}
-            {/* Условно рендерим компонент модала на основе значения modalType из стора */}
-            {modalType && ( // Если modalType не null (т.е., какой-то модал должен быть открыт)
-                // Проверяем, какой тип модала открыт, и рендерим соответствующий компонент
-                // --- ИСПРАВЛЕНО: ДОБАВЛЕНЫ ТИПЫ 'addGoal' и 'editGoal' для рендеринга Modal ---
-                ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'].includes(modalType) ? ( // Если тип - один из типов форм (для Modal.jsx)
-                    // --- Конец ИСПРАВЛЕНИЯ ---
-                    <Modal // Рендерим компонент Modal
-                        isOpen={true} // Всегда передаем true, т.к. условный рендеринг выше уже определяет его видимость
-                        onClose={closeModal} // Передаем функцию закрытия из стора
-                        {...modalProps} // Передаем все пропсы из modalProps стора (title, fields, initialData, onSubmit и т.д.)
-                    />
-                    // --- ИСПРАВЛЕНО: ДОБАВЛЕНЫ ТИПЫ 'confirmDeleteGoal' и 'confirmSetCurrentGoal' для рендеринга ConfirmModal ---
-                ) : ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? ( // Если тип - модал подтверждения
-                    // --- Конец ИСПРАВЛЕНИЯ ---
-                    <ConfirmModal // Рендерим компонент ConfirmModal
-                        isOpen={true} // Всегда передаем true
-                        onClose={closeModal} // Передаем функцию закрытия
-                        {...modalProps} // Передаем пропсы (title, message, onConfirm)
-                    />
-                ) : null // Если modalType не совпал ни с одним известным типом, ничего не рендерим
-            )}
-            {/* --- Конец Области Рендеринга Модальных Окон --- */}
-
+            <ErrorBoundary>
+                <ModalManager />
+            </ErrorBoundary>
         </div>
     );
 }

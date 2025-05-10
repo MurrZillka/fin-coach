@@ -1,14 +1,13 @@
 // src/pages/CreditsPage.jsx
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {CheckCircleIcon, XCircleIcon} from '@heroicons/react/24/solid';
 import useCreditStore from '../stores/creditStore';
 import useModalStore from '../stores/modalStore.js';
 
-// Динамическое формирование полей
 function getCreditFields(formData) {
     const isPermanent = !!formData.is_permanent;
     const isExhausted = !!formData.is_exhausted;
@@ -32,7 +31,7 @@ function getCreditFields(formData) {
             label: 'Дата окончания доходов из этого источника',
             required: false,
             type: 'date',
-            disabled: !isExhausted, // disabled если чекбокс не отмечен
+            disabled: !isExhausted,
         });
     }
 
@@ -55,7 +54,7 @@ export default function CreditsPage() {
     const validateCreditDates = (formData) => {
         if (formData.is_permanent) {
             const startDate = new Date(formData.date);
-            if (formData.end_date) {
+            if (formData.end_date && formData.end_date !== '0001-01-01') {
                 const endDate = new Date(formData.end_date);
                 if (endDate < startDate) {
                     throw new Error('Дата окончания должна быть больше или равна дате начала.');
@@ -89,11 +88,11 @@ export default function CreditsPage() {
         clearError();
         const initialData = {
             ...credit,
-            date: credit.date ? new Date(credit.date).toISOString().split('T')[0] : '',
-            end_date: (credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z')
-                ? new Date(credit.end_date).toISOString().split('T')[0]
+            date: credit.date ? new Date(credit.date).toISOString().slice(0, 10) : '',
+            end_date: (credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01')
+                ? new Date(credit.end_date).toISOString().slice(0, 10)
                 : '',
-            is_exhausted: !!credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z',
+            is_exhausted: !!credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01',
         };
         openModal('editCredit', {
             title: 'Редактировать доход',
@@ -135,7 +134,15 @@ export default function CreditsPage() {
     const handleAddSubmit = async (formData) => {
         try {
             validateCreditDates(formData);
-            await addCredit(formData);
+            const dataToSend = { ...formData };
+            // Если постоянный доход и end_date не указан или is_exhausted=false, отправляем "нулевую дату"
+            if (dataToSend.is_permanent) {
+                if (!dataToSend.is_exhausted || !dataToSend.end_date || dataToSend.end_date === '') {
+                    dataToSend.end_date = '0001-01-01';
+                    dataToSend.is_exhausted = false; // Явно передаём актуальное значение
+                }
+            }
+            await addCredit(dataToSend);
             closeModal();
         } catch (err) {
             if (err.message === 'Дата окончания должна быть больше или равна дате начала.') {
@@ -152,8 +159,12 @@ export default function CreditsPage() {
         try {
             validateCreditDates(formData);
             const dataToUpdate = { ...formData };
-            if (dataToUpdate.is_permanent && dataToUpdate.end_date === '') {
-                dataToUpdate.end_date = '0001-01-01T00:00:00Z';
+            // Если постоянный доход и end_date не указан или is_exhausted=false, отправляем "нулевую дату"
+            if (dataToUpdate.is_permanent) {
+                if (!dataToUpdate.is_exhausted || !dataToUpdate.end_date || dataToUpdate.end_date === '') {
+                    dataToUpdate.end_date = '0001-01-01';
+                    dataToUpdate.is_exhausted = false; // Явно передаём актуальное значение
+                }
             }
             await updateCredit(id, dataToUpdate);
             closeModal();
@@ -258,7 +269,7 @@ export default function CreditsPage() {
                                             <td className="p-4">
                                                 {credit.is_permanent ? (
                                                     <div className="flex items-center gap-1">
-                                                        {credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && new Date(credit.end_date) < new Date() ? (
+                                                        {credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01' && new Date(credit.end_date) < new Date() ? (
                                                             <>
                                                                 <CheckCircleIcon className="h-5 w-5 text-gray-400" />
                                                                 <Text variant="tdSecondary" className="text-gray-600">
