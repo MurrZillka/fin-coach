@@ -42,16 +42,13 @@ function getCreditFields(formData) {
 
 export default function CreditsPage() {
     const { credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
-    const { openModal, closeModal, setModalSubmissionError } = useModalStore(); // Получаем setModalSubmissionError из modalStore
+    const { openModal, closeModal, setModalSubmissionError, modalType } = useModalStore(); // Получаем setModalSubmissionError из modalStore
 
     useEffect(() => {
         if (!loading && credits === null && !error) {
             fetchCredits();
         }
         // Cleanup function to clear the main page error when component unmounts or dependencies change
-        return () => {
-            clearError();
-        };
     }, [fetchCredits, loading, credits, error, clearError]);
 
     // Удалена неиспользуемая функция validateCreditDates
@@ -185,9 +182,11 @@ export default function CreditsPage() {
             // closeModal сбрасывает submissionError в сторе
         } catch (err) {
             console.error('Error during add credit (after form submit):', err);
-            setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при добавлении дохода.');
-            useCreditStore.getState().clearError(); // Очищаем общую ошибку стора (creditStore)
-            // Модалка остается открытой, чтобы показать ошибку.
+            const errorMessage = err.message === 'Failed to add credit'
+                ? 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.'
+                : err.message || 'Произошла непредвиденная ошибка при добавлении дохода.';
+            setModalSubmissionError(errorMessage);
+            useCreditStore.getState().clearError();
         }
     };
 
@@ -216,9 +215,11 @@ export default function CreditsPage() {
             // closeModal сбрасывает submissionError в сторе
         } catch (err) {
             console.error('CreditsPage Logic: Error during edit credit (after form submit):', err);
-            setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при сохранении изменений.');
-            useCreditStore.getState().clearError(); // Очищаем общую ошибку стора (creditStore)
-            // Модалка остается открытой, чтобы показать ошибку.
+            const errorMessage = err.message === 'Failed to update credit' || err.message === 'Failed to add credit'
+                ? 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.'
+                : err.message || 'Произошла непредвиденная ошибка при сохранении изменений.';
+            setModalSubmissionError(errorMessage);
+            useCreditStore.getState().clearError();
         }
     };
 
@@ -228,10 +229,13 @@ export default function CreditsPage() {
             closeModal();
         } catch (err) {
             console.error('Error during delete credit (after confirmation):', err);
-            closeModal(); // Модалка подтверждения закрывается и при ошибке удаления
-            // Ошибка удаления покажет на главной странице через store.error
-            // Явно устанавливаем store error, так как модалка закрывается.
-            useCreditStore.getState().set({ error: { message: err.message || 'Произошла ошибка при удалении.' } });
+            console.log('Setting error in store:', { message: err.message || 'Произошла ошибка при удалении дохода.' });
+            const errorMessage = err.message === 'Failed to delete credit'
+                ? 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.'
+                : err.message || 'Произошла ошибка при удалении дохода.';
+            useCreditStore.getState().setError({ message: errorMessage });
+            console.log('Error set in store, current state:', useCreditStore.getState().error);
+            closeModal();
         }
     };
 
@@ -251,11 +255,11 @@ export default function CreditsPage() {
                 </div>
 
                 {/* Этот блок показывает общие ошибки из стора (например, ошибка загрузки) */}
-                {displayError && (
+                {console.log('Rendering error:', displayError, 'modalType:', modalType) || (displayError && modalType === null && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
                     </div>
-                )}
+                ))}
 
                 {loading && credits === null ? (
                    <Loader/>

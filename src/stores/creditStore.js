@@ -15,6 +15,9 @@ const useCreditStore = create((set, get) => ({
     credits: null,
     loading: false,
     error: null,
+    setCredits: (credits) => set({ credits }),
+    setLoading: (loading) => set({ loading }),
+    setError: (error) => set({ error }),
 
     // --- Вспомогательная функция: Получение токена ---
     getToken: () => {
@@ -180,31 +183,22 @@ const useCreditStore = create((set, get) => ({
             console.log('creditStore: API deleteCredit result:', result);
 
             if (result.error) {
-                set({ error: result.error, loading: false });
                 console.error('Ошибка удаления дохода от API:', result.error);
                 throw result.error;
             } else {
                 await get().fetchCredits();
                 useBalanceStore.getState().fetchBalance(token);
-                // ДОБАВЛЕНО: Обновляем текущую цель
                 useGoalsStore.getState().getCurrentGoal();
                 console.log(`creditStore: Доход ${id} успешно удален, fetching credits and balance.`);
                 return result.data;
             }
-
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при удалении дохода.' };
-            set({
-                error: unexpectedError,
-                loading: false
-            });
             console.error('Непредвиденная ошибка deleteCredit:', error);
             throw error;
         } finally {
             console.log('creditStore: deleteCredit finished.');
         }
     },
-
     // Действие для сброса состояния стора доходов (используется при выходе пользователя)
     resetCredits: () => {
         console.log('creditStore: resetCredits called.');
