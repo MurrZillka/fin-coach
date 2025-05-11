@@ -48,6 +48,7 @@ function App() {
         }
         // Нет else блока здесь. Если пользователь не авторизован, fetchInitialUserData
         // сама сбросит состояние других сторов (как мы реализовали через storeInitializer).
+        // сама сбросит состояние других сторов (как мы реализовали через storeInitializer).
 
     }, [isAuthenticated]); // Зависимость на isAuthenticated. Эффект сработает при true -> false и false -> true.
 
