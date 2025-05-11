@@ -1,11 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
+import Loader from "./ui/Loader.jsx";
 
 export default function ProtectedRoute({ children }) {
     const { isAuthenticated, isInitializing } = useAuthStore();
 
     if (isInitializing) {
-        return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
+        return <Loader/>;
     }
 
     if (!isAuthenticated) {

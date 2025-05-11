@@ -1,6 +1,6 @@
 // src/App.jsx
-import { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import {useEffect} from 'react';
+import {BrowserRouter as Router} from 'react-router-dom';
 // Убедись, что путь к stores/authStore корректный
 import useAuthStore from './stores/authStore';
 // --- Импортируем стор Целей ---
@@ -8,13 +8,14 @@ import useGoalsStore from './stores/goalsStore';
 // --- Конец ДОБАВЛЕННОГО ---
 
 import LayoutWithHeader from './components/LayoutWithHeader';
+import Loader from "./components/ui/Loader.jsx";
 
 
 function App() {
     // Получаем действия и состояние из стора авторизации
     // initAuth для первичной проверки токена
     // isAuthenticated для запуска эффекта загрузки данных
-    const { initAuth, isAuthenticated } = useAuthStore(); // Получаем initAuth и isAuthenticated
+    const {initAuth, isAuthenticated, isInitializing} = useAuthStore(); // Получаем initAuth и isAuthenticated
 
     // --- Первый useEffect: Инициализация авторизации при загрузке приложения ---
     // Этот эффект запускается один раз при монтировании компонента App.
@@ -51,11 +52,15 @@ function App() {
     }, [isAuthenticated]); // Зависимость на isAuthenticated. Эффект сработает при true -> false и false -> true.
 
     return (
-        <Router>
-            {/* LayoutWithHeader содержит логику рендеринга HeaderAuth/Header
-                и ProtectedRoute для маршрутов */}
-            <LayoutWithHeader/>
-        </Router>
+
+        <>
+            {isInitializing
+                ? (<Loader/>)
+                : (< Router>
+                        <LayoutWithHeader/>
+                    </Router>
+                )}
+        < />
     );
 }
 

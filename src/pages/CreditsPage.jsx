@@ -6,7 +6,8 @@ import IconButton from '../components/ui/IconButton';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import useCreditStore from '../stores/creditStore';
-import useModalStore from '../stores/modalStore.js'; // Импортируем useModalStore
+import useModalStore from '../stores/modalStore.js';
+import Loader from "../components/ui/Loader.jsx"; // Импортируем useModalStore
 
 // Динамическое формирование полей
 function getCreditFields(formData) {
@@ -257,9 +258,7 @@ export default function CreditsPage() {
                 )}
 
                 {loading && credits === null ? (
-                    <div className="text-center p-4">
-                        <Text variant="body">Загрузка доходов...</Text>
-                    </div>
+                   <Loader/>
                 ) : (
                     <div className="bg-background shadow-md rounded-md overflow-hidden">
                         {credits !== null && credits.length === 0 ? (
@@ -361,9 +360,7 @@ export default function CreditsPage() {
                             )
                         )}
                         {loading && credits !== null && (
-                            <div className="text-center p-4">
-                                <Text variant="body">Обновление данных...</Text>
-                            </div>
+                            <Loader/>
                         )}
                     </div>
                 )}
