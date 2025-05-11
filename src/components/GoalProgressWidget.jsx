@@ -148,8 +148,8 @@ export default function GoalProgressWidget() {
             // Контейнер для сообщения об отсутствии цели
             // ИЗМЕНЕНО: ширина w-1/3 на w-2/3
             <div className="flex-shrink-0 w-2/3 text-right"> {/* ИЗМЕНЕНО w-1/3 на w-2/3 */}
-                <Text variant="body" className="text-secondary-600 italic">
-                    Текущая цель не установлена.
+                <Text variant="body" className="text-blue-700 font-semibold italic">
+                    Вы еще не установили для себя ни одной финансовой цели. Усильте мотивацию, выберите цель!
                 </Text>
             </div>
         );
@@ -157,12 +157,14 @@ export default function GoalProgressWidget() {
 
     // Если текущая цель достигнута
     if (currentGoal.is_achieved || percentage >= 100) {
-        let achievedText = 'Установленная Вами цель достигнута! Поздравляем! 🎉';
+        //let achievedText = 'Установленная Вами цель достигнута! Поздравляем! 🎉';
         // Добавляем дату достижения, если она есть и корректна
+        let achievedText = '';
         if (currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z") {
             try {
                 const achievedDate = new Date(currentGoal.achievement_date);
-                achievedText += ` (${achievedDate.toLocaleDateString()})`;
+                achievedText = `Установленная Вами цель достигнута ${achievedDate.toLocaleDateString()}! Поздравляем! 🎉`;
+                // achievedText += ` (${achievedDate.toLocaleDateString()})`;
             } catch (e) {
                 console.error("Error formatting achievement date:", e);
                 // В случае ошибки форматирования даты, просто показываем текст без даты
@@ -209,10 +211,7 @@ export default function GoalProgressWidget() {
         infoText += ` (${daysText})`;
     }
 
-
     const formattedPercentage = percentage.toFixed(0);
-
-
     return (
         // Главный контейнер виджета прогресса
         // w-2/3: УВЕЛИЧЕНА ширина до 2/3 родителя (футера)
