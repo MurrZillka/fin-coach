@@ -52,7 +52,7 @@ export default function Input({
 
     return (
         // Используем gap-1, как и было
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0">
             {label && (
                 // Используем htmlFor для связки метки с полем ввода по ID
                 <Text variant="label" htmlFor={name}>

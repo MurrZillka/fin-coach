@@ -1,11 +1,11 @@
 // src/components/ui/Modal.jsx
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import Text from './Text';
 import Input from './Input';
 import TextButton from './TextButton';
 import Tooltip from './Tooltip';
 import PropTypes from 'prop-types';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import {XMarkIcon} from '@heroicons/react/24/outline';
 import IconButton from './IconButton';
 // --- Корректный путь импорта и перенос в начало файла ---
 import useModalStore from '../../stores/modalStore';
@@ -67,12 +67,11 @@ const Modal = ({
                         } else {
                             acc[field.name] = String(initialValue); // Если не удалось распарсить, используем как есть (возможно, ужеY-MM-DD)
                         }
-                    } catch (e) {
+                    } catch {
                         acc[field.name] = String(initialValue); // В случае ошибки парсинга, используем как есть
                     }
                 }
-            }
-            else { // Other types
+            } else { // Other types
                 acc[field.name] = initialValue === undefined || initialValue === null ? '' : initialValue;
             }
             return acc;
@@ -104,7 +103,7 @@ const Modal = ({
                 // Если это какая-то другая submissionError, убедимся, что предыдущие ошибки дат сброшены
                 // (те, которые были установлены этим эффектом)
                 setErrors(prevErrors => {
-                    const newErrors = { ...prevErrors };
+                    const newErrors = {...prevErrors};
                     if (newErrors.date === 'Проверьте даты') delete newErrors.date;
                     if (newErrors.end_date === 'Проверьте даты') delete newErrors.end_date;
                     return newErrors;
@@ -114,7 +113,7 @@ const Modal = ({
             // Если submissionError стал null (успешный сабмит, закрытие модалки),
             // очищаем ошибки для полей даты, если они были установлены этим эффектом.
             setErrors(prevErrors => {
-                const newErrors = { ...prevErrors };
+                const newErrors = {...prevErrors};
                 if (newErrors.date === 'Проверьте даты') delete newErrors.date;
                 if (newErrors.end_date === 'Проверьте даты') delete newErrors.end_date;
                 return newErrors;
@@ -123,8 +122,28 @@ const Modal = ({
     }, [submissionError]); // Запускать эффект при изменении submissionError
     // --- КОНЕЦ ЭФФЕКТА ---
 
+    useEffect(() => {
+        const handleEscapeKey = (event) => {
+            if (event.key === 'Escape') {
+                onClose(); // Вызываем функцию закрытия модалки
+            }
+        };
+
+        // Добавляем слушатель события keydown при открытии модалки
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        // Функция очистки: удаляем слушатель события при закрытии модалки или размонтировании компонента
+        return () => {
+            document.removeEventListener('keydown', handleEscapeKey);
+        };
+    }, [isOpen, onClose]); // Зависимости: isOpen (чтобы активировать/деактивировать слушатель) и onClose (чтобы использовать его в обработчике)
+
 
     if (!isOpen) return null;
+
+
 
     // Универсальный обработчик для всех Input (ожидает name, value)
     // --- Убеждаемся, что здесь нет параметра 'e' ---
@@ -150,7 +169,7 @@ const Modal = ({
 
         setFormData(prev => {
             // Используем fieldValue (которое может быть скорректировано для дат)
-            const newFormData = { ...prev, [name]: fieldValue };
+            const newFormData = {...prev, [name]: fieldValue};
             if (onFieldChange) {
                 // onFieldChange ожидает name, value (оригинальное value от Input), и весь объект formData
                 // Здесь мы передаем оригинальное value из Input, т.к. onFieldChange может зависеть от него (как is_exhausted меняет end_date)
@@ -163,7 +182,7 @@ const Modal = ({
         });
 
         setErrors(prev => {
-            const newErrors = { ...prev };
+            const newErrors = {...prev};
             delete newErrors[name]; // Удаляем ошибку для поля, которое изменилось
             return newErrors;
         });
@@ -180,7 +199,7 @@ const Modal = ({
     const handleSubmit = (e) => {
         e.preventDefault();
         const newErrors = {};
-        const dataToSend = { ...formData }; // Берем данные из состояния formData
+        const dataToSend = {...formData}; // Берем данные из состояния formData
 
         // Преобразование и локальная валидация
         currentFields.forEach((field) => {
@@ -212,7 +231,7 @@ const Modal = ({
                     // Поэтому сначала проверим специфичную ошибку суммы, а потом обязательность.
                     // Или добавим обязательность только если специфичная ошибка суммы не сработала.
                     // Давайте сделаем так: специфичная ошибка суммы ПЕРЕЗАПИСЫВАЕТ ошибку обязательности для поля amount.
-                    newErrors[fieldName] = `${field.label} обязателен`; // Сначала ставим ошибку обязательности, если есть
+                    newErrors[fieldName] = `Вы обязаны выбрать. Отправка формы невозможна`; // Сначала ставим ошибку обязательности, если есть
                 }
             }
 
@@ -295,29 +314,43 @@ const Modal = ({
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[20vh]"
-             style={{ backgroundColor: 'rgba(229, 231, 235, 0.7)' }}>
+        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh]"
+             style={{backgroundColor: 'rgba(229, 231, 235, 0.7)'}}
+             onClick={(event) => {
+                 // Проверяем, был ли клик именно по этому элементу (оверлею),
+                 // а не по одному из его дочерних элементов (содержимому модалки).
+                 if (event.target === event.currentTarget) {
+                     onClose(); // Вызываем функцию закрытия модалки
+                 }
+             }}>
             {/* Классы из предоставленного тобой "рабочего" кода */}
-            <div className="p-6 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto">
-                {/* Кнопка закрытия позиционируется абсолютно */}
-                <IconButton
-                    icon={XMarkIcon}
-                    onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
-                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                    tooltip="Закрыть"
-                />
-                {/* Заголовок */}
-                <Text variant="h2" className="mb-4 text-center">
-                    {title}
-                </Text>
-                {/* Блок общей ошибки с сервера */}
+            <div
+                className="p-4 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto">
+                {/* Контейнер для заголовка и кнопки закрытия */}
+                <div className="flex justify-between items-center mb-1">
+                    {/* Заголовок */}
+                    {/* Убираем text-center у заголовка, так как flexbox управляет выравниванием */}
+                    {/* Убираем mb-4 у заголовка, так как контейнер теперь имеет mb-4 */}
+                    <Text variant="h2" className="">
+                        {title}
+                    </Text>
+                    {/* Кнопка закрытия */}
+                    {/* Убрали абсолютное позиционирование и z-index */}
+                    <IconButton
+                        icon={XMarkIcon}
+                        onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
+                        className="text-gray-500 hover:text-gray-700" // Оставляем только стили цвета
+                    />
+                </div>
+                {/* Блок общей ошибки с сервера */} {/* <--- Исправлено здесь */}
                 {submissionError && (
-                    <div className="mb-4 p-3 bg-red-100 border rounded-md text-[var(--color-form-error)] border-[var(--color-form-error)]">
+                    <div
+                        className="mb-4 py-2 px-3 bg-red-100 text-sm border rounded-md text-[var(--color-form-error)] border-[var(--color-form-error)]">
                         {submissionError}
                     </div>
                 )}
                 {/* Форма */}
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-0">
                     {currentFields.map((field) => (
                         <div key={field.name} className="relative">
                             <Input
@@ -347,15 +380,13 @@ const Modal = ({
                         <TextButton
                             onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
                             type="button"
-                            style={{ backgroundColor: `rgb(var(--color-secondary-500))`, color: 'white' }}
-                            className="hover:[background-color:rgb(var(--color-secondary-800))] rounded-md px-4 py-2"
+                            style={{backgroundColor: `rgb(var(--color-secondary-500))`, color: 'white'}}
                         >
                             Отмена
                         </TextButton>
                         <TextButton
                             type="submit"
-                            style={{ backgroundColor: `rgb(var(--color-primary-500))`, color: 'white' }}
-                            className="hover:[background-color:rgb(var(--color-primary-600))] rounded-md px-4 py-2"
+                            style={{backgroundColor: `rgb(var(--color-primary-500))`, color: 'white'}}
                         >
                             {submitText}
                         </TextButton>
