@@ -308,7 +308,7 @@ export default function GoalsPage() {
                             )}
                         </div>
                     ) : (
-                        <Text variant="body" className="text-blue-700">Текущая цель не установлена.</Text>
+                        <Text variant="body" className="text-blue-700 ml-2">Текущая цель не установлена.</Text>
                     )}
                 </div>
 
