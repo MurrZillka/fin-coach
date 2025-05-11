@@ -13,10 +13,8 @@ import useSpendingsStore from './spendingsStore';
 import useGoalsStore from './goalsStore'; // Импортируем useGoalsStore
 // --- Конец ИМПОРТОВ ---
 
-
 // Добавляем get во второй аргумент create для доступа к текущему состоянию стора
 const useAuthStore = create((set, get) => ({
-    // Состояние
     user: null,
     isAuthenticated: false,
     status: 'idle', // 'idle', 'loading', 'succeeded', 'failed'
@@ -199,53 +197,38 @@ const useAuthStore = create((set, get) => ({
     // Действие для инициализации стора при запуске приложения (проверка localStorage)
     // Это первое действие, которое вызывается при монтировании App.
     initAuth: () => {
-        console.log('authStore: initAuth started'); // Лог начала
+        console.log('authStore: initAuth started');
         set({ isInitializing: true });
         const token = localStorage.getItem('token');
         const userName = localStorage.getItem('userName');
 
         if (token) {
-            console.log("authStore: Found token in localStorage, setting isAuthenticated true..."); // Лог успеха
-            // Устанавливаем начальное состояние аутентификации на основе localStorage
+            console.log("authStore: Found token in localStorage, setting isAuthenticated true...");
             set({
                 isAuthenticated: true,
-                user: { // Устанавливаем user объект на основе токена и userName из localStorage
-                    access_token: token, // Сохраняем токен в user объекте для легкого доступа
-                    userName: userName || 'Пользователь' // Используем userName из localStorage или дефолт
+                user: {
+                    access_token: token,
+                    userName: userName || 'Пользователь'
                 },
-                status: 'succeeded', // Считаем, что если токен есть, то аутентификация успешна
-                error: null, // Сбрасываем ошибки при инициализации
+                status: 'succeeded',
+                error: null,
                 isInitializing: false
             });
-            console.log('authStore: initAuth finished (authenticated). State set based on token.'); // Лог завершения
-            // fetchInitialUserData будет вызван в App.jsx после initAuth,
-            // и он инициирует загрузку данных для этого пользователя.
-
+            console.log('authStore: initAuth finished (authenticated). State set based on token.');
         } else {
-            console.log("authStore: No token found in localStorage."); // Лог отсутствия токена
+            console.log("authStore: No token found in localStorage.");
             set({
-                isAuthenticated: false, // --- ЭТО ИЗМЕНЕНИЕ ВЫЗЫВАЕТ СБРОС В ДРУГИХ СТОРАХ ЧЕРЕЗ ПОДПИСКУ ---
+                isAuthenticated: false,
                 user: null,
                 status: 'idle',
                 error: null,
-                sInitializing: false
+                isInitializing: false // Исправлено
             });
-            // Если нет токена при инициализации, состояние isAuthenticated становится false.
-            // ЭТО ИЗМЕНЕНИЕ ВЫЗЫВАЕТ СБРОС В ДРУГИХ СТОРАХ ЧЕРЕЗ ПОДПИСКУ.
-            // Здесь нам не нужно явно вызывать reset, подписки сделают это.
-            console.log('authStore: No token on init. Resetting other stores handled by subscriptions.'); // Лог сброса
-
-            // --- УДАЛЕНО: Вызовы сброса других сторов теперь обрабатываются подписками ---
-            // useBalanceStore.getState().resetBalance();
-            // useCreditStore.getState().resetCredits();
-            // useSpendingsStore.getState().resetSpendings();
-            // useCategoryStore.getState().resetCategories();
-            // --- Конец УДАЛЕНИЯ ---
-
-            console.log('authStore: Finished attempting to reset other stores (not authenticated).'); // Лог завершения сброса
-            console.log('authStore: initAuth finished (not authenticated).'); // Лог завершения
+            console.log('authStore: No token on init. Resetting other stores handled by subscriptions.');
+            console.log('authStore: Finished attempting to reset other stores (not authenticated).');
+            console.log('authStore: initAuth finished (not authenticated).');
         }
-    }
+    },
 }));
 
 export default useAuthStore;

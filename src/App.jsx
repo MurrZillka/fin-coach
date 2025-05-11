@@ -52,16 +52,16 @@ function App() {
 
     }, [isAuthenticated]); // Зависимость на isAuthenticated. Эффект сработает при true -> false и false -> true.
 
+    console.log('App.jsx: Rendering, isInitializing:', isInitializing, 'isAuthenticated:', isAuthenticated);
     return (
-
         <>
             {isInitializing
                 ? (<Loader/>)
-                : (< Router>
+                : (<Router>
                         <LayoutWithHeader/>
                     </Router>
                 )}
-        < />
+        </>
     );
 }
 

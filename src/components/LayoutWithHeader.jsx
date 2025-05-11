@@ -13,6 +13,7 @@ import BalanceWidget from './BalanceWidget.jsx';
 
 export default function LayoutWithHeader() {
     const location = useLocation();
+    console.log('LayoutWithHeader: Accessing useAuthStore');
     const { isAuthenticated } = useAuthStore();
 
     // Публичные страницы (без баланса и обычного хедера)
