@@ -6,6 +6,8 @@ import * as creditAPI from '../api/credit/index';
 import useAuthStore from './authStore';
 // Импортируем стор баланса (нужен для обновления баланса после операций)
 import useBalanceStore from './balanceStore';
+// ДОБАВЛЕНО: Импортируем стор Целей
+import useGoalsStore from './goalsStore';
 
 
 const useCreditStore = create((set, get) => ({
@@ -98,6 +100,8 @@ const useCreditStore = create((set, get) => ({
             } else {
                 await get().fetchCredits();
                 useBalanceStore.getState().fetchBalance(token);
+                // ДОБАВЛЕНО: Обновляем текущую цель
+                useGoalsStore.getState().getCurrentGoal();
                 console.log('creditStore: addCredit success, fetching credits and balance.');
                 return result.data;
             }
@@ -141,6 +145,8 @@ const useCreditStore = create((set, get) => ({
             } else {
                 await get().fetchCredits();
                 useBalanceStore.getState().fetchBalance(token);
+                // ДОБАВЛЕНО: Обновляем текущую цель
+                useGoalsStore.getState().getCurrentGoal();
                 console.log('creditStore: updateCredit success, fetching credits and balance.');
                 return result.data;
             }
@@ -180,6 +186,8 @@ const useCreditStore = create((set, get) => ({
             } else {
                 await get().fetchCredits();
                 useBalanceStore.getState().fetchBalance(token);
+                // ДОБАВЛЕНО: Обновляем текущую цель
+                useGoalsStore.getState().getCurrentGoal();
                 console.log(`creditStore: Доход ${id} успешно удален, fetching credits and balance.`);
                 return result.data;
             }

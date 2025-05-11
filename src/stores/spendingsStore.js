@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import * as spendingsAPI from '../api/spendings/index';
 import useAuthStore from './authStore';
 import useBalanceStore from './balanceStore';
+// ДОБАВЛЕНО: Импортируем стор Целей
+import useGoalsStore from './goalsStore';
 
 const useSpendingsStore = create((set, get) => ({
     // --- Состояние (State) ---
@@ -131,6 +133,8 @@ const useSpendingsStore = create((set, get) => ({
                 console.log('useSpendingsStore: Spending added successfully.');
                 await get().fetchSpendings();
                 useBalanceStore.getState().fetchBalance(token);
+                // ДОБАВЛЕНО: Обновляем текущую цель
+                useGoalsStore.getState().getCurrentGoal();
                 console.log('useSpendingsStore: Balance fetch triggered after adding spending.');
             }
         } catch (error) {
@@ -193,6 +197,8 @@ const useSpendingsStore = create((set, get) => ({
                 console.log(`useSpendingsStore: Spending ID ${id} updated successfully.`);
                 await get().fetchSpendings();
                 useBalanceStore.getState().fetchBalance(token);
+                // ДОБАВЛЕНО: Обновляем текущую цель
+                useGoalsStore.getState().getCurrentGoal();
                 console.log('useSpendingsStore: Balance fetch triggered after updating spending.');
             }
         } catch (error) {
@@ -256,6 +262,8 @@ const useSpendingsStore = create((set, get) => ({
                 // При успехе обновляем список и баланс
                 await get().fetchSpendings();
                 useBalanceStore.getState().fetchBalance(token);
+                // ДОБАВЛЕНО: Обновляем текущую цель
+                useGoalsStore.getState().getCurrentGoal();
                 console.log('useSpendingsStore: Balance fetch triggered after deleting spending.');
             }
         } catch (error) {
