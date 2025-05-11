@@ -1,3 +1,4 @@
+//src/stores/spendingsStore.js
 import { create } from 'zustand';
 import * as spendingsAPI from '../api/spendings/index';
 import useAuthStore from './authStore';
@@ -10,6 +11,9 @@ const useSpendingsStore = create((set, get) => ({
     spendings: null,
     loading: false,
     error: null,
+    setSpendings: (spendings) => set({ spendings }),
+    setLoading: (loading) => set({ loading }),
+    setError: (error) => set({ error }),
 
     // --- Вспомогательная функция ---
     getToken: () => {

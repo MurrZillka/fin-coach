@@ -1,3 +1,4 @@
+//src/pages/SpeningsPage.jsx
 import React, { useEffect } from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
@@ -47,7 +48,7 @@ function getSpendingFields(formData, categories) {
 
 export default function SpendingsPage() {
     const {
-        spendings, loading, error, // loading и error теперь для состояния страницы
+        spendings, loading, error,// loading и error теперь для состояния страницы
         fetchSpendings, addSpending, updateSpending, deleteSpending, clearError
     } = useSpendingsStore();
     const {
@@ -55,27 +56,24 @@ export default function SpendingsPage() {
         fetchCategories, clearError: clearCategoriesError
     } = useCategoryStore();
     // --- ИЗМЕНЕНИЕ: Получаем submissionError и setModalSubmissionError из modalStore ---
-    const { openModal, closeModal, submissionError, setModalSubmissionError } = useModalStore();
+    const { openModal, closeModal, submissionError, setModalSubmissionError, modalType } = useModalStore();
     // --- Конец ИЗМЕНЕНИЯ ---
 
 
     useEffect(() => {
-        if (!loading && spendings === null && !error) fetchSpendings();
-        if (!categoriesLoading && categories === null && !categoriesError) fetchCategories();
+        if (!loading && spendings === null) fetchSpendings();
+        if (!categoriesLoading && categories === null) fetchCategories();
         return () => {
-            clearError(); // Очищаем ошибку стора расходов при размонтировании
-            clearCategoriesError(); // Очищаем ошибку стора категорий при размонтировании
-            // --- ИЗМЕНЕНИЕ: Очищаем ошибку модалки при размонтировании страницы ---
+            clearError();
+            clearCategoriesError();
             setModalSubmissionError(null);
-            // --- Конец ИЗМЕНЕНИЯ ---
         };
     }, [
-        fetchSpendings, loading, spendings, error,
-        fetchCategories, categoriesLoading, categories, categoriesError,
+        fetchSpendings, loading, spendings,
+        fetchCategories, categoriesLoading, categories,
         clearError, clearCategoriesError,
-        setModalSubmissionError // Добавляем в зависимости
+        setModalSubmissionError
     ]);
-
     // --- ИЗМЕНЕНИЕ: Удалена локальная функция validateSpendingDates ---
     // const validateSpendingDates = (formData) => { ... };
     // --- Конец ИЗМЕНЕНИЯ ---
@@ -211,7 +209,7 @@ export default function SpendingsPage() {
             // setModalSubmissionError из useModalStore
             setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при добавлении расхода.');
             // Очищаем общую ошибку на странице расходов, если она была установлена стором до этого
-            useSpendingsStore.getState().clearError();
+           // useSpendingsStore.getState().clearError();
             // Модалка НЕ закрывается, чтобы показать ошибку.
         } finally {
             // Можно добавить логику скрытия индикатора загрузки, если loading управляется страницей
@@ -243,7 +241,7 @@ export default function SpendingsPage() {
             // При ошибке отображаем ее в модалке через submissionError
             setModalSubmissionError(err.message || 'Произошла непредвиденная ошибка при сохранении изменений.');
             // Очищаем общую ошибку на странице расходов
-            useSpendingsStore.getState().clearError();
+            //useSpendingsStore.getState().clearError();
             // Модалка НЕ закрывается.
         } finally {
             // Можно добавить логику скрытия индикатора загрузки
@@ -253,17 +251,17 @@ export default function SpendingsPage() {
 
     // --- Сабмит: удаление ---
     const handleDeleteConfirm = async (id) => {
-        // --- ИЗМЕНЕНИЕ: Добавляем try...catch для обработки ошибок стора ---
         try {
-            await deleteSpending(id); // Вызываем action стора (который выбрасывает ошибку)
-            closeModal(); // Закрываем модалку только в случае УСПЕХА
+            await deleteSpending(id);
+            closeModal();
         } catch (err) {
             console.error('Error during delete spending (after confirmation):', err);
-            closeModal(); // Модалка подтверждения закрывается и при ошибке удаления
-            // При ошибке удаления устанавливаем общую ошибку стора расходов (на странице)
-            useSpendingsStore.getState().set({ error: { message: err.message || 'Произошла ошибка при удалении расхода.' } });
+            console.log('Setting error in store:', { message: err.message || 'Произошла ошибка при удалении расхода.' });
+            useSpendingsStore.getState().setError({ message: err.message || 'Произошла ошибка при удалении расхода.' });
+            console.log('Error set in store, current state:', useSpendingsStore.getState().error);
+            closeModal();
+            console.log('Modal type after close:', useModalStore.getState().modalType);
         }
-        // --- Конец ИЗМЕНЕНИЯ ---
     };
 
     // Общая ошибка для отображения на главной странице (из сторов)
@@ -280,11 +278,11 @@ export default function SpendingsPage() {
                 </div>
 
                 {/* Этот блок показывает общие ошибки из сторов (например, ошибка загрузки) */}
-                {displayError && (
+                {console.log('Rendering error:', displayError, 'modalType:', modalType) || (displayError && modalType === null && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
                     </div>
-                )}
+                ))}
 
                 {(loading && spendings === null) || (categoriesLoading && categories === null) ? (
                     <div className="text-center p-4">

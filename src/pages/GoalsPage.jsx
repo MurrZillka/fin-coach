@@ -274,7 +274,7 @@ export default function GoalsPage() {
 
                 {/* Header section: Title and Add Button */}
                 <div className="flex justify-between items-center mb-4">
-                    <Text variant="h2">Мои цели</Text>
+                    <Text variant="h2">Мои Цели</Text>
                     <TextButton onClick={handleAddClick}>
                         Добавить цель
                     </TextButton>
