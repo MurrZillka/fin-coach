@@ -7,7 +7,8 @@ import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
-import useModalStore from '../stores/modalStore.js'; // Импортируем useModalStore
+import useModalStore from '../stores/modalStore.js';
+import {isDateTodayOrEarlier} from "../utils/dateUtils.js"; // Импортируем useModalStore
 
 // Формируем динамические поля для модалки расходов
 function getSpendingFields(formData, categories) {
@@ -310,10 +311,14 @@ export default function SpendingsPage() {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {spendings.map((spending, index) => {
+                                    {spendings.map((spending, index) => { // Начало колбэка map
                                         const category = categories.find(cat => cat.id === spending.category_id);
                                         const categoryName = category ? category.name : 'Неизвестно';
 
+                                        // --- Вычисляем статус isEndedDisplay здесь, используя внешнюю чистую функцию ---
+                                        // Расход считается "завершенным" для отображения, если он постоянный
+                                        // И его дата окончания приходится на сегодня или в прошлом, согласно нашей функции
+                                        const isEndedDisplay = spending.is_permanent && isDateTodayOrEarlier(spending.end_date);
                                         return (
                                             <tr key={spending.id}
                                                 className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
@@ -354,18 +359,24 @@ export default function SpendingsPage() {
                                                 <td className="p-4"><Text variant="tdSecondary">
                                                     {spending.date ? new Date(spending.date).toLocaleDateString('ru-RU') : '-'}
                                                 </Text></td>
+                                                {/* Ячейка "Регулярный" - Здесь используем isEndedDisplay */}
                                                 <td className="p-4">
                                                     {spending.is_permanent ? (
                                                         <div className="flex items-center gap-1">
-                                                            {spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01' && new Date(spending.end_date) < new Date() ? (
+                                                            {/* Если расход постоянный И по нашей логике отображения он завершен */}
+                                                            {isEndedDisplay ? (
                                                                 <>
+                                                                    {/* Иконка и текст для завершенного статуса */}
                                                                     <CheckCircleIcon className="h-5 w-5 text-gray-400" />
                                                                     <Text variant="tdSecondary" className="text-gray-600">
-                                                                        до {new Date(spending.end_date).toLocaleDateString('ru-RU')}
+                                                                        {/* Показываем дату окончания, только если она есть и валидна */}
+                                                                        до {spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01' ? new Date(spending.end_date).toLocaleDateString('ru-RU') : '-'}
                                                                     </Text>
                                                                 </>
                                                             ) : (
+                                                                // Иначе (расход постоянный, но по логике отображения еще продолжается)
                                                                 <>
+                                                                    {/* Иконка и текст для продолжающегося статуса */}
                                                                     <CheckCircleIcon className="h-5 w-5 text-blue-500" />
                                                                     <Text variant="tdSecondary" className="text-blue-700">
                                                                         расходы продолжаются
@@ -374,6 +385,7 @@ export default function SpendingsPage() {
                                                             )}
                                                         </div>
                                                     ) : (
+                                                        // Логика для разового расхода (остается без изменений)
                                                         <div className="flex items-center gap-1">
                                                             <XCircleIcon className="h-5 w-5 text-red-300" />
                                                             <Text variant="tdSecondary">Разовый</Text>

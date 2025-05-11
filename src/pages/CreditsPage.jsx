@@ -7,7 +7,8 @@ import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import useCreditStore from '../stores/creditStore';
 import useModalStore from '../stores/modalStore.js';
-import Loader from "../components/ui/Loader.jsx"; // Импортируем useModalStore
+import Loader from "../components/ui/Loader.jsx";
+import {isDateTodayOrEarlier} from "../utils/dateUtils.js"; // Импортируем useModalStore
 
 // Динамическое формирование полей
 function getCreditFields(formData) {
@@ -283,82 +284,106 @@ export default function CreditsPage() {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {credits.map((credit, index) => (
-                                        <tr key={credit.id}
-                                            className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                            <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                                            <td className="p-4">
-                                                {credit.is_permanent ? (
-                                                    <>
-                                                        <div className="flex items-center mb-1">
-                                                            <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Разовый платеж:</Text>
+                                    {credits.map((credit, index) => { // Начало колбэка map
+                                        console.log('Checking credit:', credit); // <-- Добавь эту строку
+                                        console.log('credit.end_date:', credit.end_date, 'Type:', typeof credit.end_date); // <-- И эту
+                                        const isEndedDisplay = credit.is_permanent && isDateTodayOrEarlier(credit.end_date);
+                                        console.log('isEndedDisplay calculated as:', isEndedDisplay); // <-- И эту
+                                        // --- Теперь возвращаем JSX для строки таблицы ---
+                                        return (
+                                            <tr key={credit.id}
+                                                className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
+                                                {/* Ячейка "№" */}
+                                                <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
+
+                                                {/* Ячейка "Сумма" */}
+                                                <td className="p-4">
+                                                    {credit.is_permanent ? (
+                                                        <>
+                                                            <div className="flex items-center mb-1">
+                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Разовый платеж:</Text>
+                                                                <Text variant="tdPrimary" className="text-accent-success font-semibold">
+                                                                    {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount} ₽
+                                                                </Text>
+                                                            </div>
+                                                            <div className="flex items-center">
+                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
+                                                                <Text variant="tdPrimary" className="text-accent-success font-semibold">
+                                                                    {typeof credit.full_amount === 'number' ? credit.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.full_amount} ₽
+                                                                </Text>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex items-center">
+                                                            <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text>
                                                             <Text variant="tdPrimary" className="text-accent-success font-semibold">
                                                                 {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount} ₽
                                                             </Text>
                                                         </div>
-                                                        <div className="flex items-center">
-                                                            <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
-                                                            <Text variant="tdPrimary" className="text-accent-success font-semibold">
-                                                                {typeof credit.full_amount === 'number' ? credit.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.full_amount} ₽
-                                                            </Text>
+                                                    )}
+                                                </td>
+
+                                                {/* Ячейка "Описание" */}
+                                                <td className="p-4"><Text
+                                                    variant="tdSecondary">{credit.description || '-'}</Text></td>
+
+                                                {/* Ячейка "Дата начала" */}
+                                                <td className="p-4"><Text variant="tdSecondary">
+                                                    {credit.date ? new Date(credit.date).toLocaleDateString('ru-RU') : '-'}
+                                                </Text></td>
+
+                                                {/* Ячейка "Регулярный" - Здесь используем isEndedDisplay */}
+                                                <td className="p-4">
+                                                    {credit.is_permanent ? (
+                                                        <div className="flex items-center gap-1">
+                                                            {/* Если доход постоянный И по нашей логике отображения он завершен */}
+                                                            {isEndedDisplay ? (
+                                                                <>
+                                                                    {/* Иконка и текст для завершенного статуса */}
+                                                                    <CheckCircleIcon className="h-5 w-5 text-gray-400" />
+                                                                    <Text variant="tdSecondary" className="text-gray-600">
+                                                                        {/* Показываем дату окончания, только если она есть и валидна */}
+                                                                        до {credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01' ? new Date(credit.end_date).toLocaleDateString('ru-RU') : '-'}
+                                                                    </Text>
+                                                                </>
+                                                            ) : (
+                                                                // Иначе (доход постоянный, но по логике отображения еще продолжается)
+                                                                <>
+                                                                    {/* Иконка и текст для продолжающегося статуса */}
+                                                                    <CheckCircleIcon className="h-5 w-5 text-blue-500" />
+                                                                    <Text variant="tdSecondary" className="text-blue-700">
+                                                                        выплаты продолжаются
+                                                                    </Text>
+                                                                </>
+                                                            )}
                                                         </div>
-                                                    </>
-                                                ) : (
-                                                    <div className="flex items-center">
-                                                        <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text>
-                                                        <Text variant="tdPrimary" className="text-accent-success font-semibold">
-                                                            {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount} ₽
-                                                        </Text>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="p-4"><Text
-                                                variant="tdSecondary">{credit.description || '-'}</Text></td>
-                                            <td className="p-4"><Text variant="tdSecondary">
-                                                {credit.date ? new Date(credit.date).toLocaleDateString('ru-RU') : '-'}
-                                            </Text></td>
-                                            <td className="p-4">
-                                                {credit.is_permanent ? (
-                                                    <div className="flex items-center gap-1">
-                                                        {credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01' && new Date(credit.end_date) < new Date() ? (
-                                                            <>
-                                                                <CheckCircleIcon className="h-5 w-5 text-gray-400" />
-                                                                <Text variant="tdSecondary" className="text-gray-600">
-                                                                    до {new Date(credit.end_date).toLocaleDateString('ru-RU')}
-                                                                </Text>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <CheckCircleIcon className="h-5 w-5 text-blue-500" />
-                                                                <Text variant="tdSecondary" className="text-blue-700">
-                                                                    выплаты продолжаются
-                                                                </Text>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-1">
-                                                        <XCircleIcon className="h-5 w-5 text-red-300" />
-                                                        <Text variant="tdSecondary">Разовый</Text>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="p-4 flex gap-2">
-                                                <IconButton
-                                                    icon={PencilIcon}
-                                                    tooltip="Редактировать"
-                                                    className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                    onClick={() => handleEditClick(credit)}
-                                                />
-                                                <IconButton
-                                                    icon={TrashIcon}
-                                                    tooltip="Удалить"
-                                                    className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                    onClick={() => handleDeleteClick(credit)}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                    ) : (
+                                                        // Логика для разового дохода (остается без изменений)
+                                                        <div className="flex items-center gap-1">
+                                                            <XCircleIcon className="h-5 w-5 text-red-300" />
+                                                            <Text variant="tdSecondary">Разовый</Text>
+                                                        </div>
+                                                    )}
+                                                </td>
+
+                                                {/* Ячейка "Действия" */}
+                                                <td className="p-4 flex gap-2">
+                                                    <IconButton
+                                                        icon={PencilIcon}
+                                                        tooltip="Редактировать"
+                                                        className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
+                                                        onClick={() => handleEditClick(credit)}
+                                                    />
+                                                    <IconButton
+                                                        icon={TrashIcon}
+                                                        tooltip="Удалить"
+                                                        className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
+                                                        onClick={() => handleDeleteClick(credit)}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                     </tbody>
                                 </table>
                             )
