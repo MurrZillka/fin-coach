@@ -21,7 +21,7 @@ const useAuthStore = create((set, get) => ({
     isAuthenticated: false,
     status: 'idle', // 'idle', 'loading', 'succeeded', 'failed'
     error: null,
-
+    isInitializing: true,
     // Действия
     login: async (credentials) => {
         console.log('authStore: login started'); // Лог начала
@@ -196,12 +196,11 @@ const useAuthStore = create((set, get) => ({
         console.log('authStore: fetchInitialUserData finished.'); // Лог завершения
     },
     // --- Конец Действия Инициализации данных ---
-
-
     // Действие для инициализации стора при запуске приложения (проверка localStorage)
     // Это первое действие, которое вызывается при монтировании App.
     initAuth: () => {
         console.log('authStore: initAuth started'); // Лог начала
+        set({ isInitializing: true });
         const token = localStorage.getItem('token');
         const userName = localStorage.getItem('userName');
 
@@ -215,7 +214,8 @@ const useAuthStore = create((set, get) => ({
                     userName: userName || 'Пользователь' // Используем userName из localStorage или дефолт
                 },
                 status: 'succeeded', // Считаем, что если токен есть, то аутентификация успешна
-                error: null // Сбрасываем ошибки при инициализации
+                error: null, // Сбрасываем ошибки при инициализации
+                isInitializing: false
             });
             console.log('authStore: initAuth finished (authenticated). State set based on token.'); // Лог завершения
             // fetchInitialUserData будет вызван в App.jsx после initAuth,
@@ -227,7 +227,8 @@ const useAuthStore = create((set, get) => ({
                 isAuthenticated: false, // --- ЭТО ИЗМЕНЕНИЕ ВЫЗЫВАЕТ СБРОС В ДРУГИХ СТОРАХ ЧЕРЕЗ ПОДПИСКУ ---
                 user: null,
                 status: 'idle',
-                error: null
+                error: null,
+                sInitializing: false
             });
             // Если нет токена при инициализации, состояние isAuthenticated становится false.
             // ЭТО ИЗМЕНЕНИЕ ВЫЗЫВАЕТ СБРОС В ДРУГИХ СТОРАХ ЧЕРЕЗ ПОДПИСКУ.
