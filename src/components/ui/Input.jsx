@@ -1,6 +1,7 @@
 // src/components/ui/Input.jsx
 import PropTypes from 'prop-types';
 import Text from './Text';
+import { forwardRef } from 'react';
 
 // --- Определяем propTypes для опций выпадающего списка ---
 const optionShape = PropTypes.shape({
@@ -9,7 +10,7 @@ const optionShape = PropTypes.shape({
 });
 // --- Конец propTypes для опций ---
 
-export default function Input({
+const Input = forwardRef(({
                                   label,
                                   value, // value для всех типов, булево для checkbox
                                   onChange,
@@ -20,7 +21,7 @@ export default function Input({
                                   disabled = false,
                                   options, // <--- prop: массив опций для типа 'select'
                                   required = false, // пропс required
-                              }) {
+                              }, ref) => {
     const errorId = `${name}-error`;
 
     // --- Проверяем тип поля ---
@@ -67,6 +68,7 @@ export default function Input({
                 <div className="flex items-center gap-2">
                     <input
                         id={name}
+                        ref={ref}
                         type="checkbox" // Всегда type="checkbox"
                         name={name}
                         checked={!!value} // Привязываем к пропу value (который должен быть булевым)
@@ -88,6 +90,7 @@ export default function Input({
                 // --- Рендеринг select ---
                 <select
                     id={name}
+                    ref={ref}
                     name={name}
                     // Value должно быть строкой для HTML select.
                     // Преобразуем полученное value (которое может быть числом, например, ID категории) в строку.
@@ -121,6 +124,7 @@ export default function Input({
                 // --- Рендеринг стандартного поля ввода (text, number, date и т.д.) ---
                 <input
                     id={name}
+                    ref={ref}
                     type={type} // Используем переданный тип
                     name={name}
                     // Value для input, всегда преобразуем в строку
@@ -154,7 +158,9 @@ export default function Input({
             {/* Тултип рендерится в Modal.jsx */}
         </div>
     );
-}
+});
+
+export default Input;
 
 // --- Обновленные propTypes (без изменений) ---
 Input.propTypes = {

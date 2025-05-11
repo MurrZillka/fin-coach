@@ -1,5 +1,5 @@
 // src/components/ui/Modal.jsx
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import Text from './Text';
 import Input from './Input';
 import TextButton from './TextButton';
@@ -31,6 +31,7 @@ const Modal = ({
     const [formData, setFormData] = useState(initialData);
     const [errors, setErrors] = useState({});
     const [currentFields, setCurrentFields] = useState(fields);
+    const firstInputRef = useRef(null);
 
     // Эффект для сброса formData, errors и currentFields при изменении initialData, fields или при открытии модала
     useEffect(() => {
@@ -81,6 +82,11 @@ const Modal = ({
         setCurrentFields(fields); // Сбрасываем поля
     }, [initialData, fields]); // Зависимости: initialData и fields
 
+    useEffect(() => {
+        if (isOpen && firstInputRef.current) {
+            firstInputRef.current.focus();
+        }
+    }, [isOpen])
 
     // --- ЭФФЕКТ ДЛЯ ОБРАБОТКИ submissionError И УСТАНОВКИ ЛОКАЛЬНЫХ ОШИБОК ПОЛЕЙ ---
     useEffect(() => {
@@ -140,11 +146,7 @@ const Modal = ({
         };
     }, [isOpen, onClose]); // Зависимости: isOpen (чтобы активировать/деактивировать слушатель) и onClose (чтобы использовать его в обработчике)
 
-
-    if (!isOpen) return null;
-
-
-
+        if (!isOpen) return null;
     // Универсальный обработчик для всех Input (ожидает name, value)
     // --- Убеждаемся, что здесь нет параметра 'e' ---
     const handleChange = (name, value) => { // --- ИСПРАВЛЕННАЯ СИГНАТУРА ---
@@ -351,9 +353,10 @@ const Modal = ({
                 )}
                 {/* Форма */}
                 <form onSubmit={handleSubmit} className="space-y-0">
-                    {currentFields.map((field) => (
+                    {currentFields.map((field, index) => (
                         <div key={field.name} className="relative">
                             <Input
+                                ref={index === 0 ? firstInputRef : null}
                                 label={field.label}
                                 name={field.name}
                                 type={field.type || 'text'}
