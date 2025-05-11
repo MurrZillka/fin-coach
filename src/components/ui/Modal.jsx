@@ -380,13 +380,13 @@ const Modal = ({
                         <TextButton
                             onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
                             type="button"
-                            style={{backgroundColor: `rgb(var(--color-secondary-500))`, color: 'white'}}
+                            variant="secondary"
                         >
                             Отмена
                         </TextButton>
                         <TextButton
                             type="submit"
-                            style={{backgroundColor: `rgb(var(--color-primary-500))`, color: 'white'}}
+                            variant="primary"
                         >
                             {submitText}
                         </TextButton>
