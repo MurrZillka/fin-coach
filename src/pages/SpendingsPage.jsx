@@ -324,7 +324,7 @@ export default function SpendingsPage() {
                                                     {spending.is_permanent ? (
                                                         <>
                                                             <div className="flex items-center mb-1">
-                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Периодическая:</Text>
+                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Разовый платеж:</Text>
                                                                 <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                                                     {typeof spending.amount === 'number'
                                                                         ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -332,7 +332,7 @@ export default function SpendingsPage() {
                                                                 </Text>
                                                             </div>
                                                             <div className="flex items-center">
-                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Общая:</Text>
+                                                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
                                                                 <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                                                     {typeof spending.full_amount === 'number'
                                                                         ? spending.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
