@@ -108,7 +108,7 @@ export default function SpendingsPage() {
                 return getSpendingFields(newFormData, categories); // Обновляем поля, включая disabled состояние end_date
             },
             // --- ИЗМЕНЕНИЕ: Передаем submissionError из modalStore и добавляем onClose ---
-            submissionError: submissionError, // Передаем ошибку модалки
+            submissionError, // Передаем ошибку модалки
             onClose: () => {
                 closeModal(); // Закрывает модалку и сбрасывает submissionError в modalStore
                 useSpendingsStore.getState().clearError(); // Очищаем общую ошибку стора расходов на всякий случай
@@ -154,7 +154,7 @@ export default function SpendingsPage() {
                 return getSpendingFields(newFormData, categories); // Обновляем поля
             },
             // --- ИЗМЕНЕНИЕ: Передаем submissionError из modalStore и добавляем onClose ---
-            submissionError: submissionError, // Передаем ошибку модалки
+            submissionError, // Передаем ошибку модалки
             onClose: () => {
                 closeModal(); // Закрывает модалку и сбрасывает submissionError в modalStore
                 useSpendingsStore.getState().clearError(); // Очищаем общую ошибку стора расходов на всякий случай

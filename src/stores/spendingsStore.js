@@ -104,7 +104,6 @@ const useSpendingsStore = create((set, get) => ({
             console.log('useSpendingsStore: API addSpending result:', result);
 
             if (result.error) {
-                // --- ИЗМЕНЕНИЕ: Исправленная логика обработки и замены сообщения об ошибке ---
                 let originalErrorMessage = result.error.message || 'Ошибка при добавлении расхода с сервера.';
                 const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
                 const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
@@ -112,32 +111,22 @@ const useSpendingsStore = create((set, get) => ({
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
 
-                let userMessage = genericErrorMessage; // Начинаем с универсального по умолчанию
-
-                // **ПРИОРИТЕТ 1:** В первую очередь проверяем на специфическую ошибку валидации даты от сервера (английскую)
+                let userMessage = genericErrorMessage;
                 if (originalErrorMessage === dateValidationErrorEnglish) {
-                    userMessage = dateValidationErrorRussianSpending; // Если совпало, используем наш русский текст для даты
-                }
-                // **ПРИОРИТЕТ 2:** Если это НЕ специфическая ошибка даты, проверяем на ошибки аутентификации/авторизации
-                else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
+                    userMessage = dateValidationErrorRussianSpending;
+                } else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;
-                }
-                // **ПРИОРИТЕТ 3:** Если это НЕ ошибка даты и НЕ ошибка аутентификации/авторизации, проверяем на другие клиентские ошибки (4хх)
-                else if (result.error.status >= 400 && result.error.status < 500) {
-                    // Используем общее сообщение для ошибок в данных формы
+                } else if (result.error.status >= 400 && result.error.status < 500) {
                     userMessage = formInputErrorMessage;
                 }
-                // **ПРИОРИТЕТ 4:** Для всех остальных ошибок (серверные 5хх, сетевые, неизвестные) оставляем универсальное сообщение
-                // userMessage = genericErrorMessage; // Это значение уже установлено по умолчанию, ничего не меняем здесь
-
-                // --- Конец ИЗМЕНЕНИЯ ---
 
                 const apiError = {
-                    message: userMessage, // Используем финальное сообщение для пользователя
-                    status: result.error.status, // Передаем статус, может быть полезен
+                    message: userMessage,
+                    status: result.error.status,
                 };
+                set({ error: apiError, loading: false });
                 console.error('useSpendingsStore: API error adding spending:', result.error);
-                throw apiError; // Выбрасываем ошибку для обработки компонентом
+                throw apiError; // Выбрасываем ошибку с переведённым сообщением
             } else {
                 console.log('useSpendingsStore: Spending added successfully.');
                 await get().fetchSpendings();
@@ -145,55 +134,8 @@ const useSpendingsStore = create((set, get) => ({
                 console.log('useSpendingsStore: Balance fetch triggered after adding spending.');
             }
         } catch (error) {
-            // Перехватываем ошибку (API error или непредвиденную) и обрабатываем ее сообщение
-            const processedError = {
-                message: error.message || 'Произошла непредвиденная ошибка при добавлении расхода.',
-                status: error.status, // Сохраняем статус, если есть
-            };
-            // Пытаемся получить более детальное сообщение, если оно пришло в ответе API
-            if (error.response && error.response.data && error.response.data.message) {
-                processedError.message = error.response.data.message;
-                processedError.status = error.response.status || processedError.status; // Сохраняем статус из ответа, если есть
-            } else if (error.message === "Failed to fetch") {
-                processedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
-            } else if (error.message) {
-                // Если это ошибка, которую мы сами выбросили ранее (например, ошибка аутентификации из getToken)
-                processedError.message = error.message;
-                if (error.status) processedError.status = error.status; // Сохраняем статус, если есть
-            }
-
-            // --- ИЗМЕНЕНИЕ: Применяем ту же исправленную логику замены сообщения для пойманных ошибок ---
-            const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
-            const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
-            const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
-            const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
-            const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
-
-            let userMessage = genericErrorMessage; // Начинаем с универсального по умолчанию
-
-            // **ПРИОРИТЕТ 1:** В первую очередь проверяем на специфическую ошибку валидации даты (английскую)
-            if (processedError.message === dateValidationErrorEnglish) {
-                userMessage = dateValidationErrorRussianSpending; // Если совпало, используем наш русский текст для даты
-            }
-            // **ПРИОРИТЕТ 2:** Если это НЕ специфическая ошибка даты, проверяем на ошибки аутентификации/авторизации
-            else if (processedError.status === 401 || processedError.status === 403 || (processedError.message && (processedError.message.toLowerCase().includes('token') || processedError.message.toLowerCase().includes('unauthorized') || processedError.message.toLowerCase().includes('forbidden')))) {
-                userMessage = authErrorMessage;
-            }
-            // **ПРИОРИТЕТ 3:** Если это НЕ ошибка даты и НЕ ошибка аутентификации/авторизации, проверяем на другие клиентские ошибки (4хх)
-            else if (processedError.status >= 400 && processedError.status < 500) {
-                // Используем общее сообщение для ошибок в данных формы
-                userMessage = formInputErrorMessage;
-            }
-            // **ПРИОРИТЕТ 4:** Для всех остальных ошибок (серверные 5хх, сетевые, неизвестные) оставляем универсальное сообщение
-            // userMessage = genericErrorMessage; // Это значение уже установлено по умолчанию, ничего не меняем здесь
-
-
-            processedError.message = userMessage; // Устанавливаем финальное сообщение
-
-            // --- Конец ИЗМЕНЕНИЯ ---
-
             console.error('useSpendingsStore: Error caught in addSpending action:', error);
-            throw processedError; // Перевыбрасываем обработанную ошибку
+            throw error; // Просто перевыбрасываем ошибку, не меняя её
         } finally {
             console.log('useSpendingsStore: addSpending finished.');
         }
@@ -224,7 +166,6 @@ const useSpendingsStore = create((set, get) => ({
             console.log(`useSpendingsStore: API updateSpendingById result for ID ${id}:`, result);
 
             if (result.error) {
-                // --- ИЗМЕНЕНИЕ: Исправленная логика обработки и замена сообщения об ошибке ---
                 let originalErrorMessage = result.error.message || 'Ошибка при обновлении расхода с сервера.';
                 const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
                 const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
@@ -232,34 +173,22 @@ const useSpendingsStore = create((set, get) => ({
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
 
-
-                let userMessage = genericErrorMessage; // Начинаем с универсального по умолчанию
-
-                // **ПРИОРИТЕТ 1:** В первую очередь проверяем на специфическую ошибку валидации даты от сервера (английскую)
+                let userMessage = genericErrorMessage;
                 if (originalErrorMessage === dateValidationErrorEnglish) {
-                    userMessage = dateValidationErrorRussianSpending; // Если совпало, используем наш русский текст для даты
-                }
-                // **ПРИОРИТЕТ 2:** Если это НЕ специфическая ошибка даты, проверяем на ошибки аутентификации/авторизации
-                else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
+                    userMessage = dateValidationErrorRussianSpending;
+                } else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;
-                }
-                // **ПРИОРИТЕТ 3:** Если это НЕ ошибка даты и НЕ ошибка аутентификации/авторизации, проверяем на другие клиентские ошибки (4хх)
-                else if (result.error.status >= 400 && result.error.status < 500) {
-                    // Используем общее сообщение для ошибок в данных формы
+                } else if (result.error.status >= 400 && result.error.status < 500) {
                     userMessage = formInputErrorMessage;
                 }
-                // **ПРИОРИТЬЕТ 4:** Для всех остальных ошибок (серверные 5хх, сетевые, неизвестные) оставляем универсальное сообщение
-                // userMessage = genericErrorMessage; // Это значение уже установлено по умолчанию
-
-
-                // --- Конец ИЗМЕНЕНИЯ ---
 
                 const apiError = {
-                    message: userMessage, // Используем финальное сообщение для пользователя
-                    status: result.error.status, // Передаем статус, может быть полезен
+                    message: userMessage,
+                    status: result.error.status,
                 };
+                set({ error: apiError, loading: false });
                 console.error(`useSpendingsStore: API error updating spending ID ${id}:`, result.error);
-                throw apiError; // Выбрасываем ошибку
+                throw apiError; // Выбрасываем ошибку с переведённым сообщением // Выбрасываем ошибку
             } else {
                 console.log(`useSpendingsStore: Spending ID ${id} updated successfully.`);
                 await get().fetchSpendings();
@@ -267,55 +196,8 @@ const useSpendingsStore = create((set, get) => ({
                 console.log('useSpendingsStore: Balance fetch triggered after updating spending.');
             }
         } catch (error) {
-            // Перехватываем ошибку (API error или непредвиденную) и обрабатываем ее сообщение
-            const processedError = {
-                message: error.message || 'Произошла непредвиденная ошибка при обновлении расхода.',
-                status: error.status, // Сохраняем статус, если есть
-            };
-            // Пытаемся получить более детальное сообщение, если оно пришло в ответе API
-            if (error.response && error.response.data && error.response.data.message) {
-                processedError.message = error.response.data.message;
-                processedError.status = error.response.status || processedError.status; // Сохраняем статус из ответа, если есть
-            } else if (error.message === "Failed to fetch") {
-                processedError.message = "Не удалось подключиться к серверу. Проверьте ваше интернет-соединение.";
-            } else if (error.message) {
-                // Если это ошибка, которую мы сами выбросили ранее (например, ошибка аутентификации из getToken)
-                processedError.message = error.message;
-                if (error.status) processedError.status = error.status; // Сохраняем статус, если есть
-            }
-
-            // --- ИЗМЕНЕНИЕ: Применяем ту же исправленную логику замены сообщения для пойманных ошибок ---
-            const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
-            const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
-            const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
-            const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
-            const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
-
-            let userMessage = genericErrorMessage; // Начинаем с универсального по умолчанию
-
-            // **ПРИОРИТЕТ 1:** В первую очередь проверяем на специфическую ошибку валидации даты (английскую)
-            if (processedError.message === dateValidationErrorEnglish) {
-                userMessage = dateValidationErrorRussianSpending; // Если совпало, используем наш русский текст для даты
-            }
-            // **ПРИОРИТЕТ 2:** Если это НЕ специфическая ошибка даты, проверяем на ошибки аутентификации/авторизации
-            else if (processedError.status === 401 || processedError.status === 403 || (processedError.message && (processedError.message.toLowerCase().includes('token') || processedError.message.toLowerCase().includes('unauthorized') || processedError.message.toLowerCase().includes('forbidden')))) {
-                userMessage = authErrorMessage;
-            }
-            // **ПРИОРИТЕТ 3:** Если это НЕ ошибка даты и НЕ ошибка аутентификации/авторизации, проверяем на другие клиентские ошибки (4хх)
-            else if (processedError.status >= 400 && processedError.status < 500) {
-                // Используем общее сообщение для ошибок в данных формы
-                userMessage = formInputErrorMessage;
-            }
-            // **ПРИОРИТЕТ 4:** Для всех остальных ошибок (серверные 5хх, сетевые, неизвестные) оставляем универсальное сообщение
-            // userMessage = genericErrorMessage; // Это значение уже установлено по умолчанию
-
-
-            processedError.message = userMessage; // Устанавливаем финальное сообщение
-
-            // --- Конец ИЗМЕНЕНИЯ ---
-
             console.error('useSpendingsStore: Error caught in updateSpending action:', error);
-            throw processedError; // Перевыбрасываем обработанную ошибку
+            throw error; // Просто перевыбрасываем
         } finally {
             console.log(`useSpendingsStore: updateSpending finished for ID: ${id}.`);
         }
