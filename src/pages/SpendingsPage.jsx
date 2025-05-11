@@ -306,7 +306,7 @@ export default function SpendingsPage() {
                                         <th className="text-left p-4"><Text variant="th">Описание</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Категория</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Дата начала</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Регулярный</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Статус</Text></th>
                                         <th className="text-left p-4"><Text variant="th">Действия</Text></th>
                                     </tr>
                                     </thead>
