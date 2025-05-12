@@ -316,8 +316,7 @@ const Modal = ({
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh]"
-             style={{backgroundColor: 'rgba(229, 231, 235, 0.7)'}}
+        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-white/20"
              onClick={(event) => {
                  // Проверяем, был ли клик именно по этому элементу (оверлею),
                  // а не по одному из его дочерних элементов (содержимому модалки).
@@ -327,7 +326,7 @@ const Modal = ({
              }}>
             {/* Классы из предоставленного тобой "рабочего" кода */}
             <div
-                className="p-4 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto">
+                className="p-4 rounded-lg shadow-2xl w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto">
                 {/* Контейнер для заголовка и кнопки закрытия */}
                 <div className="flex justify-between items-center mb-1">
                     {/* Заголовок */}

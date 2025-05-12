@@ -60,8 +60,7 @@ const ConfirmModal = ({isOpen, onClose, onConfirm, title, message, confirmText =
 
     return (
         // Подложка модала (используем стили, которые обсуждали)
-        <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50"
-             style={{backgroundColor: 'rgba(229, 231, 235, 0.7)'}}
+        <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50 backdrop-blur-xs bg-white/20"
              onClick={(event) => {
                  // Проверяем, был ли клик именно по этому элементу (оверлею),
                  // а не по одному из его дочерних элементов (содержимому модалки).
@@ -70,7 +69,7 @@ const ConfirmModal = ({isOpen, onClose, onConfirm, title, message, confirmText =
                  }
              }}
         > {/* Здесь ты можешь поправить bg-opacity, когда разберешься со стилями */}
-            <div className="p-3 rounded-lg shadow-lg w-full max-w-md bg-green-100 border border-gray-300"
+            <div className="p-3 rounded-lg shadow-2xl w-full max-w-md bg-green-100 border border-gray-300"
             >
                 <div className="flex justify-between items-center mb-4"> {/* Используем mb-4 для отступа после заголовка/кнопки */}
                     {/* Заголовок модала */}
