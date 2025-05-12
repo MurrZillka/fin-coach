@@ -1,5 +1,5 @@
 // src/pages/LoginPage.jsx
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useRef} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
@@ -11,6 +11,7 @@ export default function LoginPage() {
     const location = useLocation();
     // Из стора берем только storeLogin и status.
     const { login: storeLogin, status} = useAuthStore();
+    const loginInputRef = useRef(null);
 
     // --- СОСТОЯНИЕ ФОРМЫ И ОШИБОК ---
     const [formData, setFormData] = useState({
@@ -25,6 +26,9 @@ export default function LoginPage() {
     const [localError, setLocalError] = useState(null);
     // --- Конец СОСТОЯНИЯ ФОРМЫ И ОШИБОК ---
 
+    useEffect(() => {
+        loginInputRef.current?.focus();
+    }, []);
 
     // Если пользователь перешел со страницы регистрации, заполняем поле логина
     useEffect(() => {
@@ -104,7 +108,7 @@ export default function LoginPage() {
 
     return (
         <div className="bg-secondary-50 flex items-center justify-center">
-            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-lg w-full max-w-md mt-[15vh]">
+            <div style={{ backgroundColor: `rgb(var(--color-background))` }} className="p-6 rounded-lg shadow-2xl w-full max-w-md mt-[15vh]">
                 <Text variant="h2" className="mb-6 text-center">
                     Вход в аккаунт
                 </Text>
@@ -136,6 +140,7 @@ export default function LoginPage() {
                         onChange={handleChange} // <-- Теперь Input вызывает ее с (name, value)
                         error={errors.login}
                         placeholder="Введите ваш логин"
+                        ref={loginInputRef}
                     />
                     {/* Поле Пароль */}
                     <Input

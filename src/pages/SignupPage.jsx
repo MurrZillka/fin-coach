@@ -1,5 +1,5 @@
 // src/pages/SignupPage.jsx
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
@@ -29,6 +29,12 @@ export default function SignupPage() {
         password: '',
         confirmPassword: '',
     });
+
+    const loginInputRef = useRef(null);
+
+    useEffect(() => {
+        loginInputRef.current?.focus();
+    }, [])
 
     // --- ИЗМЕНЕНИЕ: Обработчик изменения полей формы теперь принимает name и value ---
     const handleChange = (name, value) => { // --- ИЗМЕНЕНА СИГНАТУРА ---
@@ -137,7 +143,7 @@ export default function SignupPage() {
     return (
         <div className=" bg-secondary-50 flex items-center justify-center">
             <div style={{backgroundColor: `rgb(var(--color-background))`}}
-                 className="p-6 rounded-lg shadow-lg w-full max-w-md mt-[10vh]">
+                 className="p-6 rounded-lg shadow-2xl w-full max-w-md mt-[10vh]">
                 <Text variant="h2" className="mb-6 text-center">
                     Регистрация
                 </Text>
@@ -173,7 +179,7 @@ export default function SignupPage() {
                             onChange={handleChange} // <-- Input вызовет ее с (name, value)
                             error={errors.user_name}
                             placeholder="Введите имя пользователя"
-                            // errorClass={errors.user_name ? 'error-visible' : 'error-hidden'} // Если Input принимает этот проп
+                            ref={loginInputRef}                            // errorClass={errors.user_name ? 'error-visible' : 'error-hidden'} // Если Input принимает этот проп
                         />
                         <Input
                             label="Логин"

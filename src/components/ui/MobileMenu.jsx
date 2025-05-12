@@ -45,13 +45,13 @@ const MobileMenu = ({ links, userName, onLogout }) => {
 
             {/* Мобильное меню */}
             <div
-                className={`fixed top-[64px] left-0 w-full h-auto bg-secondary-800 flex flex-col px-6 py-4 gap-4 z-50 ${
+                className={`fixed top-[64px] left-0 w-full h-full flex flex-col px-6 py-4 gap-4 z-50 backdrop-blur-sm ${
                     isMenuOpen
                         ? 'animate-menu-slide-in'
                         : 'transform -translate-x-full transition-transform duration-300 ease-in-out'
                 }`}
             >
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center bg-secondary-800/75 rounded-2xl gap-4">
                     {/* Имя пользователя */}
                     {userName && (
                         <Text variant="body" className="py-4 text-background">
