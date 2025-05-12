@@ -1,5 +1,6 @@
 // src/components/ui/MobileMenu.jsx
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bars3Icon } from '@heroicons/react/24/solid';
 import NavLinkItem from './NavLinkItem';
 import Text from './Text';
@@ -8,9 +9,17 @@ import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 
 const MobileMenu = ({ links, userName, onLogout }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    const handleLinkClick = (path) => {
+        setIsMenuOpen(false); // Закрываем меню
+        setTimeout(() => {
+            navigate(path); // Переходим по ссылке после анимации
+        }, 300); // Задержка равна duration-300
     };
 
     // Авто-закрытие меню через 10 секунд бездействия
@@ -55,7 +64,7 @@ const MobileMenu = ({ links, userName, onLogout }) => {
                             key={link.path}
                             to={link.path}
                             label={link.label}
-                            onClick={toggleMenu}
+                            onClick={() => handleLinkClick(link.path)} // Вызывает закрытие и навигацию
                             className="py-4 w-fit"
                         />
                     ))}
@@ -64,8 +73,8 @@ const MobileMenu = ({ links, userName, onLogout }) => {
                         <IconButton
                             icon={ArrowRightStartOnRectangleIcon}
                             onClick={() => {
-                                toggleMenu();
-                                onLogout();
+                                toggleMenu(); // Закрывает меню
+                                onLogout(); // Выполняет выход
                             }}
                             className="py-4 text-background hover:bg-white/10"
                             tooltip="Выйти"
