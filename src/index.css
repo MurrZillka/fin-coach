@@ -79,3 +79,20 @@ input {
 .animation-delay-400 {
     animation-delay: 0.4s;
 }
+
+/* Анимация выезда меню с отскоком */
+@keyframes menu-slide-in {
+    0% {
+        transform: translateX(-100%);
+    }
+    80% {
+        transform: translateX(5%); /* Сдвиг чуть дальше */
+    }
+    100% {
+        transform: translateX(0); /* Возврат на место */
+    }
+}
+
+.animate-menu-slide-in {
+    animation: menu-slide-in 0.5s ease-out forwards;
+}
