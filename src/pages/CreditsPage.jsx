@@ -46,7 +46,7 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
     <table className={`min-w-full ${className}`}>
         <thead className="bg-secondary-200">
         <tr>
-            <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
+            <th className="text-left pl-4 pr-0 py-4"><Text variant="th">№</Text></th>
             <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
             <th className="text-left p-4"><Text variant="th">Описание</Text></th>
             <th className="text-left px-2 py-4"><Text variant="th">Дата начала</Text></th>
@@ -60,7 +60,7 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
             return (
                 <tr key={credit.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
                     {/* № */}
-                    <td className="pl-2 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>{/* Сумма: автоматический перенос, неразрывный пробел, выравнивание по базовой линии */}
+                    <td className="pl-4 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>{/* Сумма: автоматический перенос, неразрывный пробел, выравнивание по базовой линии */}
                     <td className="px-2 py-4"> {/* Отступы согласованы с SpendingTable */}
                         {credit.is_permanent ? (
                             <>

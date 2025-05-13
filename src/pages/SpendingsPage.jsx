@@ -53,7 +53,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
         <table className="min-w-full hidden md:table">
             <thead className="bg-secondary-200">
             <tr>
-                <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
+                <th className="text-left pl-4 pr-0 py-4"><Text variant="th">№</Text></th>
                 <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
                 <th className="text-left p-4"><Text variant="th">Описание</Text></th>
                 <th className="text-left px-2 py-4"><Text variant="th">Категория</Text></th>
@@ -70,7 +70,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                 return (
                     <tr key={spending.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
                         {/* № */}
-                        <td className="pl-2 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>
+                        <td className="pl-4 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>
 
                         {/* Сумма (с автоматическим переносом, неразрывным пробелом и выравниванием по базовой линии) */}
                         <td className="px-2 py-4">
