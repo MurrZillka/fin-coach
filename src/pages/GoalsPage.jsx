@@ -288,7 +288,7 @@ export default function GoalsPage() {
 
 
                 {/* Container for Goals List (Table for Desktop, Cards for Mobile) */}
-                <div className=" rounded-md overflow-hidden">
+                <div>
                     {loading && goals === null && !currentGoalLoading && !isBalanceLoading ? (
                         <div className="text-center p-4">
                             <Text variant="body">Загрузка списка целей...</Text>

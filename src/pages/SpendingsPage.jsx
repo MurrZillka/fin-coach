@@ -370,7 +370,7 @@ export default function SpendingsPage() {
                         <Text variant="body">Загрузка данных...</Text>
                     </div>
                 ) : (
-                    <div className="pb-8 px-4 pt-0 rounded-md overflow-hidden">
+                    <div>
                         {spendings !== null && spendings.length === 0 && categories !== null ? (
                             <div className="p-4 text-center">
                                 <Text variant="body">У вас пока нет добавленных расходов.</Text>
