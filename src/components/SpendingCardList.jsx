@@ -13,7 +13,7 @@ const SpendingCardList = ({spendings, categories, handleEditClick, handleDeleteC
                 const categoryName = category ? category.name : 'Неизвестно';
                 return (
                     <div key={spending.id}
-                         className="p-3 bg-background rounded-md shadow-sm flex flex-col justify-between gap-1"> {/* Удалены min-w-[220px] и min-h-[200px] */}
+                         className="p-3 bg-background rounded-md shadow-xl flex flex-col justify-between gap-1"> {/* Удалены min-w-[220px] и min-h-[200px] */}
                         {/* Описание */}
                         <Text variant="tdPrimary" className="text-sm font-semibold truncate">
                             {spending.description || `Расход #${index + 1}`}

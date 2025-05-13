@@ -314,7 +314,7 @@ export default function CreditsPage() {
                 {loading && credits === null ? (
                     <Loader />
                 ) : (
-                    <div className="bg-background shadow-md rounded-md overflow-hidden">
+                    <div className=" rounded-md overflow-hidden">
                         {credits !== null && credits.length === 0 ? (
                             <div className="p-4 text-center">
                                 <Text variant="body">У вас пока нет добавленных доходов.</Text>

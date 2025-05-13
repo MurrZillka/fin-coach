@@ -1,35 +1,36 @@
 // src/pages/GoalsPage.jsx
-import React, {useEffect, useState} from 'react'; // Импортируем useState и useEffect
+import React, {useEffect, useState} from 'react';
 // Import necessary components and stores
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 // Import icons
-import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline'; // Импортируем StarIcon для использования в списке
+import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline';
 // --- Import Stores ---
-import useGoalsStore from '../stores/goalsStore'; // Убедись, что путь корректен
-// Импорт useAuthStore может потребоваться, если нужно получить user?.userName или другие данные пользователя
-// import useAuthStore from '../stores/authStore'; // Пока не нужен для базовой логики
-// --- Корректный путь к modalStore.js ---
-import useModalStore from '../stores/modalStore.js'; // Убедись, что путь корректен
+import useGoalsStore from '../stores/goalsStore';
+import useModalStore from '../stores/modalStore.js';
 // --- ДОБАВЛЕНО: Импорт стора Баланса для расчета процента и цвета иконки ---
-import useBalanceStore from '../stores/balanceStore'; // Убедись, что путь корректен
+import useBalanceStore from '../stores/balanceStore';
+// --- ДОБАВЛЕНО: Импорт нового компонента для мобильной раскладки ---
+import GoalsCardList from '../components/GoalsCardList'; // Убедись, что путь корректен
 // --- Конец ИМПОРТОВ ---
 
 
 // Define fields for the Goal form (Add/Edit)
-// Based on API spec for AddGoal and UpdateGoalByID
 const goalFields = [
-    { name: 'description', label: 'Описание цели', required: true, type: 'text', placeholder: 'Например: Накопить на отпуск' },
-    { name: 'amount', label: 'Целевая сумма', required: true, type: 'number', placeholder: 'Например: 150000' },
-    // wish_date should be a date input
-    { name: 'wish_date', label: 'Желаемая дата', required: true, type: 'date' }, // API ожидает "YYYY-MM-DD"
-    // achievement_date, is_achieved, is_current, is_delete - не редактируются через эту форму
+    {
+        name: 'description',
+        label: 'Описание цели',
+        required: true,
+        type: 'text',
+        placeholder: 'Например: Накопить на отпуск'
+    },
+    {name: 'amount', label: 'Целевая сумма', required: true, type: 'number', placeholder: 'Например: 150000'},
+    {name: 'wish_date', label: 'Желаемая дата', required: true, type: 'date'},
 ];
 
 
 export default function GoalsPage() {
-    // Get state and actions from the goals store
     const {
         goals, loading, error,
         currentGoal, currentGoalLoading, currentGoalError,
@@ -38,239 +39,202 @@ export default function GoalsPage() {
         clearError, clearCurrentGoalError
     } = useGoalsStore();
 
-    // --- ДОБАВЛЕНО: Получаем баланс и статус его загрузки для расчета процента и цвета иконки ---
-    const { balance, isLoading: isBalanceLoading } = useBalanceStore(); // Убедись, что isLoading переименован
+    // --- ДОБАВЛЕНО: Получаем баланс и статус его загрузки ---
+    const {balance, isLoading: isBalanceLoading} = useBalanceStore();
     // --- Конец ДОБАВЛЕННОГО ---
 
-    const { openModal, closeModal } = useModalStore();
+    const {openModal, closeModal} = useModalStore();
 
     // --- ДОБАВЛЕНО: Локальное состояние для отслеживания попытки загрузки текущей цели ---
-    // Этот флаг будет true после первой попытки загрузки, независимо от результата.
     const [hasFetchedCurrentGoal, setHasFetchedCurrentGoal] = useState(false);
     // --- Конец ДОБАВЛЕННОГО ---
 
 
     // --- useEffect for initial data fetching ---
     useEffect(() => {
-        console.log('GoalsPage: useEffect triggered.'); // Лог триггера useEffect
+        // console.log('GoalsPage: useEffect triggered.'); // Лог триггера useEffect
 
         // Fetch goals list if not loading and data hasn't been loaded yet and no error
-        // Проверяем loading ИЛИ error основного списка перед fetchGoals
         if (!loading && goals === null && !error) {
-            console.log('GoalsPage: Triggering fetchGoals...'); // Лог вызова fetchGoals
+            // console.log('GoalsPage: Triggering fetchGoals...'); // Лог вызова fetchGoals
             fetchGoals();
         } else {
-            console.log('GoalsPage: fetchGoals skipped. Loading:', loading, 'goals:', goals ? 'loaded' : null, 'error:', !!error); // Лог пропуска
+            // console.log('GoalsPage: fetchGoals skipped. Loading:', loading, 'goals:', goals ? 'loaded' : null, 'error:', !!error); // Лог пропуска
         }
 
         // Fetch current goal if not loading, data hasn't been loaded, NO error, AND we haven't attempted fetching it before
-        // --- ИСПРАВЛЕНО: Добавлена проверка !hasFetchedCurrentGoal в условие ---
-        // Теперь getCurrentGoal() вызывается ТОЛЬКО ОДИН РАЗ, если currentGoal === null и нет активной загрузки или ошибки
         if (!currentGoalLoading && currentGoal === null && !currentGoalError && !hasFetchedCurrentGoal) {
-            console.log('GoalsPage: Triggering getCurrentGoal...'); // Лог вызова getCurrentGoal
+            // console.log('GoalsPage: Triggering getCurrentGoal...'); // Лог вызова getCurrentGoal
             getCurrentGoal();
-            // --- ДОБАВЛЕНО: Устанавливаем флаг, что попытка загрузки текущей цели была ---
-            // Устанавливаем флаг СРАЗУ после вызова async функции, чтобы prevent subsequent calls in this effect run
-            setHasFetchedCurrentGoal(true);
-            // --- Конец ДОБАВЛЕННОГО ---
+            setHasFetchedCurrentGoal(true); // Устанавливаем флаг сразу
         } else {
-            // Улучшенный лог для понимания, почему пропущена загрузка текущей цели
-            console.log('GoalsPage: getCurrentGoal skipped.',
-                'currentGoalLoading:', currentGoalLoading,
-                'currentGoal:', currentGoal ? 'loaded' : null,
-                'currentGoalError:', !!currentGoalError, // Логгируем булево наличие ошибки
-                'hasFetchedCurrentGoal:', hasFetchedCurrentGoal // Логгируем новый флаг
-            );
+            // console.log('GoalsPage: getCurrentGoal skipped.',
+            //     'currentGoalLoading:', currentGoalLoading,
+            //     'currentGoal:', currentGoal ? 'loaded' : null,
+            //     'currentGoalError:', !!currentGoalError,
+            //     'hasFetchedCurrentGoal:', hasFetchedCurrentGoal
+            // );
         }
 
         // Cleanup effect: clear error states in stores when unmounts
         return () => {
-            console.log('GoalsPage: useEffect cleanup.'); // Лог cleanup
-            clearError(); // Clear goals store main error
-            clearCurrentGoalError(); // Clear goals store current goal error
-            // Не сбрасываем hasFetchedCurrentGoal здесь, чтобы не вызывать повторную загрузку при перемонтировании компонента
+            // console.log('GoalsPage: useEffect cleanup.'); // Лог cleanup
+            clearError();
+            clearCurrentGoalError();
         };
-        // Dependencies: fetch actions и state variables, PLUS the new local state flag
-        // --- ИСПРАВЛЕНО: Добавлена зависимость hasFetchedCurrentGoal ---
-        // Важно: если setHasFetchedCurrentGoal вызывает ре-рендер, useEffect запустится снова.
-        // Зависимость нужна, если флаг используется в условии.
-        // Также добавляем зависимости balance и isBalanceLoading, потому что они используются в рендере (для цвета иконки)
     }, [
-        fetchGoals, loading, goals, error, // Зависимости для fetchGoals
-        getCurrentGoal, currentGoalLoading, currentGoal, currentGoalError, // Зависимости для getCurrentGoal
-        clearError, clearCurrentGoalError, // Зависимости для cleanup
-        hasFetchedCurrentGoal, // <-- ДОБАВЛЕНА новая зависимость
-        balance, isBalanceLoading // <-- ДОБАВЛЕНЫ зависимости для баланса
+        fetchGoals, loading, goals, error,
+        getCurrentGoal, currentGoalLoading, currentGoal, currentGoalError,
+        clearError, clearCurrentGoalError,
+        hasFetchedCurrentGoal,
+        balance, isBalanceLoading // Зависимости для данных, используемых в рендере
     ]);
-    // Примечание: Когда setHasFetchedCurrentGoal(true) меняет состояние, useEffect запускается снова.
-    // Но благодаря проверке `!hasFetchedCurrentGoal` внутри условия, fetchGoals() не будет вызван повторно.
 
 
     // --- Handlers for UI actions (opening modals/confirmations) ---
-    // Определяем все функции обработчики кликов и действий
-    const handleAddClick = () => { // <-- Функция handleAddClick определена здесь
-        console.log('GoalsPage: Add Goal button clicked'); // Лог клика
-        clearError(); // Clear store errors before opening modal
+    const handleAddClick = () => {
+        // console.log('GoalsPage: Add Goal button clicked');
+        clearError();
         clearCurrentGoalError();
 
-        openModal('addGoal', { // 'addGoal' is a type string for Modal
+        openModal('addGoal', {
             title: 'Добавить цель',
-            fields: goalFields, // Use defined goal fields
-            initialData: {}, // Empty object for add form
-            onSubmit: handleAddSubmit, // Function to call on modal form submission
+            fields: goalFields,
+            initialData: {},
+            onSubmit: handleAddSubmit,
             submitText: 'Добавить',
         });
     };
 
-    const handleEditClick = (goal) => { // <-- Функция handleEditClick определена здесь
-        console.log('GoalsPage: Edit button clicked for goal:', goal); // Лог клика
-        clearError(); // Clear store errors
+    const handleEditClick = (goal) => {
+        // console.log('GoalsPage: Edit button clicked for goal:', goal);
+        clearError();
         clearCurrentGoalError();
 
-        // Open the generic Modal component for editing
-        openModal('editGoal', { // 'editGoal' is a type string for Modal
+        openModal('editGoal', {
             title: 'Редактировать цель',
-            fields: goalFields, // Use defined goal fields
-            // Prepare initialData, formatting date for the input type="date"
+            fields: goalFields,
             initialData: {
-                ...goal, // Include all other fields from the goal object
-                // Format wish_date: ISO string from API -> Date object -> ISO string -> "YYYY-MM-DD" for input
-                // API может вернуть "0001-01-01T00:00:00Z" для пустой даты, проверяем это
+                ...goal,
                 wish_date: goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z"
                     ? new Date(goal.wish_date).toISOString().split('T')[0]
                     : '',
-                // Другие поля, возможно, не нужно форматировать (amount, description)
             },
-            // onSubmit handler that captures the goal.id
             onSubmit: (formData) => handleEditSubmit(goal.id, formData),
             submitText: 'Сохранить изменения',
         });
-        console.log('GoalsPage: Calling openModal for Edit Goal...'); // Лог вызова модала
+        // console.log('GoalsPage: Calling openModal for Edit Goal...');
     };
 
-    const handleDeleteClick = (goal) => { // <-- Функция handleDeleteClick определена здесь
-        console.log(`GoalsPage: Delete button clicked for goal ID: ${goal.id}`); // Лог клика
-        clearError(); // Clear store errors
+    const handleDeleteClick = (goal) => {
+        // console.log(`GoalsPage: Delete button clicked for goal ID: ${goal.id}`);
+        clearError();
         clearCurrentGoalError();
 
-        // Formulate confirmation message
         const goalDescription = goal.description || `с ID ${goal.id}`;
         const formattedAmount = typeof goal.amount === 'number'
-            ? goal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            ? goal.amount.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})
             : goal.amount;
         const message = `Вы уверены, что хотите удалить цель "${goalDescription}" на сумму ${formattedAmount} ₽?`;
 
-        // Open the ConfirmModal component
-        openModal('confirmDeleteGoal', { // 'confirmDeleteGoal' is a type string
+        openModal('confirmDeleteGoal', {
             title: 'Подтверждение удаления цели',
             message: message,
-            onConfirm: () => handleDeleteConfirm(goal.id), // Pass ID to confirm handler
+            onConfirm: () => handleDeleteConfirm(goal.id),
             confirmText: 'Удалить',
         });
-        console.log('GoalsPage: Calling openModal for Delete Goal confirmation...'); // Лог вызова модала
+        // console.log('GoalsPage: Calling openModal for Delete Goal confirmation...');
     };
 
-    const handleSetCurrentClick = (goal) => { // <-- Функция handleSetCurrentClick определена здесь
-        console.log(`GoalsPage: Set Current button clicked for goal ID: ${goal.id}`); // Лог клика
-        clearError(); // Clear store errors
+    const handleSetCurrentClick = (goal) => {
+        // console.log(`GoalsPage: Set Current button clicked for goal ID: ${goal.id}`);
+        clearError();
         clearCurrentGoalError();
 
-        // Check if this goal is already the current goal
         if (currentGoal && currentGoal.id === goal.id) {
-            console.log('GoalsPage: Selected goal is already the current one.'); // Лог, если уже текущая
-            // Optionally show a message or do nothing
-            return; // Do nothing if already current
+            // console.log('GoalsPage: Selected goal is already the current one.');
+            return;
         }
 
         const goalDescription = goal.description || `с ID ${goal.id}`;
         const message = `Вы уверены, что хотите установить цель "${goalDescription}" как текущую?`;
 
-
-        // Open the ConfirmModal component for setting current
-        openModal('confirmSetCurrentGoal', { // 'confirmSetCurrentGoal' is a type string
+        openModal('confirmSetCurrentGoal', {
             title: 'Установить текущую цель',
             message: message,
-            onConfirm: () => handleSetCurrentConfirm(goal.id), // Pass ID to confirm handler
+            onConfirm: () => handleSetCurrentConfirm(goal.id),
             confirmText: 'Установить',
         });
-        console.log('GoalsPage: Calling openModal for Set Current Goal confirmation...'); // Лог вызова модала
+        // console.log('GoalsPage: Calling openModal for Set Current Goal confirmation...');
     };
 
 
-    // --- Logic functions called by Modal/ConfirmModal components after user interaction ---
-    // Эти функции вызываются из модальных окон после подтверждения действий
-    const handleAddSubmit = async (formData) => { // <-- Функция handleAddSubmit определена здесь
-        console.log('GoalsPage Logic: handleAddSubmit called with data:', formData);
+    // --- Logic functions called by Modal/ConfirmModal components ---
+    const handleAddSubmit = async (formData) => {
+        // console.log('GoalsPage Logic: handleAddSubmit called with data:', formData);
         try {
-            // formData contains wish_date as "YYYY-MM-DD" string (from Modal validation)
             await addGoal(formData);
-            closeModal(); // Close modal on success
-            console.log('GoalsPage Logic: addGoal store action finished successfully.');
+            closeModal();
+            // console.log('GoalsPage Logic: addGoal store action finished successfully.');
         } catch (err) {
             console.error('GoalsPage Logic: Error during add goal (after form submit):', err);
-            closeModal(); // Close modal on error too
-            // Errors are displayed by LayoutWithHeader
+            closeModal();
         }
-        console.log('GoalsPage Logic: handleAddSubmit finished.');
+        // console.log('GoalsPage Logic: handleAddSubmit finished.');
     };
 
-    const handleEditSubmit = async (id, formData) => { // <-- Функция handleEditSubmit определена здесь
-        console.log(`GoalsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData);
+    const handleEditSubmit = async (id, formData) => {
+        // console.log(`GoalsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData);
         try {
-            // formData contains wish_date as "YYYY-MM-DD" string or null
             await updateGoal(id, formData);
-            closeModal(); // Close modal on success
-            console.log(`GoalsPage Logic: updateGoal store action finished successfully for ID: ${id}.`);
+            closeModal();
+            // console.log(`GoalsPage Logic: updateGoal store action finished successfully for ID: ${id}.`);
             // eslint-disable-next-line no-unused-vars
         } catch (err) {
             console.error(`GoalsPage Logic: Error during edit goal ID ${id} (after form submit):', err);`);
-            closeModal(); // Close modal on error
-            // Errors are displayed by LayoutWithHeader
+            closeModal();
         }
-        console.log(`GoalsPage Logic: handleEditSubmit finished for ID: ${id}.`);
+        // console.log(`GoalsPage Logic: handleEditSubmit finished for ID: ${id}.`);
     };
 
-    const handleDeleteConfirm = async (id) => { // <-- Функция handleDeleteConfirm определена здесь
-        console.log(`GoalsPage Logic: handleDeleteConfirm called for ID: ${id}`);
+    const handleDeleteConfirm = async (id) => {
+        // console.log(`GoalsPage Logic: handleDeleteConfirm called for ID: ${id}`);
         try {
             await deleteGoal(id);
-            console.log(`GoalsPage Logic: deleteGoal store action finished for ID: ${id}.`);
-            closeModal(); // Close modal on success
-            console.log(`GoalsPage Logic: handleDeleteConfirm finished.`);
+            // console.log(`GoalsPage Logic: deleteGoal store action finished for ID: ${id}.`);
+            closeModal();
+            // console.log(`GoalsPage Logic: handleDeleteConfirm finished.`);
             // eslint-disable-next-line no-unused-vars
         } catch (err) {
             console.error(`GoalsPage Logic: Error during delete goal ID ${id} (after confirmation):', err);`);
-            closeModal(); // Close modal on error
-            // Errors are displayed by LayoutWithHeader
+            closeModal();
         }
     };
 
-    const handleSetCurrentConfirm = async (id) => { // <-- Функция handleSetCurrentConfirm определена здесь
-        console.log(`GoalsPage Logic: handleSetCurrentConfirm called for ID: ${id}`);
+    const handleSetCurrentConfirm = async (id) => {
+        // console.log(`GoalsPage Logic: handleSetCurrentConfirm called for ID: ${id}`);
         try {
-            await setCurrentGoal(id); // Call the store action to set current
-            console.log(`GoalsPage Logic: setCurrentGoal store action finished for ID: ${id}.`);
-            closeModal(); // Close modal on success
-            console.log(`GoalsPage Logic: handleSetCurrentConfirm finished.`);
+            await setCurrentGoal(id);
+            // console.log(`GoalsPage Logic: setCurrentGoal store action finished for ID: ${id}.`);
+            closeModal();
+            // console.log(`GoalsPage Logic: handleSetCurrentConfirm finished.`);
             // eslint-disable-next-line no-unused-vars
         } catch (err) {
             console.error(`GoalsPage Logic: Error during setting goal ID ${id} as current (after confirmation):', err);`);
-            closeModal(); // Close modal on error
-            // Errors are displayed by LayoutWithHeader
+            closeModal();
         }
     };
     // --- Конец определения Logic functions ---
 
 
     // Determine if a general error message should be displayed
-    // Show error if there is an error in main goals operations or current goal operations
     const displayError = error || currentGoalError;
 
 
     // --- Rendering ---
     return (
-        <div className="bg-secondary-50"> {/* Light grey background */}
-            <main className="max-w-7xl mx-auto p-4"> {/* Centered container с padding */}
+        <div className="bg-secondary-50">
+            <main className="max-w-7xl mx-auto p-4">
 
                 {/* Header section: Title and Add Button */}
                 <div className="flex justify-between items-center mb-4">
@@ -287,24 +251,34 @@ export default function GoalsPage() {
                     </div>
                 )}
 
-                {/* Section for Current Goal */}
-                <div className="mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
+                {/* Section for Current Goal (Desktop only) */}
+                {/* Этот блок виден только на десктопе */}
+                <div className="hidden md:block mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
                     <Text variant="h3" className="mb-2 text-blue-800">Текущая цель:</Text>
-                    {currentGoalLoading || isBalanceLoading ? ( // Добавлена проверка загрузки баланса
-                        <div className="text-blue-700"><Text variant="body">Загрузка текущей цели и баланса...</Text></div>
+                    {currentGoalLoading || isBalanceLoading ? (
+                        <div className="text-blue-700"><Text variant="body">Загрузка текущей цели и баланса...</Text>
+                        </div>
                     ) : currentGoal ? (
                         <div className="flex items-center flex-wrap gap-x-4">
+                            {/* Описание цели с иконкой звезды (на десктопе иконка отрисовывается в таблице) */}
                             <Text variant="body" className="font-semibold">{currentGoal.description}</Text>
+                            {/* Сумма цели */}
                             <Text variant="body">Сумма: {typeof currentGoal.amount === 'number'
-                                ? currentGoal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                ? currentGoal.amount.toLocaleString('ru-RU', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                })
                                 : currentGoal.amount} ₽
                             </Text>
+                            {/* Желаемая дата */}
                             {currentGoal.wish_date && currentGoal.wish_date !== "0001-01-01T00:00:00Z" && (
-                                <Text variant="body">Желаемая дата: {new Date(currentGoal.wish_date).toLocaleDateString()}</Text>
-                            )}
-                            {/* Можно добавить индикатор достижения и дату достижения */}
+                                <Text variant="body">Желаемая
+                                    дата: {new Date(currentGoal.wish_date).toLocaleDateString('ru-RU')}</Text>
+                                )}
+                            {/* Достигнута / Дата достижения */}
                             {currentGoal.is_achieved && currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z" && (
-                                <Text variant="body" className="text-green-700">Достигнута: {new Date(currentGoal.achievement_date).toLocaleDateString()}</Text>
+                                <Text variant="body"
+                                      className="text-green-700">Достигнута: {new Date(currentGoal.achievement_date).toLocaleDateString('ru-RU')}</Text> // Формат даты
                             )}
                         </div>
                     ) : (
@@ -313,108 +287,96 @@ export default function GoalsPage() {
                 </div>
 
 
-                {/* Conditional Rendering for Goals List */}
-                {loading && goals === null ? (
-                    // Show initial loading spinner for goals list
-                    <div className="text-center p-4">
-                        <Text variant="body">Загрузка списка целей...</Text>
-                    </div>
-                ) : (
-                    // Content container for the list
-                    <div className="bg-background shadow-md rounded-md overflow-hidden">
-                        {/* If not loading, no error, and goals list is loaded but empty */}
-                        {goals !== null && goals.length === 0 ? (
-                            <div className="p-4 text-center">
-                                <Text variant="body">У вас пока нет добавленных целей.</Text>
-                            </div>
-                        ) : (
-                            // If goals list is loaded and not empty
-                            goals !== null && goals.length > 0 && (
-                                <table className="min-w-full">
+                {/* Container for Goals List (Table for Desktop, Cards for Mobile) */}
+                <div className=" rounded-md overflow-hidden">
+                    {loading && goals === null && !currentGoalLoading && !isBalanceLoading ? (
+                        <div className="text-center p-4">
+                            <Text variant="body">Загрузка списка целей...</Text>
+                        </div>
+                    ) : (
+                        // Content container
+                        <>
+                            {/* Desktop Table (hidden on mobile) */}
+                            {/* Отображаем таблицу только если есть цели ИЛИ если загрузка еще идет, но данных пока нет (чтобы показать "Обновление") */}
+                            {/* Проверяем, что есть данные goals ИЛИ loading, но goals == null (т.е. идет первая загрузка) */}
+                            {(goals !== null && goals.length > 0) || (loading && goals === null) ? (
+                                <table className="min-w-full hidden md:table">
                                     <thead className="bg-secondary-200">
                                     <tr>
-                                        <th className="text-left p-4"><Text variant="th">№</Text></th>
+                                        {/* Заголовки таблицы - Отступы как в финальной SpendingTable */}
+                                        <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
+                                        {/* № */}
                                         <th className="text-left p-4"><Text variant="th">Описание</Text></th>
+                                        {/* Описание */}
                                         <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Желаемая дата</Text></th>
-                                        {/* Можем добавить колонки для is_achieved, achievement_date */}
-                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th>
+                                        {/* Сумма */}
+                                        <th className="text-left px-2 py-4"><Text variant="th">Желаемая дата</Text></th>
+                                        {/* Желаемая дата */}
+                                        <th className="text-left px-2 py-4"><Text variant="th">Действия</Text></th>
+                                        {/* Действия */}
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {/* Проходим по массиву goals и рендерим строку для каждой цели */}
-                                    {goals.map((goal, index) => {
-                                        // Определяем, является ли текущая цель в итерации текущей выбранной целью
+                                    {goals !== null && goals.length > 0 && goals.map((goal, index) => {
+                                        {/* Проверяем goals перед map */
+                                        }
                                         const isCurrent = currentGoal && currentGoal.id === goal.id;
 
-                                        // --- Расчет процента и определение класса цвета для иконки ---
+                                        // --- Расчет процента и определение класса цвета для иконки (для звезды в таблице) ---
                                         let percentage = 0;
                                         let starColorClass = 'text-gray-500'; // Цвет по умолчанию (если не текущая или баланс не загружен)
 
-                                        // Рассчитываем процент только если это текущая цель, баланс и сумма цели - числа и сумма цели > 0
-                                        // Убедимся, что balance и goal.amount доступны и валидны
                                         if (isCurrent && typeof balance === 'number' && typeof goal.amount === 'number' && goal.amount > 0) {
                                             const achieved = balance >= 0 ? balance : 0; // Достигнутая часть
                                             percentage = Math.min((achieved / goal.amount) * 100, 100); // Процент (не более 100)
 
-                                            // Определяем класс цвета на основе процента (логика по пороговым значениям)
-                                            if (percentage < 25) {
-                                                starColorClass = 'text-red-500';      // Красный до 25%
-                                            } else if (percentage < 50) {
-                                                starColorClass = 'text-orange-500';   // Оранжевый до 50% (используем оранжевый Tailwind)
-                                            } else if (percentage < 75) {
-                                                starColorClass = 'text-yellow-500';   // Желтый до 75%
-                                            } else { // percentage >= 75
-                                                starColorClass = 'text-green-500';    // Зеленый от 75% и выше
-                                            }
-                                            // Дополнительно можно сделать цвет ярче, если цель достигнута (percentage >= 100)
-                                            if (percentage >= 100) {
-                                                starColorClass = 'text-green-600'; // Или text-green-700 для более насыщенного зеленого
-                                            }
-
+                                            if (percentage < 25) starColorClass = 'text-red-500';
+                                            else if (percentage < 50) starColorClass = 'text-orange-500';
+                                            else if (percentage < 75) starColorClass = 'text-yellow-500';
+                                            else starColorClass = 'text-green-500';
+                                            if (percentage >= 100) starColorClass = 'text-green-600';
                                         } else if (!isCurrent) {
-                                            // Если цель не текущая, звездочка может быть, например, серой или невидимой
                                             starColorClass = 'text-transparent'; // Делаем иконку невидимой, если не текущая цель
                                         }
-                                        // --- Конец ДОБАВЛЕННОГО ---
-
+                                        // --- Конец расчета ---
 
                                         return (
-                                            // Убран лишний пробел после <tr> и комментарий
-                                            <tr key={goal.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                                {/* Убран лишний пробел после <td> и комментарий */}
-                                                <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                                                {/* Убран лишний пробел перед <td> и комментарий */}
-                                                <td className="p-4"> {/* Ячейка для описания цели */}
-                                                    {/* Flex контейнер для иконки и текста, выравнивание по центру */}
+                                            <tr key={goal.id}
+                                                className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
+                                                {/* № */}
+                                                <td className="pl-2 pr-0 py-4"><Text
+                                                    variant="tdPrimary">{index + 1}</Text></td>
+                                                {/* Отступы как в SpendingTable */}
+                                                {/* Описание с иконкой звезды (в таблице) */}
+                                                <td className="p-4"> {/* Отступы как в SpendingTable */}
                                                     <div className="flex items-center">
                                                         {/* Рендерим StarIcon только если это текущая цель */}
-                                                        {isCurrent && ( // Рендерим только если isCurrent истинно
-                                                            // Используем определенный класс цвета для звездочки
-                                                            // Добавляем mx-0 mr-1 для контроля отступа между иконкой и текстом
-                                                            <StarIcon className={`w-5 h-5 mr-1 ${starColorClass}`} />
-                                                        )}
-                                                        {/* Текст описания цели */}
-                                                        <Text
-                                                            variant="tdPrimary" // Вариант текста для ячейки таблицы
-                                                        >
-                                                            {goal.description} {/* Само описание цели */}
-                                                        </Text>
+                                                        {isCurrent && (
+                                                            <StarIcon
+                                                                className={`w-5 h-5 mr-1 ${starColorClass}`}/>
+                                                            )}
+                                                        <Text variant="tdPrimary">{goal.description}</Text>
                                                     </div>
                                                 </td>
-                                                {/* Убран лишний пробел перед <td> и комментарий */}
-                                                <td className="p-4"><Text variant="tdSecondary"> {/* Ячейка для суммы */}
+                                                {/* Сумма */}
+                                                <td className="p-4"><Text
+                                                    variant="tdSecondary"> {/* Отступы как в SpendingTable */}
                                                     {typeof goal.amount === 'number'
-                                                        ? goal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                                        : goal.amount} ₽
+                                                        ? goal.amount.toLocaleString('ru-RU', {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        })
+                                                        : goal.amount}
+                                                    {'\u00A0'}₽ {/* Неразрывный пробел */}
                                                 </Text></td>
-                                                {/* Убран лишний пробел перед <td> и комментарий */}
-                                                <td className="p-4"><Text variant="tdSecondary"> {/* Ячейка для желаемой даты */}
-                                                    {/* Форматирование даты для отображения */}
-                                                    {goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z" ? new Date(goal.wish_date).toLocaleDateString() : '-'}
+                                                {/* Желаемая дата */}
+                                                <td className="px-2 py-4"><Text
+                                                    variant="tdSecondary"> {/* Отступы как в SpendingTable */}
+                                                    {goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z" ? new Date(goal.wish_date).toLocaleDateString('ru-RU') : '-'} {/* Формат даты */}
                                                 </Text></td>
-                                                {/* Убран лишний пробел перед <td> и комментарий */}
-                                                <td className="p-4 flex gap-2"> {/* Ячейка для кнопок действий */}
+                                                {/* Действия */}
+                                                <td className="px-2 py-4 flex gap-1"> {/* Отступы и зазор как в финальной SpendingTable */}
                                                     {/* Кнопка "Редактировать" */}
                                                     <IconButton
                                                         icon={PencilIcon}
@@ -422,8 +384,7 @@ export default function GoalsPage() {
                                                         className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
                                                         onClick={() => handleEditClick(goal)}
                                                     />
-                                                    {/* Кнопка "Установить текущей" */}
-                                                    {/* Рендерим кнопку только если эта цель НЕ является текущей */}
+                                                    {/* Кнопка "Установить текущей" (не отображается для текущей) */}
                                                     {!(isCurrent) && (
                                                         <IconButton
                                                             icon={StarIcon}
@@ -441,20 +402,51 @@ export default function GoalsPage() {
                                                     />
                                                 </td>
                                             </tr>
-                                        ); // Конец возврата из map
+                                        );
                                     })}
                                     </tbody>
                                 </table>
-                            )
-                        )}
-                        {/* Show a general loading/updating indicator if loading but we already have data */}
-                        {loading && goals !== null ? (
-                            <div className="text-center p-4">
-                                <Text variant="body">Обновление списка целей...</Text>
-                            </div>
-                        ) : null}
-                    </div>
-                )}
+                            ) : null /* Не рендерим таблицу, если целей нет и не идет загрузка */
+                            }
+
+                            {/* Mobile Card List (hidden on desktop) */}
+                            {/* Отображаем карточки только если есть цели ИЛИ если загрузка еще идет, но данных пока нет */}
+                            {/* goals === null && loading - условие для показа "Загрузка списка целей..." внутри карточек, если goals пуст при первой загрузке */}
+                            {(goals !== null && goals.length > 0) || (loading && goals === null) ? (
+                                <GoalsCardList
+                                    className="block md:hidden"
+                                    goals={goals}
+                                    currentGoal={currentGoal}
+                                    balance={balance}
+                                    loading={loading}
+                                    currentGoalLoading={currentGoalLoading}
+                                    isBalanceLoading={isBalanceLoading}
+                                    handleEditClick={handleEditClick}
+                                    handleDeleteClick={handleDeleteClick}
+                                    handleSetCurrentClick={handleSetCurrentClick}
+                                />
+                            ) : (
+                                // Состояние "Нет целей" (для обоих видов, но будет видно только там, где нет таблицы/карточек)
+                                // Поскольку таблица и карточки скрываются при goals === null && !loading,
+                                // этот блок будет виден только в этом случае.
+                                !loading && goals !== null && goals.length === 0 && (
+                                    <div className="p-4 text-center">
+                                        <Text variant="body">У вас пока нет добавленных целей.</Text>
+                                    </div>
+                                )
+                            )}
+
+                            {/* Show a general loading/updating indicator only if loading and we already have data (for table/cards) */}
+                            {/* Этот индикатор будет отображаться ПОСЛЕ таблицы ИЛИ карточек, если они уже были загружены ранее */}
+                            {loading && goals !== null && goals.length > 0 ? (
+                                <div className="text-center p-4">
+                                    <Text variant="body">Обновление списка целей...</Text>
+                                </div>
+                            ) : null}
+
+                        </>
+                    )}
+                </div>
 
                 {/* Modal and ConfirmModal components are rendered by LayoutWithHeader */}
 
