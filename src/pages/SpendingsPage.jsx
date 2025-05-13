@@ -111,7 +111,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                 <div className="flex items-center gap-1">
                                     {isEndedDisplay ? (
                                         <>
-                                            <CheckCircleIcon className="h-5 w-5 text-gray-400" />
+                                            <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-gray-400" />
                                             <Text variant="tdSecondary" className="text-gray-600">
                                                 до {spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01'
                                                 ? new Date(spending.end_date).toLocaleDateString('ru-RU')
@@ -120,7 +120,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                         </>
                                     ) : (
                                         <>
-                                            <CheckCircleIcon className="h-5 w-5 text-blue-500" />
+                                            <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-blue-500" />
                                             <Text variant="tdSecondary" className="text-blue-700">
                                                 расходы продолжаются
                                             </Text>
@@ -129,7 +129,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1">
-                                    <XCircleIcon className="h-5 w-5 text-red-300" />
+                                    <XCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-red-300" />
                                     <Text variant="tdSecondary">Разовый</Text>
                                 </div>
                             )}

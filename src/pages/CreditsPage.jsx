@@ -94,14 +94,14 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
                             <div className="flex items-center gap-1">
                                 {isEndedDisplay ? (
                                     <>
-                                        <CheckCircleIcon className="h-5 w-5 text-gray-400" />
+                                        <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-gray-400" />
                                         <Text variant="tdSecondary" className="text-gray-600">
                                             до {credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01' ? new Date(credit.end_date).toLocaleDateString('ru-RU') : '-'}
                                         </Text>
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircleIcon className="h-5 w-5 text-blue-500" />
+                                        <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-blue-500" />
                                         <Text variant="tdSecondary" className="text-blue-700">
                                             выплаты продолжаются
                                         </Text>
@@ -110,7 +110,7 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
                             </div>
                         ) : (
                             <div className="flex items-center gap-1">
-                                <XCircleIcon className="h-5 w-5 text-red-300" />
+                                <XCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-red-300" />
                                 <Text variant="tdSecondary">Разовый</Text>
                             </div>
                         )}
