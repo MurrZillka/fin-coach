@@ -56,10 +56,10 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                 <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
                 <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
                 <th className="text-left p-4"><Text variant="th">Описание</Text></th>
-                <th className="text-left p-4"><Text variant="th">Категория</Text></th>
-                <th className="text-left p-4"><Text variant="th">Дата начала</Text></th>
-                <th className="text-left p-4"><Text variant="th">Статус</Text></th>
-                <th className="text-left p-4"><Text variant="th">Действия</Text></th>
+                <th className="text-left px-2 py-4"><Text variant="th">Категория</Text></th>
+                <th className="text-left px-2 py-4"><Text variant="th">Дата начала</Text></th>
+                <th className="text-left px-2 py-4"><Text variant="th">Статус</Text></th>
+                <th className="text-left px-2 py-4"><Text variant="th">Действия</Text></th>
             </tr>
             </thead>
             <tbody>
@@ -69,44 +69,67 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                 const isEndedDisplay = spending.is_permanent && isDateTodayOrEarlier(spending.end_date);
                 return (
                     <tr key={spending.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
+                        {/* № */}
                         <td className="pl-2 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>
+
+                        {/* Сумма (с автоматическим переносом, неразрывным пробелом и выравниванием по базовой линии) */}
                         <td className="px-2 py-4">
                             {spending.is_permanent ? (
                                 <>
-                                    <div className="flex items-center min-w-[220px] mb-1">
-                                        <Text variant="tdSecondary" className="text-xs text-gray-600 mr-1">Разовый платеж:</Text>
+                                    {/*
+                                Container div с flex-wrap для автоматического переноса.
+                                Использован items-baseline для выравнивания по нижней линии текста.
+                            */}
+                                    <div className="flex flex-wrap items-baseline mb-1"> {/* Изменено items-start на items-baseline */}
+                                        {/* Метка "Разовый платеж:" */}
+                                        <Text variant="tdSecondary" className="text-xs text-gray-600 mr-1 mb-1 whitespace-nowrap">Разовый платеж:</Text>
+                                        {/* Сумма с неразрывным пробелом перед знаком рубля */}
                                         <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                             {typeof spending.amount === 'number'
                                                 ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                                : spending.amount} ₽
-
+                                                : spending.amount}
+                                            {'\u00A0'}₽ {/* Используем \u00A0 для неразрывного пробела */}
                                         </Text>
                                     </div>
+                                    {/* Часть "Всего:" (уже использует items-center, которое часто приводит к выравниванию по базовой линии для текста) */}
                                     <div className="flex items-center">
                                         <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
+                                        {/* Общая сумма с неразрывным пробелом перед знаком рубля */}
                                         <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                             {typeof spending.full_amount === 'number'
                                                 ? spending.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                                : spending.full_amount} ₽
+                                                : spending.full_amount}
+                                            {'\u00A0'}₽ {/* Используем \u00A0 для неразрывного пробела */}
                                         </Text>
                                     </div>
                                 </>
                             ) : (
+                                // Часть для нерегулярных расходов
                                 <div className="flex items-center">
                                     <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text>
+                                    {/* Сумма нерегулярного расхода с неразрывным пробелом */}
                                     <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                         {typeof spending.amount === 'number'
                                             ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                            : spending.amount} ₽
+                                            : spending.amount}
+                                        {'\u00A0'}₽ {/* Используем \u00A0 для неразрывного пробела */}
                                     </Text>
                                 </div>
                             )}
                         </td>
-                        <td className="p-4"><Text variant="tdSecondary">{spending.description || '-'}</Text></td>
-                        <td className="p-4"><Text variant="tdSecondary">{categoryName}</Text></td>
-                        <td className="p-4"><Text variant="tdSecondary">
+
+                        {/* Описание */}
+                        <td className="px-2 py-4"><Text variant="tdSecondary">{spending.description || '-'}</Text></td>
+
+                        {/* Категория */}
+                        <td className="px-2 py-4"><Text variant="tdSecondary">{categoryName}</Text></td>
+
+                        {/* Дата начала */}
+                        <td className="px-2 py-4"><Text variant="tdSecondary">
                             {spending.date ? new Date(spending.date).toLocaleDateString('ru-RU') : '-'}
                         </Text></td>
+
+                        {/* Статус */}
                         <td className="px-2 py-4 max-w-[100px]">
                             {spending.is_permanent ? (
                                 <div className="flex items-center gap-1">
@@ -135,7 +158,10 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                 </div>
                             )}
                         </td>
-                        <td className="p-4 flex gap-2">
+
+                        {/* Действия */}
+                        <td className="px-2 py-4 flex gap-1"> {/* Уменьшены горизонтальные отступы (px-2) и зазор между иконками (gap-1) */}
+                            {/* ... кнопки иконок без изменений ... */}
                             <IconButton
                                 icon={PencilIcon}
                                 tooltip="Редактировать"
