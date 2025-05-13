@@ -22,7 +22,6 @@ const categoryFields = [
     },
 ];
 
-
 export default function CategoriesPage() {
     const {
         categories,
@@ -129,7 +128,6 @@ export default function CategoriesPage() {
         // console.log(`CategoriesPage Logic: handleDeleteConfirm finished for ID: ${id}.`);
     };
 
-
     useEffect(() => {
         return () => {
             // console.log('CategoriesPage: useEffect cleanup, clearing error.');
@@ -147,7 +145,6 @@ export default function CategoriesPage() {
     const showList = categories !== null && categories.length > 0;
     // Проверяем, идет ли фоновая загрузка (loading: true, но categories уже не null)
     const isBackgroundLoading = loading && categories !== null;
-
 
     return (
         <div className="bg-secondary-50">
@@ -188,10 +185,10 @@ export default function CategoriesPage() {
                                     <thead className="bg-secondary-200">
                                     <tr>
                                         {/* Заголовки таблицы - Отступы как в финальной SpendingTable */}
-                                        <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th> {/* № */}
+                                        <th className="text-left p-4"><Text variant="th">№</Text></th> {/* № */}
                                         <th className="text-left p-4"><Text variant="th">Название</Text></th> {/* Название */}
                                         <th className="text-left p-4"><Text variant="th">Описание</Text></th> {/* Описание */}
-                                        <th className="text-left px-2 py-4"><Text variant="th">Действия</Text></th> {/* Действия */}
+                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th> {/* Действия */}
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -200,7 +197,7 @@ export default function CategoriesPage() {
                                     {categories.map((category, index) => (
                                         <tr key={category.id}
                                             className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                            <td className="pl-2 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td><td className="p-4"><Text variant="tdPrimary">{category.name}</Text></td><td className="p-4"><Text
+                                            <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td><td className="p-4"><Text variant="tdPrimary">{category.name}</Text></td><td className="p-4"><Text
                                             variant="tdSecondary">{category.description}</Text></td><td className="px-2 py-4 flex gap-1"> {/* Отступы и зазор как в финальной SpendingTable Actions */}
                                             <IconButton
                                                 icon={PencilIcon}

@@ -1,9 +1,9 @@
-// src/components/BalanceWidget.jsx (Использует кастомные классы)
+// src/components/BalanceWidget.jsx
 import React from 'react';
 // Убедись, что путь к useBalanceStore корректный
 import useBalanceStore from '../stores/balanceStore'; // Импортируем стор баланса
 // Убедись, что путь к Text корректный относительно этой папки components
-import Text from './ui/Text'; // Импортируем компонент Text (BalanceWidget.jsx в src/components, Text.jsx в src/components/ui)
+import Text from './ui/Text'; // Импортируем компонент Text
 // --- ДОБАВЛЕНО: Импортируем новый компонент виджета прогресса цели ---
 import GoalProgressWidget from './GoalProgressWidget'; // Убедись, что путь к GoalProgressWidget.jsx корректен
 // --- Конец ДОБАВЛЕННОГО ---
@@ -14,42 +14,41 @@ export default function BalanceWidget() {
     const {balance, isLoading, error} = useBalanceStore();
 
     // --- Форматирование баланса ---
-    // Используем toLocaleString для правильного форматирования чисел с разделителями и знаками после запятой
     const formattedBalanceValue = typeof balance === 'number'
         ? balance.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})
         : null;
 
 
     // --- Определение КАСТОМНОГО класса для баланса ---
-    // Возвращаем имя кастомного CSS класса в зависимости от знака баланса
     const balanceCustomColorClass = balance !== null && !isLoading && !error
-        ? (balance >= 0 ? 'balance-positive' : 'balance-negative') // Имена новых кастомных классов
-        : ''; // Пустая строка, если баланс еще не загружен/ошибка. Базовый стиль от Text компонента.
-    // --- Конец Определения КАСТОМНОГО класса ---
+        ? (balance >= 0 ? 'balance-positive' : 'balance-negative')
+        : '';
+
 
     return (
         // Главный контейнер виджета - прямоугольник
         <div className="bg-white p-4 rounded-md shadow-md">
-            {/* Контейнер для разделения на левую (Баланс) и правую (Цель) части */}
-            {/* justify-between: элементы по краям, items-center: выравнивание по центру по вертикали */}
-            <div className="flex justify-between items-center ">
+            {/*
+                Контейнер для разделения на левую (Баланс) и правую (Цель) части.
+                На мобильных/планшетах (по умолчанию): flex-col, items-start, gap-4.
+                На десктопах (md:): flex-row, justify-between, items-center, gap-0.
+            */}
+            <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mr-6 gap-4 md:gap-0">
 
                 {/* --- Левая часть: Отображение Баланса --- */}
                 {/* Контейнер для надписи "Ваш баланс:" и самого значения/статуса */}
                 {/* flex: чтобы элементы были в строку, items-baseline: выравнивание по базовой линии текста */}
-                <div className="flex items-baseline">
+                {/* На мобильных: занимает всю ширину */}
+                <div className="flex items-baseline w-full md:w-auto"> {/* Добавлены w-full md:w-auto */}
                     {/* Надпись "Ваш баланс:" */}
-                    {/* mr-2: правый отступ от надписи до значения */}
                     <Text variant="body" className="text-secondary-600 mr-2">Ваш баланс:</Text>
 
                     {/* --- Динамическое содержимое: Загрузка, Ошибка, Значение Баланса, или Плейсхолдер --- */}
                     {isLoading && (
-                        // Загрузка - оставляем стандартные классы
                         <Text className="text-2xl font-bold text-primary-700">Загрузка...</Text>
                     )}
 
                     {error && (
-                        // Ошибка - оставляем стандартные классы (красный, жирный)
                         <Text className="text-2xl font-bold text-red-500">
                             Ошибка
                         </Text>
@@ -58,16 +57,13 @@ export default function BalanceWidget() {
                     {/* Если не загрузка, нет ошибки, и баланс успешно загружен (значение не null) */}
                     {!isLoading && !error && balance !== null && (
                         <Text
-                            className={`text-2xl ${balanceCustomColorClass}`}> {/* Используем только размер и кастомный класс */}
-                            {/* Добавляем знак "-" если баланс отрицательный */}
-                            {/*{balance < 0 && '-'}*/}
-                            {formattedBalanceValue} ₽ {/* Форматированное значение и символ валюты */}
+                            className={`text-2xl ${balanceCustomColorClass}`}>
+                            {formattedBalanceValue}{'\u00A0'}₽ {/* Добавлен неразрывный пробел */}
                         </Text>
                     )}
 
                     {/* Если не загрузка, нет ошибки, но баланс еще не загружен или сброшен (значение null) */}
                     {!isLoading && !error && balance === null && (
-                        // Плейсхолдер - оставляем стандартные классы
                         <Text className="text-2xl font-bold text-secondary-600">
                             --.-- ₽
                         </Text>
@@ -77,16 +73,15 @@ export default function BalanceWidget() {
                 {/* --- Конец Левой части --- */}
 
 
-                {/* --- Правая часть: Место для Финансовой цели (ТЕПЕРЬ НАШ НОВЫЙ ВИДЖЕТ) --- */}
-                {/* Заменяем placeholder div на наш новый компонент виджета прогресса цели */}
-                {/* --- ИСПРАВЛЕНО: Заменен placeholder на GoalProgressWidget --- */}
+                {/* --- Правая часть: Место для Финансовой цели (Виджет Прогресса) --- */}
+                {/* Сам виджет */}
+                {/* Его ширина и расположение будут адаптированы в его собственном компоненте */}
                 <GoalProgressWidget />
-                {/* --- Конец ИСПРАВЛЕНИЯ --- */}
+                {/* --- Конец Правой части --- */}
 
             </div>
 
             {error && error.message && (
-                // Текст ошибки - оставляем стандартные классы (красный)
                 <Text variant="body" className="text-red-500 mt-2">
                     Подробно: {error.message}
                 </Text>
