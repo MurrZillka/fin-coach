@@ -357,6 +357,7 @@ export default function SpendingsPage() {
                                         spendings={spendings}
                                         handleEditClick={handleEditClick}
                                         handleDeleteClick={handleDeleteClick}
+                                        categories={categories}
                                     />
                                     <SpendingTable
                                         className="hidden md:table"
