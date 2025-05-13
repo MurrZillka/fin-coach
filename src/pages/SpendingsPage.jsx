@@ -79,6 +79,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                             {typeof spending.amount === 'number'
                                                 ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                                                 : spending.amount} ₽
+
                                         </Text>
                                     </div>
                                     <div className="flex items-center">
