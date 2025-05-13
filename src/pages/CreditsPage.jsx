@@ -46,12 +46,12 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
     <table className={`min-w-full ${className}`}>
         <thead className="bg-secondary-200">
         <tr>
-            <th className="text-left px-1 py-4"><Text variant="th">№</Text></th>
-            <th className="text-left px-1 py-4"><Text variant="th">Сумма</Text></th>
+            <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
+            <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
             <th className="text-left p-4"><Text variant="th">Описание</Text></th>
-            <th className="text-left p-4"><Text variant="th">Дата начала</Text></th>
-            <th className="text-left p-4"><Text variant="th">Статус</Text></th>
-            <th className="text-left p-4"><Text variant="th">Действия</Text></th>
+            <th className="text-left px-2 py-4"><Text variant="th">Дата начала</Text></th>
+            <th className="text-left px-2 py-4"><Text variant="th">Статус</Text></th>
+            <th className="text-left px-2 py-4"><Text variant="th">Действия</Text></th>
         </tr>
         </thead>
         <tbody>
@@ -59,36 +59,42 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
             const isEndedDisplay = credit.is_permanent && isDateTodayOrEarlier(credit.end_date);
             return (
                 <tr key={credit.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                    <td className="px-2 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                    <td className="px-2 py-4">
+                    {/* № */}
+                    <td className="pl-2 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>{/* Сумма: автоматический перенос, неразрывный пробел, выравнивание по базовой линии */}
+                    <td className="px-2 py-4"> {/* Отступы согласованы с SpendingTable */}
                         {credit.is_permanent ? (
                             <>
-                                <div className="flex items-center min-w-[220px] mb-1">
-                                    <Text variant="tdSecondary" className="font-normal text-[0.7rem] text-gray-600 mr-1">Разовый платеж:</Text>
-                                    <Text variant="tdPrimary" className="text-accent-success font-semibold">
-                                        {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount} ₽
+                                {/* Container div с flex-wrap для автоматического переноса. */}
+                                <div className="flex flex-wrap items-baseline mb-1"> {/* Изменено items-center на items-baseline, удален min-w */}
+                                    {/* Метка "Разовый платеж:" */}
+                                    {/* Note: text-[0.7rem] из оригинального кода сохранен */}
+                                    <Text variant="tdSecondary" className="font-normal text-[0.7rem] text-gray-600 mr-1 mb-1 whitespace-nowrap">Разовый платеж:</Text><Text variant="tdPrimary" className="text-accent-success font-semibold">
+                                        {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount}
+                                        {'\u00A0'}₽ {/* Добавлен неразрывный пробел */}
                                     </Text>
                                 </div>
+                                {/* Часть "Всего:": неразрывный пробел */}
                                 <div className="flex items-center">
-                                    <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
-                                    <Text variant="tdPrimary" className="text-accent-success font-semibold">
-                                        {typeof credit.full_amount === 'number' ? credit.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.full_amount} ₽
-                                    </Text>
+                                    <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text><Text variant="tdPrimary" className="text-accent-success font-semibold">
+                                    {typeof credit.full_amount === 'number' ? credit.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.full_amount}
+                                    {'\u00A0'}₽ {/* Добавлен неразрывный пробел */}
+                                </Text>
                                 </div>
                             </>
                         ) : (
+                            // Часть для нерегулярных расходов: неразрывный пробел
                             <div className="flex items-center">
-                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text>
-                                <Text variant="tdPrimary" className="text-accent-success font-semibold">
-                                    {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount} ₽
-                                </Text>
+                                <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text><Text variant="tdPrimary" className="text-accent-success font-semibold">
+                                {typeof credit.amount === 'number' ? credit.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : credit.amount}
+                                {'\u00A0'}₽ {/* Добавлен неразрывный пробел */}
+                            </Text>
                             </div>
                         )}
-                    </td>
-                    <td className="p-4"><Text variant="tdSecondary">{credit.description || '-'}</Text></td>
-                    <td className="p-4"><Text variant="tdSecondary">
+                    </td>{/* Описание: корректировка отступов */}
+                    <td className="px-2 py-4"><Text variant="tdSecondary">{credit.description || '-'}</Text></td>{/* Дата начала: корректировка отступов */}
+                    <td className="px-2 py-4"><Text variant="tdSecondary"> {/* Изменено с p-4 на px-2 py-4 */}
                         {credit.date ? new Date(credit.date).toLocaleDateString('ru-RU') : '-'}
-                    </Text></td>
+                    </Text></td>{/* Статус: отступы и min-w как в SpendingTable */}
                     <td className="px-2 py-4 max-w-[100px]">
                         {credit.is_permanent ? (
                             <div className="flex items-center gap-1">
@@ -103,7 +109,7 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
                                     <>
                                         <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-blue-500" />
                                         <Text variant="tdSecondary" className="text-blue-700">
-                                            выплаты продолжаются
+                                            выплаты продолжаются {/* Текст из оригинального кода Credits */}
                                         </Text>
                                     </>
                                 )}
@@ -115,7 +121,7 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
                             </div>
                         )}
                     </td>
-                    <td className="p-4 flex gap-2">
+                    <td className="px-2 py-4 flex gap-1"> {/* Изменено с p-4 flex gap-2 на px-2 py-4 flex gap-1 */}
                         <IconButton
                             icon={PencilIcon}
                             tooltip="Редактировать"
@@ -135,7 +141,6 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
         </tbody>
     </table>
 );
-
 export default function CreditsPage() {
     const { credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
     const { openModal, closeModal, setModalSubmissionError, modalType } = useModalStore();
