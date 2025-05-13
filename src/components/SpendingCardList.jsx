@@ -1,18 +1,19 @@
 import React from 'react';
 import Text from './ui/Text';
 import IconButton from './ui/IconButton';
-import { CheckCircleIcon, XCircleIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { isDateTodayOrEarlier } from '../utils/dateUtils';
+import {CheckCircleIcon, XCircleIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {isDateTodayOrEarlier} from '../utils/dateUtils';
 
-const SpendingCardList = ({ spendings, categories, handleEditClick, handleDeleteClick, className }) => {
+const SpendingCardList = ({spendings, categories, handleEditClick, handleDeleteClick, className}) => {
     return (
-        <div className={`flex flex-wrap justify-center gap-4 p-4 block md:hidden ${className}`}>
+        <div className={`grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4 p-4 md:hidden ${className}`}>
             {spendings.map((spending, index) => {
                 const isEndedDisplay = spending.is_permanent && isDateTodayOrEarlier(spending.end_date);
                 const category = categories ? categories.find(cat => cat.id === spending.category_id) : null;
                 const categoryName = category ? category.name : 'Неизвестно';
                 return (
-                    <div key={spending.id} className="min-w-[220px] min-h-[200px] p-3 bg-background rounded-md shadow-sm flex flex-col justify-between gap-1">
+                    <div key={spending.id}
+                         className="p-3 bg-background rounded-md shadow-sm flex flex-col justify-between gap-1"> {/* Удалены min-w-[220px] и min-h-[200px] */}
                         {/* Описание */}
                         <Text variant="tdPrimary" className="text-sm font-semibold truncate">
                             {spending.description || `Расход #${index + 1}`}
@@ -26,8 +27,12 @@ const SpendingCardList = ({ spendings, categories, handleEditClick, handleDelete
                                     </Text>
                                     <Text variant="tdPrimary" className="text-sm text-accent-error font-semibold">
                                         {typeof spending.amount === 'number'
-                                            ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                            : spending.amount} ₽
+                                            ? spending.amount.toLocaleString('ru-RU', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })
+                                            : spending.amount}
+                                        {'\u00A0'}₽ {/* Неразрывный пробел */}
                                     </Text>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -36,8 +41,12 @@ const SpendingCardList = ({ spendings, categories, handleEditClick, handleDelete
                                     </Text>
                                     <Text variant="tdPrimary" className="text-sm text-accent-error font-semibold">
                                         {typeof spending.full_amount === 'number'
-                                            ? spending.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                            : spending.full_amount} ₽
+                                            ? spending.full_amount.toLocaleString('ru-RU', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })
+                                            : spending.full_amount}
+                                        {'\u00A0'}₽ {/* Неразрывный пробел */}
                                     </Text>
                                 </div>
                             </>
@@ -48,8 +57,12 @@ const SpendingCardList = ({ spendings, categories, handleEditClick, handleDelete
                                 </Text>
                                 <Text variant="tdPrimary" className="text-sm text-accent-error font-semibold">
                                     {typeof spending.amount === 'number'
-                                        ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                        : spending.amount} ₽
+                                        ? spending.amount.toLocaleString('ru-RU', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        })
+                                        : spending.amount}
+                                    {'\u00A0'}₽ {/* Неразрывный пробел */}
                                 </Text>
                             </div>
                         )}
@@ -76,7 +89,7 @@ const SpendingCardList = ({ spendings, categories, handleEditClick, handleDelete
                             {spending.is_permanent ? (
                                 isEndedDisplay ? (
                                     <>
-                                        <CheckCircleIcon className="h-3 w-3 text-gray-400" />
+                                        <CheckCircleIcon className="h-3 w-3 text-gray-400"/>
                                         <Text variant="tdSecondary" className="text-xs text-gray-600">
                                             до {spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01'
                                             ? new Date(spending.end_date).toLocaleDateString('ru-RU')
@@ -85,7 +98,7 @@ const SpendingCardList = ({ spendings, categories, handleEditClick, handleDelete
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircleIcon className="h-3 w-3 text-blue-500" />
+                                        <CheckCircleIcon className="h-3 w-3 text-blue-500"/>
                                         <Text variant="tdSecondary" className="text-xs text-blue-700">
                                             расходы продолжаются
                                         </Text>
@@ -93,7 +106,7 @@ const SpendingCardList = ({ spendings, categories, handleEditClick, handleDelete
                                 )
                             ) : (
                                 <>
-                                    <XCircleIcon className="h-3 w-3 text-red-300" />
+                                    <XCircleIcon className="h-3 w-3 text-red-300"/>
                                     <Text variant="tdSecondary" className="text-xs">
                                         Разовый
                                     </Text>
