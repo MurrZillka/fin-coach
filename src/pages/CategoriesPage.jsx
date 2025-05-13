@@ -184,11 +184,10 @@ export default function CategoriesPage() {
                                 <table className="min-w-full hidden md:table">
                                     <thead className="bg-secondary-200">
                                     <tr>
-                                        {/* Заголовки таблицы - Отступы как в финальной SpendingTable */}
-                                        <th className="text-left p-4"><Text variant="th">№</Text></th> {/* № */}
-                                        <th className="text-left p-4"><Text variant="th">Название</Text></th> {/* Название */}
-                                        <th className="text-left p-4"><Text variant="th">Описание</Text></th> {/* Описание */}
-                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th> {/* Действия */}
+                                        <th className="text-left p-4"><Text variant="th">№</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Название</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Описание</Text></th>
+                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th>
                                     </tr>
                                     </thead>
                                     <tbody>
