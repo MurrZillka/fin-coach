@@ -53,7 +53,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
         <table className="min-w-full hidden md:table">
             <thead className="bg-secondary-200">
             <tr>
-                <th className="text-left p-4"><Text variant="th">№</Text></th>
+                <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
                 <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
                 <th className="text-left p-4"><Text variant="th">Описание</Text></th>
                 <th className="text-left p-4"><Text variant="th">Категория</Text></th>
@@ -69,12 +69,12 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                 const isEndedDisplay = spending.is_permanent && isDateTodayOrEarlier(spending.end_date);
                 return (
                     <tr key={spending.id} className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                        <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                        <td className="p-4">
+                        <td className="pl-2 pr-0 py-4"><Text variant="tdPrimary">{index + 1}</Text></td>
+                        <td className="px-2 py-4">
                             {spending.is_permanent ? (
                                 <>
-                                    <div className="flex items-center mb-1">
-                                        <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Разовый платеж:</Text>
+                                    <div className="flex items-center min-w-[220px] mb-1">
+                                        <Text variant="tdSecondary" className="text-xs text-gray-600 mr-1">Разовый платеж:</Text>
                                         <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                             {typeof spending.amount === 'number'
                                                 ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -106,7 +106,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                         <td className="p-4"><Text variant="tdSecondary">
                             {spending.date ? new Date(spending.date).toLocaleDateString('ru-RU') : '-'}
                         </Text></td>
-                        <td className="p-4">
+                        <td className="px-2 py-4 max-w-[100px]">
                             {spending.is_permanent ? (
                                 <div className="flex items-center gap-1">
                                     {isEndedDisplay ? (
