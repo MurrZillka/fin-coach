@@ -33,7 +33,7 @@ export default function MainPage() {
     const {spendings, loading: spendingsLoading, fetchSpendings} = useSpendingsStore(); // Возможно, fetch нужен тут
     const {credits, loading: creditsLoading, fetchCredits} = useCreditStore(); // Возможно, fetch нужен тут
     const {goals, currentGoal, loading: goalsLoading, fetchGoals} = useGoalsStore(); // Возможно, fetch нужен тут
-    const {balance, isLoading: isBalanceLoading, fetchBalance} = useBalanceStore(); // Получаем баланс и его загрузку
+    const {balance, isLoading: isBalanceLoading} = useBalanceStore(); // Получаем баланс и его загрузку
 
 
     // Определяем, идет ли какая-либо загрузка основных данных для страницы
@@ -61,7 +61,7 @@ export default function MainPage() {
         // можно было бы установить флаг isInitialLoadComplete(true),
         // но мы можем обойтись без этого флага для простого лоадера.
 
-    }, [fetchSpendings, spendings, spendingsLoading, fetchCredits, credits, creditsLoading, fetchGoals, goals, goalsLoading, fetchBalance, balance, isBalanceLoading]); // Зависимости
+    }, [fetchSpendings, spendings, spendingsLoading, fetchCredits, credits, creditsLoading, fetchGoals, goals, goalsLoading, balance, isBalanceLoading]); // Зависимости
 
 
     // Определяем, полностью ли данные пустые (для приветственного сообщения)
