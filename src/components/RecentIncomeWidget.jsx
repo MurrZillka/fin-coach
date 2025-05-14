@@ -43,7 +43,7 @@ const RecentIncomeWidget = ({
     const showEmptyState = !loading && isEmpty;
     const showLoading = loading;
 
-    const itemsToDisplay = showList ? recentIncomes.slice(0, 5) : [];
+    const itemsToDisplay = showList ? recentIncomes.slice(0, 3) : [];
 
 
     return (
@@ -62,7 +62,7 @@ const RecentIncomeWidget = ({
 
                 {/* Иконка стрелки */}
                 {/* Tooltip оборачивает иконку */}
-                <Tooltip content={`Перейти в ${categoryName}`}> {/* Тултип с названием раздела */}
+                <Tooltip text={`Перейти в ${categoryName}`}> {/* Тултип с названием раздела */}
                     <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-primary-700" /> {/* Иконка */}
                 </Tooltip>
             </div>

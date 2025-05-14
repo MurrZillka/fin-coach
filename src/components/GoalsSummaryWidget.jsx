@@ -36,7 +36,7 @@ const GoalsSummaryWidget = ({
                 <Text variant="h3" className="flex-grow mr-2">Финансовые Цели</Text>
 
                 {/* Иконка стрелки */}
-                <Tooltip content={`Перейти в ${categoryName}`}>
+                <Tooltip text={`Перейти в ${categoryName}`}>
                     <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-primary-700" />
                 </Tooltip>
             </div>
