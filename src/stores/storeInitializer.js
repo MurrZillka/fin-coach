@@ -9,6 +9,7 @@ import useSpendingsStore from './spendingsStore';
 import useCategoryStore from './categoryStore';
 // --- ДОБАВЛЕНО: Импортируем стор Целей ---
 import useGoalsStore from './goalsStore';
+import useMainPageStore from './mainPageStore'; // ДОБАВЛЕНО: Импорт mainPageStore
 // --- Конец ДОБАВЛЕНИЯ ---
 
 
@@ -87,6 +88,18 @@ useAuthStore.subscribe(
 );
 console.log('storeInitializer: GoalsStore subscription set up.'); // Лог установки
 // --- Конец ДОБАВЛЕНИЯ ---
+useAuthStore.subscribe(
+    (authState) => {
+        console.log('storeInitializer: MainPageStore subscription triggered by auth state change.', authState);
+        const mainPageStoreState = useMainPageStore.getState();
+        if (!authState.isAuthenticated && (mainPageStoreState.recommendations !== null || mainPageStoreState.financialEntries !== null)) {
+            console.log('storeInitializer: User became unauthenticated, triggering mainPageStore reset.');
+            mainPageStoreState.resetMainPage();
+        }
+    },
+    (state) => ({ isAuthenticated: state.isAuthenticated })
+);
+console.log('storeInitializer: MainPageStore subscription set up.');
 
 
 console.log('storeInitializer: Store subscriptions initialization finished.'); // Лог завершения

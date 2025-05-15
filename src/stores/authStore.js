@@ -11,6 +11,7 @@ import useCategoryStore from './categoryStore';
 import useSpendingsStore from './spendingsStore';
 // --- ДОБАВЛЕНО: Импортируем стор Целей ---
 import useGoalsStore from './goalsStore'; // Импортируем useGoalsStore
+import useMainPageStore from './mainPageStore';
 // --- Конец ИМПОРТОВ ---
 
 // Добавляем get во второй аргумент create для доступа к текущему состоянию стора
@@ -175,6 +176,8 @@ const useAuthStore = create((set, get) => ({
             // Убедитесь, что useGoalsStore импортирован в начале файла
             useGoalsStore.getState().fetchGoals(); // Вызываем загрузку списка целей
             useGoalsStore.getState().getCurrentGoal(); // Вызываем загрузку текущей цели
+            useMainPageStore.getState().fetchRecommendations(token); // ДОБАВЛЕНО
+            useMainPageStore.getState().fetchFinancialOverview(token); // ДОБАВЛЕНО
             // --- Конец ДОБАВЛЕННОГО ---
 
 
