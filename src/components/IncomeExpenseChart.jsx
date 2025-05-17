@@ -1,5 +1,5 @@
 // src/components/IncomeExpenseChart.jsx
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect} from 'react'; // Добавил useEffect
 import Text from './ui/Text';
 
 // Импортируем компоненты Recharts
@@ -81,8 +81,6 @@ const hasDateOverlap = (start1, end1, start2, end2) => {
 // Вспомогательная функция для подготовки данных графика
 const prepareChartData = (credits, spendings, selectedPeriod) => {
     let aggregatedData = {}; // Объект для агрегации { 'Период': { Доходы: N, Расходы: M } }
-    //let dataFormat = ''; // 'YYYY-MM-DD' или 'YYYY-MM'
-    //let tickFormat = ''; // 'DD.MM' или 'Мес ГГГГ'
     let periodStep = 'day'; // Шаг агрегации: 'day' или 'month'
 
 
@@ -102,9 +100,6 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
             chartStartDate = new Date(today);
             chartStartDate.setDate(today.getDate() - 29); // Начало диапазона - 30 дней назад
             chartStartDate.setHours(0, 0, 0, 0);
-
-            //dataFormat = 'YYYY-MM-DD';
-            //tickFormat = 'DD.MM';
             periodStep = 'day';
             break;
         } // --- ДОБАВЛЕНО: Фигурные скобки ---
@@ -114,8 +109,6 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
             chartEndDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999); // Последний день текущего месяца (конец дня)
             chartStartDate = new Date(chartEndDate.getFullYear(), chartEndDate.getMonth() - 11, 1, 0, 0, 0, 0); // Первое число месяца 12 месяцев назад от конца текущего
 
-            //dataFormat = 'YYYY-MM';
-            //tickFormat = 'Мес ГГГГ';
             periodStep = 'month';
             break;
         } // --- ДОБАВЛЕНО: Фигурные скобки ---
@@ -150,10 +143,7 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
                 chartStartDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1, 0, 0, 0, 0); // Начало месяца самой ранней транзакции
             }
 
-            //dataFormat = 'YYYY-MM';
-            //tickFormat = 'Мес ГГГГ';
             periodStep = 'month';
-            // Ширина будет рассчитана в конце исходя из количества месяцев
             break;
         } // --- ДОБАВЛЕНО: Фигурные скобки ---
 
@@ -335,7 +325,6 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
 
     // Ширина графика теперь полностью управляется ResponsiveContainer
     // dynamicWidth больше не используется для задания ширины графика
-    // return { data: chartData, width: dynamicChartWidth }; // Удалено
     return { data: chartData }; // Возвращаем только данные
 };
 
@@ -352,11 +341,25 @@ const IncomeExpenseChart = ({
     const handleChartTypeChange = (type) => setChartType(type);
     const handlePeriodChange = (period) => setSelectedPeriod(period);
 
-    // Получаем только данные из useMemo
+    // --- ДОБАВЛЕНО ДЛЯ АДАПТИВНОСТИ ---
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768); // 768px - стандартный md breakpoint
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSmallScreen(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        // Очистка при размонтировании компонента
+        return () => window.removeEventListener('resize', handleResize);
+    }, []); // Пустой массив зависимостей означает, что эффект запустится только при монтировании и размонтировании
+    // --- Конец ДОБАВЛЕНО ДЛЯ АДАПТИВНОСТИ ---
+
+
     const { data: chartData } = useMemo(() => {
         console.log("prepareChartData called with period:", selectedPeriod);
+        // Убрана prepareChartData из зависимостей useMemo, так как она объявлена снаружи и не меняется
         return prepareChartData(credits, spendings, selectedPeriod);
-    }, [credits, spendings, selectedPeriod, prepareChartData]);
+    }, [credits, spendings, selectedPeriod]);
 
 
     const hasChartData = Array.isArray(chartData) && chartData.length > 0;
@@ -368,35 +371,45 @@ const IncomeExpenseChart = ({
                 <Text variant="h3" className="mb-2 md:mb-0 mr-0 md:mr-4">Динамика Доходов и Расходов</Text>
                 <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
                     <button
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${chartType === 'line' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- ИСПРАВЛЕНО: Классы для адаптивного размера кнопок ---
+                        className={`px-1 py-0.5 text-xs md:px-3 md:py-1 md:text-sm rounded transition-colors duration-200 ${chartType === 'line' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- Конец ИСПРАВЛЕНО ---
                         onClick={() => handleChartTypeChange('line')}
                         disabled={isLoadingData}
                     >
                         Линии
                     </button>
                     <button
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${chartType === 'bar' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- ИСПРАВЛЕНО: Классы для адаптивного размера кнопок ---
+                        className={`px-1 py-0.5 text-xs md:px-3 md:py-1 md:text-sm rounded transition-colors duration-200 ${chartType === 'bar' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- Конец ИСПРАВЛЕНО ---
                         onClick={() => handleChartTypeChange('bar')}
                         disabled={isLoadingData}
                     >
                         Столбцы
                     </button>
                     <button
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${selectedPeriod === 'year' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- ИСПРАВЛЕНО: Классы для адаптивного размера кнопок ---
+                        className={`px-1 py-0.5 text-xs md:px-3 md:py-1 md:text-sm rounded transition-colors duration-200 ${selectedPeriod === 'year' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- Конец ИСПРАВЛЕНО ---
                         onClick={() => handlePeriodChange('year')}
                         disabled={isLoadingData}
                     >
                         За год
                     </button>
                     <button
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${selectedPeriod === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- ИСПРАВЛЕНО: Классы для адаптивного размера кнопок ---
+                        className={`px-1 py-0.5 text-xs md:px-3 md:py-1 md:text-sm rounded transition-colors duration-200 ${selectedPeriod === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- Конец ИСПРАВЛЕНО ---
                         onClick={() => handlePeriodChange('month')}
                         disabled={isLoadingData}
                     >
                         За месяц
                     </button>
                     <button
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${selectedPeriod === 'all-time' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- ИСПРАВЛЕНО: Классы для адаптивного размера кнопок ---
+                        className={`px-1 py-0.5 text-xs md:px-3 md:py-1 md:text-sm rounded transition-colors duration-200 ${selectedPeriod === 'all-time' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        // --- Конец ИСПРАВЛЕНО ---
                         onClick={() => handlePeriodChange('all-time')}
                         disabled={isLoadingData}
                     >
@@ -406,23 +419,37 @@ const IncomeExpenseChart = ({
             </div>
 
             {hasChartData ? (
+                // ResponsiveContainer помогает графику адаптироваться к размеру родительского контейнера
                 <ResponsiveContainer width="100%" height={300}>
                     {/* Графики внутри ResponsiveContainer обычно не нуждаются в явных width/height */}
                     {chartType === 'line' ? (
-                        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <LineChart
+                            data={chartData}
+                            // Адаптируем отступы для малых экранов
+                            margin={{ top: 5, right: isSmallScreen ? 10 : 30, left: isSmallScreen ? 0 : 20, bottom: 5 }}
+                        >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            {/* Адаптируем интервал тиков X-оси для месячного графика на малых экранах */}
+                            {/* Show ~7 ticks on small screen month view, otherwise auto (0) */}
+                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 'auto'} />
+                            {/* Условное отображение Y-оси: скрываем на малых экранах */}
+                            {!isSmallScreen && <YAxis />}
                             <RechartsTooltip />
                             <Legend />
                             <Line type="monotone" dataKey="Доходы" stroke="#82ca9d" strokeWidth={2} activeDot={{ r: 8 }} />
                             <Line type="monotone" dataKey="Расходы" stroke="#DC143C" strokeWidth={2} activeDot={{ r: 8 }} />
                         </LineChart>
                     ) : (
-                        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <BarChart
+                            data={chartData}
+                            // Адаптируем отступы для малых экранов
+                            margin={{ top: 5, right: isSmallScreen ? 10 : 30, left: isSmallScreen ? 0 : 20, bottom: 5 }}
+                        >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            {/* Адаптируем интервал тиков X-оси для месячного графика на малых экранах */}
+                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 'auto'} /> {/* Show ~7 ticks on small screen month view */}
+                            {/* Условное отображение Y-оси: скрываем на малых экранах */}
+                            {!isSmallScreen && <YAxis />}
                             <RechartsTooltip />
                             <Legend />
                             <Bar dataKey="Доходы" fill="#82ca9d" />
