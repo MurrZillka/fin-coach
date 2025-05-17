@@ -33,7 +33,7 @@ export default function BalanceWidget() {
                 На мобильных/планшетах (по умолчанию): flex-col, items-start, gap-4.
                 На десктопах (md:): flex-row, justify-between, items-center, gap-0.
             */}
-            <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mr-6 gap-4 md:gap-0">
+            <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mr-6">
 
                 {/* --- Левая часть: Отображение Баланса --- */}
                 {/* Контейнер для надписи "Ваш баланс:" и самого значения/статуса */}
@@ -41,7 +41,7 @@ export default function BalanceWidget() {
                 {/* На мобильных: занимает всю ширину */}
                 <div className="flex items-baseline w-full flex-shrink-0 md:w-auto mr-2"> {/* Добавлены w-full md:w-auto */}
                     {/* Надпись "Ваш баланс:" */}
-                    <Text variant="body" className="text-secondary-600 mr-2">Ваш баланс:</Text>
+                    <Text variant="body" className="text-secondary-600 mr-2">Баланс:</Text>
 
                     {/* --- Динамическое содержимое: Загрузка, Ошибка, Значение Баланса, или Плейсхолдер --- */}
                     {isLoading && (

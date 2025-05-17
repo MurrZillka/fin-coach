@@ -128,7 +128,7 @@ export default function GoalProgressWidget() {
         }
         return (
             // Контейнер для сообщения о достижении цели: ширина w-full на мобильных, w-2/3 на десктопах
-            <div className="flex-shrink-0 w-full md:w-2/3 text-left"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
+            <div className=" flex-shrink-0 w-full md:w-2/3 text-left"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
                 <Text variant="body" className="text-green-700 font-semibold italic">
                     {achievedText}
                 </Text>
@@ -156,7 +156,7 @@ export default function GoalProgressWidget() {
     let infoText = '';
     const daysPart = (daysText && daysText !== 'Дата не указана' && daysText !== 'Некорректная дата') ? `${daysText}, ` : '';
     // Используем неразрывный пробел перед знаком рубля
-    infoText = `До достижения текущей цели осталось ${daysPart}${formattedRemainingAmount}${'\u00A0'}₽`; // Неразрывный пробел перед знаком рубля
+    infoText = `До текущей цели осталось ${daysPart}${formattedRemainingAmount}${'\u00A0'}₽`; // Неразрывный пробел перед знаком рубля
 
     if (daysText === 'Дата не указана' || daysText === 'Некорректная дата') {
         infoText += ` (${daysText})`;
@@ -170,11 +170,11 @@ export default function GoalProgressWidget() {
         // md:w-2/3: занимает 2/3 ширины на десктопах
         // flex flex-col: элементы внутри выстраиваются в колонку
         // items-start: выравнивает ДОЧЕРНИЕ ЭЛЕМЕНТЫ КОЛОНКИ по левому краю
-        <div className="flex-shrink-0 w-full md:w-2/3 flex flex-col items-start"> {/* ИЗМЕНЕНО: w-1/3 на w-2/3, добавлен w-full, удален text-right */}
+        <div className="w-full md:w-2/3 flex flex-col items-start"> {/* ИЗМЕНЕНО: w-1/3 на w-2/3, добавлен w-full, удален text-right */}
 
             {/* Верхняя строка текста (со значком рубля) */}
             {/* Обернута в div w-full flex justify-end, чтобы она сама выравнивалась по правому краю */}
-            <div className="w-full flex md:justify-end">
+            <div className="w-full flex md:justify-end md:ml-2">
                 <Text variant="body" className="text-secondary-800 text-sm">
                     {infoText}
                 </Text>
