@@ -58,7 +58,7 @@ const RecentIncomeWidget = ({
                 title={`Перейти в ${categoryName}`} // Стандартный HTML тултип на всю область
             >
                 {/* Текст заголовка */}
-                <Text variant="h3" className="flex-grow mr-2">Последние Доходы</Text>
+                <Text variant="h3" className="flex-grow mr-2">Последние доходы</Text>
 
                 {/* Иконка стрелки */}
                 {/* Tooltip оборачивает иконку */}

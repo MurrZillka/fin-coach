@@ -368,7 +368,7 @@ const IncomeExpenseChart = ({
         // Контейнер графика. overflow-x-auto нужен, если график внутри ResponsiveContainer все же станет шире (например, при очень большом количестве точек или узком экране)
         <div className="bg-white p-4 rounded-md shadow-md overflow-x-auto">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-                <Text variant="h3" className="mb-2 md:mb-0 mr-0 md:mr-4">Динамика Доходов и Расходов</Text>
+                <Text variant="h3" className="mb-2 md:mb-0 mr-0 md:mr-4">Динамика доходов и расходов</Text>
                 <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
                     <button
                         // --- ИСПРАВЛЕНО: Классы для адаптивного размера кнопок ---

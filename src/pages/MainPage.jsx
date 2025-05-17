@@ -98,10 +98,6 @@ export default function MainPage() {
         mainPageLoading, mainPageError
     ]);
 
-
-    // УБРАН ВРЕМЕННЫЙ КОНСОЛЬНЫЙ ЛОГ ДЛЯ ПРОВЕРКИ СТРУКТУРЫ РЕКОМЕНДАЦИЙ
-
-
     // Определяем, полностью ли данные пустые
     const hasAnyData =
         (spendings !== null && spendings.length > 0) ||
@@ -202,23 +198,7 @@ export default function MainPage() {
                     <div
                         className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${!isLoadingData && !hasAnyData ? '' : 'mt-6'}`}>
 
-                        {/* TODO: Реализовать красивое отображение financialEntries */}
-                        {/* Пример временного вывода financialEntries: */}
-                        {/* {financialEntries !== null && financialEntries.length > 0 && (
-                             <div className="col-span-full bg-white p-4 rounded-md shadow-md">
-                                 <Text variant="h3" className="mb-2">Финансовый обзор</Text>
-                                 <ul>
-                                     {financialEntries.map((entry, index) => (
-                                         <li key={index} className="mb-1">
-                                             <Text variant="body">{entry.title}: {entry.value}</Text>
-                                         </li>
-                                     ))}
-                                 </ul>
-                             </div>
-                        )} */}
-
-
-                        {/* Блок для Графика Доходов/Расходов */}
+                                               {/* Блок для Графика Доходов/Расходов */}
                         <div className="col-span-full md:col-span-2 lg:col-span-3">
                             <IncomeExpenseChart
                                 credits={credits}

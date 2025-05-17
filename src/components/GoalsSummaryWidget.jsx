@@ -33,7 +33,7 @@ const GoalsSummaryWidget = ({
                 title={`Перейти в ${categoryName}`} // Стандартный HTML тултип
             >
                 {/* Текст заголовка */}
-                <Text variant="h3" className="flex-grow mr-2">Финансовые Цели</Text>
+                <Text variant="h3" className="flex-grow mr-2">Финансовые цели</Text>
 
                 {/* Иконка стрелки */}
                 <Tooltip text={`Перейти в ${categoryName}`}>

@@ -299,7 +299,7 @@ export default function CreditsPage() {
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">
-                    <Text variant="h2">Мои Доходы</Text>
+                    <Text variant="h2">Мои доходы</Text>
                     <TextButton onClick={handleAddClick}>
                         Добавить доход
                     </TextButton>

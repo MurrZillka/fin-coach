@@ -353,7 +353,7 @@ export default function SpendingsPage() {
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">
-                    <Text variant="h2">Мои Расходы</Text>
+                    <Text variant="h2">Мои расходы</Text>
                     <TextButton onClick={handleAddClick}>
                         Добавить расход
                     </TextButton>

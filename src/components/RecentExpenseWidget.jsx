@@ -56,7 +56,7 @@ const RecentExpenseWidget = ({ // Название компонента
                 title={`Перейти в ${categoryName}`} // Стандартный HTML тултип
             >
                 {/* Текст заголовка */}
-                <Text variant="h3" className="flex-grow mr-2">Последние Расходы</Text>
+                <Text variant="h3" className="flex-grow mr-2">Последние расходы</Text>
 
                 {/* Иконка стрелки */}
                 <Tooltip text={`Перейти в ${categoryName}`}>
