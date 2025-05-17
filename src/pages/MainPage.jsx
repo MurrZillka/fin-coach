@@ -241,7 +241,6 @@ export default function MainPage() {
                                 categoryName="Расходы"
                             />
                         </div>
-
                         {/* Блок для Виджета "Финансовые Цели" */}
                         <div className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md">
                             <GoalsSummaryWidget
@@ -252,20 +251,15 @@ export default function MainPage() {
                                 categoryName="Цели"
                             />
                         </div>
-
                         {/* Индикатор фоновой загрузки */}
                         { !showFullPageLoader && isLoadingData && hasAnyData && (
                             <div className="col-span-full text-center mt-4">
                                 <Text variant="body">Обновление данных...</Text>
                             </div>
                         )}
-
                     </div>
                 )}
-
-
             </main>
-
             {/* Модалка для отображения рекомендаций */}
             {/* Используем новую RecommendationsModal */}
             <RecommendationsModal
@@ -279,7 +273,7 @@ export default function MainPage() {
                 ) : recommendations && recommendations.length > 0 ? (
                     // Отображаем список рекомендаций, используя поля name и description
                     <div>
-                        <Text variant="body" className="mb-2">Ваши рекомендации:</Text>
+
                         <ul className="space-y-4">
                             {/* Используем index как ключ */}
                             {recommendations.map((rec, index) => {
@@ -346,7 +340,6 @@ export default function MainPage() {
                     ) : null
                 )}
             </RecommendationsModal>
-
         </div>
     );
 };

@@ -40,7 +40,7 @@ const RecommendationsModal = ({ isOpen, onClose, title, children }) => {
         >
             {/* Контейнер содержимого модалки: центрирован, скругленные углы, тени, фон, отступы */}
             {/* max-w-md для средней ширины, max-h-[80vh] для ограничения высоты и overflow-y-auto для прокрутки */}
-            <div className="p-4 rounded-lg shadow-2xl w-full max-w-md bg-white border border-gray-300 relative max-h-[80vh] overflow-y-auto">
+            <div className="p-4 rounded-lg shadow-2xl w-full max-w-xl bg-white border border-gray-300 relative max-h-[80vh] overflow-y-auto">
 
                 {/* Заголовок и кнопка закрытия */}
                 <div className="flex justify-between items-center mb-4">
