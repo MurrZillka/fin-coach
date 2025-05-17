@@ -1,5 +1,5 @@
 // src/pages/MainPage.jsx
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 // Импортируем компоненты UI
 import Text from '../components/ui/Text';
 // Импортируем компонент Loader для плавной загрузки
@@ -34,10 +34,10 @@ import {useNavigate} from "react-router-dom";
 
 export default function MainPage() {
     // Получаем данные и статусы загрузки из сторов
-    const { spendings, loading: spendingsLoading, fetchSpendings, error: spendingsError } = useSpendingsStore();
-    const { credits, loading: creditsLoading, fetchCredits, error: creditsError } = useCreditStore();
-    const { goals, currentGoal, loading: goalsLoading, fetchGoals, error: goalsError } = useGoalsStore();
-    const { balance, isLoading: isBalanceLoading, fetchBalance, error: balanceError } = useBalanceStore();
+    const {spendings, loading: spendingsLoading, fetchSpendings, error: spendingsError} = useSpendingsStore();
+    const {credits, loading: creditsLoading, fetchCredits, error: creditsError} = useCreditStore();
+    const {goals, currentGoal, loading: goalsLoading, fetchGoals, error: goalsError} = useGoalsStore();
+    const {balance, isLoading: isBalanceLoading, fetchBalance, error: balanceError} = useBalanceStore();
     // Получаем из стора Main Page (рекомендации, обзор)
     const {
         recommendations, financialEntries,
@@ -46,7 +46,7 @@ export default function MainPage() {
     } = useMainPageStore();
 
     // Получаем modalType из useModalStore для правильного отображения ошибок
-    const { modalType } = useModalStore();
+    const {modalType} = useModalStore();
 
     const navigate = useNavigate();
     // Состояние для управления модалкой рекомендаций
@@ -118,9 +118,15 @@ export default function MainPage() {
 
 
     // Обработчики кликов
-    const handleViewIncomeClick = () => { navigate('/credits') };
-    const handleViewExpensesClick = () => { navigate('/spendings'); };
-    const handleViewGoalsClick = () => { navigate('/goals') };
+    const handleViewIncomeClick = () => {
+        navigate('/credits')
+    };
+    const handleViewExpensesClick = () => {
+        navigate('/spendings');
+    };
+    const handleViewGoalsClick = () => {
+        navigate('/goals')
+    };
 
     // Обработчики открытия/закрытия модалки рекомендаций
     const handleOpenRecommendationsModal = () => {
@@ -143,7 +149,7 @@ export default function MainPage() {
     // Условный рендеринг компонента
     if (showFullPageLoader) {
         console.log('Showing full page loader...');
-        return <Loader />;
+        return <Loader/>;
     }
     console.log('Not showing full page loader. State:', {
         isLoadingData, hasAnyData,
@@ -184,7 +190,8 @@ export default function MainPage() {
                     <div className="mb-6 p-4 bg-blue-100 border border-blue-300 text-blue-800 rounded-md shadow-sm">
                         <Text variant="body">
                             Добро пожаловать! Здесь вы сможете отслеживать свои финансы.
-                            Для начала работы добавьте ваши первые доходы, расходы или поставьте финансовую цель через соответствующие разделы меню.
+                            Для начала работы добавьте ваши первые доходы, расходы или поставьте финансовую цель через
+                            соответствующие разделы меню.
                             Когда появятся данные, здесь также будут отображаться рекомендации и аналитика.
                         </Text>
                     </div>
@@ -192,7 +199,8 @@ export default function MainPage() {
 
                 {/* Сетка виджетов и графика */}
                 {(hasAnyData || isLoadingData) && (
-                    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${!isLoadingData && !hasAnyData ? '' : 'mt-6'}`}>
+                    <div
+                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${!isLoadingData && !hasAnyData ? '' : 'mt-6'}`}>
 
                         {/* TODO: Реализовать красивое отображение financialEntries */}
                         {/* Пример временного вывода financialEntries: */}
@@ -252,7 +260,7 @@ export default function MainPage() {
                             />
                         </div>
                         {/* Индикатор фоновой загрузки */}
-                        { !showFullPageLoader && isLoadingData && hasAnyData && (
+                        {!showFullPageLoader && isLoadingData && hasAnyData && (
                             <div className="col-span-full text-center mt-4">
                                 <Text variant="body">Обновление данных...</Text>
                             </div>
@@ -273,57 +281,22 @@ export default function MainPage() {
                 ) : recommendations && recommendations.length > 0 ? (
                     // Отображаем список рекомендаций, используя поля name и description
                     <div>
-
                         <ul className="space-y-4">
                             {/* Используем index как ключ */}
                             {recommendations.map((rec, index) => {
-                                // Разделяем поле name на заголовок и название категории
-                                const nameParts = rec?.name?.split(' - ') || [];
-                                const recommendationTitle = nameParts.length > 1 ? nameParts[0] : rec?.name;
-                                const categoryName = nameParts.length > 1 ? nameParts[1] : null;
-
                                 return (
                                     <li key={index} className="p-3 bg-blue-50 rounded-md border border-blue-100">
-                                        {/* Контейнер для заголовка и категории с нижним отступом */}
-                                        <div className="mb-2">
-                                            {/* Заголовок рекомендации */}
-                                            {recommendationTitle && (
-                                                <Text
-                                                    variant="body"
-                                                    // --- ИСПРАВЛЕНО: Классы line-height изменены на leading-none ---
-                                                    // Шрифт: text-sm на мобильных, md:text-xs на md+
-                                                    // Расстояние между строками: leading-none на всех экранах
-                                                    className="font-semibold text-blue-800 text-sm"
-                                                >
-                                                    {recommendationTitle + ":"}
-                                                </Text>
-                                            )}
-
-                                            {/* Название категории, если есть (красный жирный в кавычках) */}
-                                            {categoryName && (
-                                                <Text
-                                                    variant="body"
-                                                    // Красный жирный шрифт, размер и расстояние, block, отступ
-                                                    // --- ИСПРАВЛЕНО: Классы line-height изменены на leading-none ---
-                                                    // Шрифт: text-sm на мобильных, md:text-xs на md+
-                                                    // Расстояние между строками: leading-none на всех экранах
-                                                    className="text-red-600 font-bold text-sm md:text-xs block"
-                                                >
-                                                    «{categoryName}»
-                                                </Text>
-                                            )}
-                                        </div>
-
-
-                                        {/* Основной текст рекомендации (description) */}
-                                        {/* Проверяем, что description существует и не пустой */}
+                                        {rec?.name && (
+                                            <Text
+                                                variant="body"
+                                                className="font-semibold text-blue-800 text-sm block mb-2"
+                                            >
+                                                {rec.name}
+                                            </Text>
+                                        )}
                                         {rec?.description && (
                                             <Text
                                                 variant="body"
-                                                // Шрифт: text-sm на мобильных, md:text-xs на md+
-                                                // Расстояние между строками: leading-none на всех экранах
-                                                // Отступ сверху теперь обеспечивается нижним отступом родительского div
-                                                // --- ИСПРАВЛЕНО: Классы line-height изменены на leading-none ---
                                                 className="text-gray-700 text-sm leading-none"
                                             >
                                                 {rec.description}
