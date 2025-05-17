@@ -24,21 +24,3 @@ export const getRecommendations = async (token) => {
         };
     }
 };
-
-export const getFinancialOverview = async (token) => {
-    try {
-        if (getUseMocks()) return { data: await mockRecommendations.getFinancialOverview(), error: null };
-        const response = await api.get('/FinancialOverview', {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to fetch financial overview',
-                status: error.response?.status || 500,
-            },
-        };
-    }
-};

@@ -106,8 +106,7 @@ export default function MainPage() {
         (spendings !== null && spendings.length > 0) ||
         (credits !== null && credits.length > 0) ||
         (goals !== null && goals.length > 0) ||
-        (recommendations !== null && recommendations.length > 0) ||
-        (financialEntries !== null && financialEntries.length > 0);
+        (recommendations !== null && recommendations.length > 0)
 
 
     // Условие для показа полноэкранного лоадера
@@ -153,7 +152,7 @@ export default function MainPage() {
 
 
     return (
-        <div className="bg-secondary-50 min-h-screen">
+        <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
 
                 {/* Header section: Title and Recommendations Button */}

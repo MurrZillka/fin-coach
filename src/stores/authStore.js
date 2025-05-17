@@ -177,7 +177,6 @@ const useAuthStore = create((set, get) => ({
             useGoalsStore.getState().fetchGoals(); // Вызываем загрузку списка целей
             useGoalsStore.getState().getCurrentGoal(); // Вызываем загрузку текущей цели
             useMainPageStore.getState().fetchRecommendations(token); // ДОБАВЛЕНО
-            useMainPageStore.getState().fetchFinancialOverview(token); // ДОБАВЛЕНО
             // --- Конец ДОБАВЛЕННОГО ---
 
 

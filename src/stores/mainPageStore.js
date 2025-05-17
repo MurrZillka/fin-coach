@@ -5,7 +5,6 @@ import useAuthStore from './authStore';
 const useMainPageStore = create((set, get) => ({
     // Состояние
     recommendations: null,
-    financialEntries: null,
     loading: false,
     error: null,
 
@@ -58,45 +57,11 @@ const useMainPageStore = create((set, get) => ({
     },
 
     // Действие: Загрузка финансового обзора
-    fetchFinancialOverview: async () => {
-        console.log('mainPageStore: fetchFinancialOverview started');
-        if (!get().loading) {
-            set({ loading: true, error: null });
-        } else {
-            set({ error: null });
-        }
-
-        const token = get().getToken();
-        if (!token) {
-            console.log('mainPageStore: fetchFinancialOverview - No token, stopping fetch.');
-            if (!get().loading) set({ loading: false });
-            return;
-        }
-        console.log('mainPageStore: fetchFinancialOverview - Token found, proceeding with API call.');
-
-        try {
-            const result = await mainPageAPI.getFinancialOverview(token);
-            console.log('mainPageStore: API getFinancialOverview result:', result);
-
-            if (result.error) {
-                set({ error: result.error, loading: false });
-                console.error('Ошибка загрузки финансового обзора от API:', result.error);
-            } else {
-                set({ financialEntries: result.data.FinancialEntries || [], loading: false });
-            }
-        } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке финансового обзора.' };
-            set({ error: unexpectedError, loading: false });
-            console.error('Непредвиденная ошибка fetchFinancialOverview:', error);
-        } finally {
-            console.log('mainPageStore: fetchFinancialOverview finished.');
-        }
-    },
 
     // Действие: Сброс состояния стора
     resetMainPage: () => {
         console.log('mainPageStore: resetMainPage called.');
-        set({ recommendations: null, financialEntries: null, loading: false, error: null });
+        set({ recommendations: null, loading: false, error: null });
     },
 
     // Действие: Сброс ошибки

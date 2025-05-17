@@ -9,8 +9,6 @@ import useGoalsStore from './stores/goalsStore';
 
 import LayoutWithHeader from './components/LayoutWithHeader';
 import Loader from "./components/ui/Loader.jsx";
-import TestApi from "./pages/TestApi.jsx";
-
 
 function App() {
     // Получаем действия и состояние из стора авторизации
