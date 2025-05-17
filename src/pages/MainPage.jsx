@@ -29,6 +29,7 @@ import RecentExpenseWidget from '../components/RecentExpenseWidget';
 import GoalsSummaryWidget from '../components/GoalsSummaryWidget';
 // Импортируем компонент графика
 import IncomeExpenseChart from '../components/IncomeExpenseChart';
+import {useNavigate} from "react-router-dom";
 
 
 export default function MainPage() {
@@ -47,7 +48,7 @@ export default function MainPage() {
     // Получаем modalType из useModalStore для правильного отображения ошибок
     const { modalType } = useModalStore();
 
-
+    const navigate = useNavigate();
     // Состояние для управления модалкой рекомендаций
     const [isRecommendationsModalOpen, setIsRecommendationsModalOpen] = useState(false);
 
@@ -117,9 +118,9 @@ export default function MainPage() {
 
 
     // Обработчики кликов
-    const handleViewIncomeClick = () => { console.log('Navigate to Income Page'); };
-    const handleViewExpensesClick = () => { console.log('Navigate to Expenses Page'); };
-    const handleViewGoalsClick = () => { console.log('Navigate to Goals Page'); };
+    const handleViewIncomeClick = () => { navigate('/credits') };
+    const handleViewExpensesClick = () => { navigate('/spendings'); };
+    const handleViewGoalsClick = () => { navigate('/goals') };
 
     // Обработчики открытия/закрытия модалки рекомендаций
     const handleOpenRecommendationsModal = () => {
