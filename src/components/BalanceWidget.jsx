@@ -39,7 +39,7 @@ export default function BalanceWidget() {
                 {/* Контейнер для надписи "Ваш баланс:" и самого значения/статуса */}
                 {/* flex: чтобы элементы были в строку, items-baseline: выравнивание по базовой линии текста */}
                 {/* На мобильных: занимает всю ширину */}
-                <div className="flex items-baseline w-full md:w-auto"> {/* Добавлены w-full md:w-auto */}
+                <div className="flex items-baseline w-full flex-shrink-0 md:w-auto mr-2"> {/* Добавлены w-full md:w-auto */}
                     {/* Надпись "Ваш баланс:" */}
                     <Text variant="body" className="text-secondary-600 mr-2">Ваш баланс:</Text>
 
@@ -57,14 +57,15 @@ export default function BalanceWidget() {
                     {/* Если не загрузка, нет ошибки, и баланс успешно загружен (значение не null) */}
                     {!isLoading && !error && balance !== null && (
                         <Text
-                            className={`text-2xl ${balanceCustomColorClass}`}>
+                            variant='balance'
+                            className={`${balanceCustomColorClass}`}>
                             {formattedBalanceValue}{'\u00A0'}₽ {/* Добавлен неразрывный пробел */}
                         </Text>
                     )}
 
                     {/* Если не загрузка, нет ошибки, но баланс еще не загружен или сброшен (значение null) */}
                     {!isLoading && !error && balance === null && (
-                        <Text className="text-2xl font-bold text-secondary-600">
+                        <Text className= "font-bold text-secondary-600">
                             --.-- ₽
                         </Text>
                     )}

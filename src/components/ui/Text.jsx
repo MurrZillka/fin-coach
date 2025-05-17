@@ -20,6 +20,7 @@ const variants = {
     label: 'text-sm font-medium text-secondary-800',
     accent: 'text-base font-semibold text-primary-600',
     formError: 'text-sm font-normal text-form-error',
+    balance: 'md:text-2xl text-xl',
 };
 
 export default function Text({ variant = 'tdPrimary', children, className = '' }) {
