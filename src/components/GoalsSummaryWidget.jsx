@@ -74,7 +74,7 @@ const GoalsSummaryWidget = ({
                     )}
                     {/* Информация о текущей цели */}
                     {currentGoal && (
-                        <Text variant="body" className="text-blue-700 italic">
+                        <Text variant="body" className="text-blue-700 mt-4">
                             Текущая цель: <span className="font-semibold">{currentGoal.description}</span>
                         </Text>
                     )}
