@@ -27,7 +27,7 @@ export default function BalanceWidget() {
 
     return (
         // Главный контейнер виджета - прямоугольник
-        <div className="bg-amber-50 p-4 rounded-md shadow-md shadow-xl">
+        <div className="bg-amber-50 p-4 rounded-md shadow-xl">
             {/*
                 Контейнер для разделения на левую (Баланс) и правую (Цель) части.
                 На мобильных/планшетах (по умолчанию): flex-col, items-start, gap-4.
