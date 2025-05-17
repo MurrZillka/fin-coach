@@ -316,7 +316,7 @@ const Modal = ({
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-white/20"
+        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs mx-2 bg-white/20"
              onClick={(event) => {
                  // Проверяем, был ли клик именно по этому элементу (оверлею),
                  // а не по одному из его дочерних элементов (содержимому модалки).
