@@ -29,7 +29,7 @@ export default function LayoutWithHeader() {
             {showAuthHeader && <HeaderAuth />}
             {showRegularHeader && <Header />}
 
-            <div className="flex-grow overflow-y-auto relative z-0 max-w-7xl mx-auto px-4 py-4 w-full pb-20">
+            <div className="flex-grow overflow-y-auto relative z-0 max-w-7xl mx-auto px-4 py-4 w-full pb-36">
                 <Routes>
                     {routes.map((route, index) => (
                         <Route

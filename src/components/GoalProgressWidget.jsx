@@ -156,7 +156,7 @@ export default function GoalProgressWidget() {
     let infoText = '';
     const daysPart = (daysText && daysText !== 'Дата не указана' && daysText !== 'Некорректная дата') ? `${daysText}, ` : '';
     // Используем неразрывный пробел перед знаком рубля
-    infoText = `Ваш прогресс: до достижения текущей цели осталось ${daysPart}${formattedRemainingAmount}${'\u00A0'}₽`; // Неразрывный пробел перед знаком рубля
+    infoText = `До достижения текущей цели осталось ${daysPart}${formattedRemainingAmount}${'\u00A0'}₽`; // Неразрывный пробел перед знаком рубля
 
     if (daysText === 'Дата не указана' || daysText === 'Некорректная дата') {
         infoText += ` (${daysText})`;
@@ -174,8 +174,8 @@ export default function GoalProgressWidget() {
 
             {/* Верхняя строка текста (со значком рубля) */}
             {/* Обернута в div w-full flex justify-end, чтобы она сама выравнивалась по правому краю */}
-            <div className="w-full flex justify-end">
-                <Text variant="body" className="text-secondary-800 mb-1">
+            <div className="w-full flex md:justify-end">
+                <Text variant="body" className="text-secondary-800 text-sm">
                     {infoText}
                 </Text>
             </div>
@@ -184,7 +184,7 @@ export default function GoalProgressWidget() {
             {/* w-full: занимает всю доступную ширину в родительском flex-col */}
             {/* flex items-center: располагает элементы в строку и выравнивает по центру по вертикали */}
             {/* Этот контейнер теперь начинается от левого края родителя (из-за items-start) */}
-            <div className="w-full flex items-center">
+            <div className="w-full flex items-center md:ml-2">
                 {/* Контейнер Полосы Прогресса */}
                 {/* flex-grow: занимает все оставшееся место в строке после блока процентов */}
                 {/* h-4, bg-gray-300, rounded, overflow-hidden */}
