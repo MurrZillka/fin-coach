@@ -1,12 +1,6 @@
 /* src/index.css */
 @import "tailwindcss";
 
-@layer base {
-    body {
-        overflow-y: scroll; /* Всегда резервировать место для вертикальной полосы прокрутки */
-    }
-}
-
 @theme {
     --color-primary-500: #3b82f6; /* blue-500 */
     --color-primary-600: #2563eb; /* blue-600 */
@@ -20,16 +14,19 @@
     --color-accent-warning: #eab308; /* yellow-500 */
     --color-background: #ffffff; /* white */
     --color-form-error: #dc2626; /* red-600 */
-
     /* --- Добавляем переменную для Emerald-800 --- */
     --color-emerald-800: #065f46; /* Пример цвета для emerald-800 */
     /* --- Конец переменной --- */
 }
 
+body {
+overflow-y: scroll;
+}
+
 /* --- Новые кастомные классы для баланса --- */
 /* Эти классы будут использоваться в BalanceWidget.jsx для установки цвета и жирности */
 .balance-positive {
-   font-weight: bold; /* Делаем текст жирным */
+    font-weight: bold; /* Делаем текст жирным */
     color: var(--color-emerald-800); /* Цвет для положительного баланса, используем переменную */
 }
 
@@ -37,6 +34,7 @@
     font-weight: bold; /* Делаем текст жирным */
     color: var(--color-accent-error); /* Цвет для отрицательного баланса, используем существующую переменную ошибки */
 }
+
 /* --- Конец новых кастомных классов --- */
 
 
