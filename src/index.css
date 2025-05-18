@@ -1,6 +1,11 @@
 /* src/index.css */
-
 @import "tailwindcss";
+
+@layer base {
+    body {
+        overflow-y: scroll; /* Всегда резервировать место для вертикальной полосы прокрутки */
+    }
+}
 
 @theme {
     --color-primary-500: #3b82f6; /* blue-500 */
