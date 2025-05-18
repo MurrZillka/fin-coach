@@ -47,14 +47,12 @@ const parseLocalEndOfDayDate = (dateString) => {
     return new Date(2100, 0, 1, 23, 59, 59, 999);
 };
 
-// Исправлено: Корректная конверсия UTC в локальное время
 const parseLocalDateStartOfDay = (dateString) => {
     if (!dateString) return null;
 
     try {
         const date = new Date(dateString);
         if (!isNaN(date.getTime())) {
-            // Создаём дату в локальном времени из компонентов UTC
             const localDate = new Date(Date.UTC(
                 date.getUTCFullYear(),
                 date.getUTCMonth(),
@@ -87,7 +85,7 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
     switch (selectedPeriod) {
         case 'month': {
             chartEndDate = new Date(today);
-            chartEndDate.setHours(0, 0, 0, 0); // Исправлено: Обнуляем время
+            chartEndDate.setHours(0, 0, 0, 0);
             chartStartDate = new Date(today);
             chartStartDate.setDate(today.getDate() - 29);
             chartStartDate.setHours(0, 0, 0, 0);
@@ -131,7 +129,6 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         }
     }
 
-    // Инициализация агрегированных данных
     if (periodStep === 'day') {
         let currentDate = new Date(chartStartDate);
         while (currentDate.getTime() <= chartEndDate.getTime()) {
@@ -156,7 +153,9 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         }
     }
 
-    // Обработка Доходов
+    // Отладка
+    console.log("credits received:", credits);
+
     credits.forEach(credit => {
         const creditDate = parseLocalDateStartOfDay(credit.date);
         const creditEndDate = parseLocalEndOfDayDate(credit.end_date);
@@ -203,7 +202,6 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         }
     });
 
-    // Обработка Расходов
     spendings.forEach(spending => {
         const spendingDate = parseLocalDateStartOfDay(spending.date);
         const spendingEndDate = parseLocalEndOfDayDate(spending.end_date);
@@ -249,7 +247,6 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         }
     });
 
-    // Формируем итоговый массив данных для Recharts и сортируем его
     const dates = Object.keys(aggregatedData);
     let chartData = dates.map(dateString => {
         let name = dateString;
@@ -278,7 +275,7 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
 
     chartData.sort((a, b) => a._date.getTime() - b._date.getTime());
     chartData.forEach(item => delete item._date);
-
+    console.log("Final chart data:", chartData)
     return { data: chartData };
 };
 
