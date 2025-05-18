@@ -116,9 +116,16 @@ const useSpendingsStore = create((set, get) => ({
                 const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
+                // --- ДОБАВЛЕНО: Новая английская ошибка даты начала ---
+                const startDateValidationErrorEnglish = 'spending date must be less than current date';
+                // --- ДОБАВЛЕНО: Русский текст для новой ошибки даты начала ---
+                const startDateValidationErrorRussian = 'Дата расхода должна быть не больше текущей';
 
                 let userMessage = genericErrorMessage;
-                if (originalErrorMessage === dateValidationErrorEnglish) {
+                if (originalErrorMessage === startDateValidationErrorEnglish) {
+                    userMessage = startDateValidationErrorRussian; // Используем новое русское сообщение
+                } // --- Конец ИЗМЕНЕНИЯ ---
+                else if (originalErrorMessage === dateValidationErrorEnglish) {
                     userMessage = dateValidationErrorRussianSpending;
                 } else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;
@@ -180,9 +187,18 @@ const useSpendingsStore = create((set, get) => ({
                 const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
+                // --- ДОБАВЛЕНО: Новая английская ошибка даты начала ---
+                const startDateValidationErrorEnglish = 'spending date must be less than current date';
+                // --- ДОБАВЛЕНО: Русский текст для новой ошибки даты начала ---
+                const startDateValidationErrorRussian = 'Дата расхода должна быть не больше текущей';
+
 
                 let userMessage = genericErrorMessage;
-                if (originalErrorMessage === dateValidationErrorEnglish) {
+                // --- ИЗМЕНЕНИЕ: Добавляем проверку на новую ошибку даты начала с высоким приоритетом ---
+                if (originalErrorMessage === startDateValidationErrorEnglish) {
+                    userMessage = startDateValidationErrorRussian; // Используем новое русское сообщение
+                } // --- Конец ИЗМЕНЕНИЯ ---
+                else if (originalErrorMessage === dateValidationErrorEnglish) {
                     userMessage = dateValidationErrorRussianSpending;
                 } else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;

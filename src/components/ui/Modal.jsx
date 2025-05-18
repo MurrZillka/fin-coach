@@ -94,19 +94,21 @@ const Modal = ({
         const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.'; // Для расходов
         const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.'; // Для доходов
         const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей';
+        const startDateValidationErrorRussianSpending = 'Дата расхода должна быть не больше текущей'; // Для расходов (дата начала > текущей)
 
         if (submissionError) {
             // --- ИЗМЕНЕНИЕ: Проверяем, является ли submissionError одним из ожидаемых сообщений об ошибке дат ---
             if (submissionError === dateValidationErrorRussianSpending ||
                 submissionError === dateValidationErrorCreditRussian ||
-                submissionError === dateValidationErrorCreditStartDateRussian) {
+                submissionError === dateValidationErrorCreditStartDateRussian ||
+                submissionError === startDateValidationErrorRussianSpending) {
                 // --- Конец ИЗМЕНЕНИЯ ---
                 // Если да, устанавливаем ошибки для полей даты в локальном состоянии errors
                 setErrors(prevErrors => ({
                     ...prevErrors,
                     date: 'Проверьте даты', // Сообщение об ошибке для поля date
-                    ...(submissionError !== dateValidationErrorCreditStartDateRussian && {
-                        end_date: 'Проверьте даты', // Сообщение об ошибке для поля end_date
+                    ...((submissionError !== dateValidationErrorCreditStartDateRussian && submissionError !== startDateValidationErrorRussianSpending) && {
+                        end_date: 'Проверьте даты' // Сообщение об ошибке для поля end_date
                     })
                 }));
             } else {
