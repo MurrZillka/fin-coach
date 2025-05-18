@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import Text from './Text';
 
 // Определяем стили для разных вариантов кнопки
-const baseStyles = 'rounded-md px-2 py-0.5 md:px-3 md:py-1 transition focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed' // Общие стили
+const baseStyles = 'rounded-md px-2 py-1 md:px-3 md:py-2 transition focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed' // Общие стили
 
 // Определяем стили для фона и текста для каждого варианта
 const variantStyles = {
@@ -26,7 +26,7 @@ const TextButton = forwardRef(({ children, onClick, className = '', disabled = f
             className={`${baseStyles} ${stylesForVariant} ${className}`}
         >
             {/* Текст внутри компонента Text. Его цвет может быть переопределен классом text-white/text-background на button */}
-            <Text variant="button" className="text-sm md:text-lg ">{children}</Text>
+            <Text variant="button" className="text-sm md:text-base ">{children}</Text>
         </button>
     );
 });

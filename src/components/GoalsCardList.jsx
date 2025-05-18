@@ -47,8 +47,8 @@ const GoalsCardList = ({
 
             {/* Секция для Текущей цели (мобильная версия) */}
             {/* Используем стили, похожие на десктопную плашку */}
-            <div className="mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
-                <Text variant="h3" className="mb-2 text-blue-800">Текущая цель:</Text>
+            <div className="mb-6 px-4 py-2 mb:p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
+                <Text variant="h3" className="mb-2 text-blue-800 text-[0.9rem] md:text-base">Текущая цель:</Text>
                 {currentGoalLoading || isBalanceLoading ? (
                     <div className="text-blue-700"><Text variant="body">Загрузка текущей цели и баланса...</Text></div>
                 ) : currentGoal ? (
@@ -57,10 +57,10 @@ const GoalsCardList = ({
                         <div className="flex items-center"> {/* Контейнер для иконки и текста */}
                             {/* Иконка звезды с цветом по проценту */}
                             <StarIcon className={`w-5 h-5 mr-1 ${starColorClass}`} />
-                            <Text variant="body" className="font-semibold text-blue-900">{currentGoal.description}</Text> {/* Более темный цвет для описания текущей */}
+                            <Text variant="body" className="font-semibold text-blue-900 text-xs md:text-base">{currentGoal.description}</Text> {/* Более темный цвет для описания текущей */}
                         </div>
                         {/* Сумма цели */}
-                        <Text variant="body" className="text-blue-800"> {/* Цвет текста для суммы */}
+                        <Text variant="body" className="text-blue-800 text-xs md:text-base"> {/* Цвет текста для суммы */}
                             Сумма: {typeof currentGoal.amount === 'number'
                                 ? currentGoal.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                                 : currentGoal.amount}
@@ -68,19 +68,19 @@ const GoalsCardList = ({
                         </Text>
                         {/* Желаемая дата */}
                         {currentGoal.wish_date && currentGoal.wish_date !== "0001-01-01T00:00:00Z" && (
-                            <Text variant="body" className="text-blue-800">Желаемая дата: {new Date(currentGoal.wish_date).toLocaleDateString('ru-RU')}</Text>
+                            <Text variant="body" className="text-blue-800 text-xs md:text-base">Желаемая дата: {new Date(currentGoal.wish_date).toLocaleDateString('ru-RU')}</Text>
                             )}
                         {/* Достигнута / Дата достижения */}
                         {currentGoal.is_achieved && currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z" ? (
                             <Text variant="body" className="text-green-700">Достигнута: {new Date(currentGoal.achievement_date).toLocaleDateString('ru-RU')}</Text> // Формат даты
-                        ) : (
+                        ) : null
                             // Добавляем индикатор прогресса, если цель не достигнута
-                            currentGoal.amount > 0 && typeof balance === 'number' && typeof currentGoal.amount === 'number' && ( // Проверяем, что можно рассчитать прогресс
-                                <Text variant="body" className={`font-semibold ${percentage >= 100 ? 'text-green-700' : 'text-blue-800'}`}> {/* Цвет текста прогресса */}
-                                    Прогресс: {percentage.toFixed(0)}% {/* Округление процента */}
-                                </Text>
-                            )
-                        )}
+                            // currentGoal.amount > 0 && typeof balance === 'number' && typeof currentGoal.amount === 'number' && ( // Проверяем, что можно рассчитать прогресс
+                            //     <Text variant="body" className={`font-semibold ${percentage >= 100 ? 'text-green-700' : 'text-blue-800'}`}> {/* Цвет текста прогресса */}
+                            //         Прогресс: {percentage.toFixed(0)}% {/* Округление процента */}
+                            //     </Text>
+                            // )
+                        }
                     </div>
                 ) : (
                     <Text variant="body" className="text-blue-700 ml-2">Текущая цель не установлена.</Text>
