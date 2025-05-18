@@ -110,7 +110,7 @@ export default function GoalProgressWidget() {
             // Контейнер для сообщения об отсутствии цели: ширина w-full на мобильных, w-2/3 на дескпопах
             <div className="flex-shrink-0 w-full md:w-2/3 text-left"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
                 <Text variant="body" className="text-blue-700 font-semibold italic">
-                    Вы еще не установили для себя ни одной финансовой цели. Усильте мотивацию, выберите цель!
+                    Вы еще не установили для себя главную финансовую цель. Усильте мотивацию, выберите цель!
                 </Text>
             </div>
         );

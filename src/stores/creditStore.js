@@ -97,6 +97,9 @@ const useCreditStore = create((set, get) => ({
                 if (result.error.message === 'credit end_date must be greater than credit date') {
                     result.error.message = 'Дата окончания кредита должна быть больше или равна дате начала.';
                 }
+                if (result.error.message === 'credit date must be less than current date') {
+                    result.error.message = 'Дата дохода должна быть не больше текущей';
+                }
                 set({ error: result.error, loading: false });
                 console.error('Ошибка добавления дохода от API:', result.error);
                 throw result.error;
@@ -141,6 +144,9 @@ const useCreditStore = create((set, get) => ({
                 // --- ИЗМЕНЕНИЕ: Обработка специфической ошибки валидации с сервера ---
                 if (result.error.message === 'credit end_date must be greater than credit date') {
                     result.error.message = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                }
+                if (result.error.message === 'credit date must be less than current date') {
+                    result.error.message = 'Дата дохода должна быть не больше текущей';
                 }
                 set({ error: result.error, loading: false });
                 console.error('Ошибка обновления дохода от API:', result.error);
