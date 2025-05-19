@@ -106,9 +106,9 @@ const Modal = ({
                 // Если да, устанавливаем ошибки для полей даты в локальном состоянии errors
                 setErrors(prevErrors => ({
                     ...prevErrors,
-                    date: 'Проверьте даты', // Сообщение об ошибке для поля date
+                    date: 'Проверьте дату', // Сообщение об ошибке для поля date
                     ...((submissionError !== dateValidationErrorCreditStartDateRussian && submissionError !== startDateValidationErrorRussianSpending) && {
-                        end_date: 'Проверьте даты' // Сообщение об ошибке для поля end_date
+                        end_date: 'Проверьте дату' // Сообщение об ошибке для поля end_date
                     })
                 }));
             } else {
@@ -116,8 +116,8 @@ const Modal = ({
                 // (те, которые были установлены этим эффектом)
                 setErrors(prevErrors => {
                     const newErrors = {...prevErrors};
-                    if (newErrors.date === 'Проверьте даты') delete newErrors.date;
-                    if (newErrors.end_date === 'Проверьте даты') delete newErrors.end_date;
+                    if (newErrors.date === 'Проверьте дату') delete newErrors.date;
+                    if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
                     return newErrors;
                 });
             }
@@ -126,8 +126,8 @@ const Modal = ({
             // очищаем ошибки для полей даты, если они были установлены этим эффектом.
             setErrors(prevErrors => {
                 const newErrors = {...prevErrors};
-                if (newErrors.date === 'Проверьте даты') delete newErrors.date;
-                if (newErrors.end_date === 'Проверьте даты') delete newErrors.end_date;
+                if (newErrors.date === 'Проверьте дату') delete newErrors.date;
+                if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
                 return newErrors;
             });
         }
