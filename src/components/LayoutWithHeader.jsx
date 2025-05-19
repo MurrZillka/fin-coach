@@ -39,7 +39,7 @@ export default function LayoutWithHeader() {
                     {showRegularHeader && <Header/>}
                 </div>
             )}
-            <div className="flex-grow relative overflow-y-auto z-0 max-w-7xl mx-auto px-4 pt-17 w-full pb-28">
+            <div className="flex-grow relative overflow-y-auto z-0 max-w-7xl mx-auto px-4 pt-18 w-full">
                 {/* Здесь рендерятся страницы приложения через Routes */}
                 <Routes>
                     {routes.map((route, index) => (
