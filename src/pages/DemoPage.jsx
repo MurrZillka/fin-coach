@@ -8,6 +8,7 @@ import recomendationsDesktop from '../assets/images/recomendations-desktop.png';
 import mainPageChartMobile from '../assets/images/mainPageChart-mobile.png';
 import creditsMobile from '../assets/images/credits-mobile.png';
 import goalsMobile from '../assets/images/goals-mobile.png';
+import {Link} from "react-router-dom";
 
 // Данные для блоков
 const sections = [
@@ -92,23 +93,39 @@ const DemoPage = () => {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-8">
             {/* Заголовок страницы и описание */}
             <motion.div
-                className="text-center mb-8"
+                className="text-center mb-8 relative"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
             >
                 <Text className="text-2xl md:text-3xl font-bold text-blue-800">
-                    Ваш Личный Финансовый Коуч
+                    Ваш личный финансовый наставник
                 </Text>
                 <div className="mt-4">
                     <Text variant="body" className="text-gray-600 max-w-2xl mx-auto text-[clamp(0.875rem,3vw,1rem)]">
-                        Financial Coach — ваш надёжный помощник в управлении финансами. Отслеживайте доходы и расходы, ставьте цели и получайте персональные рекомендации, чтобы достичь финансовой стабильности. Удобный интерфейс и адаптивный дизайн всегда под рукой.
+                        Financial Coach - ваш надёжный помощник в управлении личными финансами. Отслеживайте доходы и расходы, ставьте цели и получайте персональные рекомендации, чтобы достичь финансовой стабильности.{' '}
+                        <Link
+                            to="/login"
+                            className="text-blue-600 hover:text-blue-800 font-medium transition-colors border-b border-blue-300 hover:border-blue-600"
+                        >
+                            Войдите
+                        </Link>{' '}
+                        или{' '}
+                        <Link
+                            to="/signup"
+                            className="text-blue-600 hover:text-blue-800 font-medium transition-colors border-b border-blue-300 hover:border-blue-600"
+                        >
+                            зарегистрируйтесь
+                        </Link>{' '}
+                        прямо сейчас, чтобы начать путь к финансовой свободе.
                     </Text>
                 </div>
             </motion.div>
 
+
+
             {/* Слайдер */}
-            <div className="relative flex flex-col items-center justify-center min-h-[70vh]">
+            <div className="relative flex flex-col items-center ml-[6vw] mr-[6vw] min-h-[70vh]">
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={wrappedIndex}
@@ -120,7 +137,7 @@ const DemoPage = () => {
                         className="absolute flex flex-col items-center justify-center gap-2"
                     >
                         <motion.div
-                            className="relative w-full max-w-[50vw] border-2 border-gradient-to-r from-blue-200 to-blue-400 rounded-lg shadow-xl"
+                            className="relative ml-5 mr-5 border-2 border-gradient-to-r max-w-0.8 from-blue-200 to-blue-400 rounded-lg shadow-xl"
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -128,9 +145,9 @@ const DemoPage = () => {
                             <img
                                 src={sections[wrappedIndex].image}
                                 alt={sections[wrappedIndex].alt}
-                                className="rounded-lg max-w-full h-auto mx-auto"
+                                className="rounded-lg max-w-full max-h-[60vh] mx-auto"
                             />
-                            <div className={`absolute bottom-4 right-0 transform translate-x-1/4 w-1/2 max-w-sm ${sections[wrappedIndex].bgColor} opacity-90 rounded-lg p-4 text-center`}>
+                            <div className={`absolute bottom-4 shadow-2xl right-0 transform translate-x-1/4 w-1/2 z-30 ${sections[wrappedIndex].bgColor} rounded-lg p-4 text-center`}>
                                 <Text className={`text-[clamp(1.25rem,4vw,1.5rem)] font-semibold mb-2 ${sections[wrappedIndex].textColor}`}>
                                     {sections[wrappedIndex].title}
                                 </Text>
@@ -144,7 +161,7 @@ const DemoPage = () => {
 
                 {/* Стрелки */}
                 <motion.div
-                    className="fixed right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    className="fixed right-4 top-1/3 transform -translate-y-1/2 cursor-pointer"
                     onClick={nextSlide}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -166,7 +183,7 @@ const DemoPage = () => {
 
                 {currentIndex !== 0 && (
                     <motion.div
-                        className="fixed left-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        className="fixed left-4 top-1/3 transform -translate-y-1/2 cursor-pointer"
                         onClick={prevSlide}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
