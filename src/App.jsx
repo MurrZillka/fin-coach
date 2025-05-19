@@ -1,5 +1,5 @@
 // src/App.jsx
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react'; // Импортируем useState
 import {BrowserRouter as Router} from 'react-router-dom';
 // Убедись, что путь к stores/authStore корректный
 import useAuthStore from './stores/authStore';
@@ -9,54 +9,74 @@ import useGoalsStore from './stores/goalsStore';
 
 import LayoutWithHeader from './components/LayoutWithHeader';
 import Loader from "./components/ui/Loader.jsx";
+// --- Импортируем компонент Text, он понадобится для сообщения ---
+import Text from './components/ui/Text.jsx';
+// --- Конец импорта Text ---
+
 
 function App() {
     // Получаем действия и состояние из стора авторизации
-    // initAuth для первичной проверки токена
-    // isAuthenticated для запуска эффекта загрузки данных
     const {initAuth, isAuthenticated, isInitializing} = useAuthStore(); // Получаем initAuth и isAuthenticated
 
+    // --- ДОБАВЛЕНО: Состояние для ширины экрана ---
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    // --- ДОБАВЛЕНО: useEffect для отслеживания изменения размера окна ---
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenWidth(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        // Очистка: удаляем обработчик при размонтировании компонента
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []); // Пустой массив зависимостей - эффект только при монтировании/размонтировании
+    // --- Конец ДОБАВЛЕНО ---
+
+
     // --- Первый useEffect: Инициализация авторизации при загрузке приложения ---
-    // Этот эффект запускается один раз при монтировании компонента App.
-    // Он вызывает initAuth из стора авторизации, который проверяет localStorage на наличие токена.
     useEffect(() => {
         console.log("App.jsx: Running initial auth check (initAuth)...");
-        // Вызываем действие initAuth из стора авторизации
         initAuth();
-    }, [initAuth]); // Зависимость на initAuth экшен криейтор. Гарантирует, что эффект не сработает без initAuth и выполнится при его изменении (хотя в Zustand экшен криейторы обычно стабильны). [] тоже вариант, если уверены в стабильности.
+    }, [initAuth]);
 
     // --- Второй useEffect: Загрузка первичных данных пользователя при авторизации ---
-    // Этот эффект запускается, когда isAuthenticated меняется.
-    // Если пользователь становится авторизован (isAuthenticated === true), запускаем загрузку данных.
     useEffect(() => {
-        // --- ИСПРАВЛЕНО: Вызываем fetchInitialUserData напрямую из getState() ---
-        // Получаем доступ к действию fetchInitialUserData и вызываем его сразу
-        // const { fetchInitialUserData } = useAuthStore.getState(); // <-- Эта строка удалена/изменена
-
-        // Если пользователь авторизован...
         if (isAuthenticated) {
             console.log("App.jsx: User is authenticated, triggering initial data fetches...");
-            // Вызываем действие fetchInitialUserData из стора авторизации.
-            // Теперь вызываем его напрямую
-            useAuthStore.getState().fetchInitialUserData(); // <-- Вызов напрямую
+            useAuthStore.getState().fetchInitialUserData();
 
-            // --- Загружаем данные о текущей цели при авторизации ---
             console.log("App.jsx: Also fetching current goal data...");
-            useGoalsStore.getState().getCurrentGoal(); // Вызываем действие загрузки текущей цели из стора Целей
-            // --- Конец ДОБАВЛЕННОГО ---
+            useGoalsStore.getState().getCurrentGoal();
         }
-        // Нет else блока здесь. Если пользователь не авторизован, fetchInitialUserData
-        // сама сбросит состояние других сторов (как мы реализовали через storeInitializer).
-        // сама сбросит состояние других сторов (как мы реализовали через storeInitializer).
-
-    }, [isAuthenticated]); // Зависимость на isAuthenticated. Эффект сработает при true -> false и false -> true.
+    }, [isAuthenticated]);
 
     console.log('App.jsx: Rendering, isInitializing:', isInitializing, 'isAuthenticated:', isAuthenticated);
+
+    // --- ДОБАВЛЕНО: Условный рендеринг в зависимости от ширины экрана ---
+    // Если ширина экрана меньше 320px, показываем сообщение
+    if (screenWidth < 320) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-secondary-50 text-center px-4">
+                {/* Используем компонент Text для сообщения */}
+                <Text variant="h3" className="text-red-600">
+                    Извините, но наше приложение рассчитано на работу с минимальным горизонтальным разрешением 320px. Войдите, пожалуйста, с другого устройства.
+                </Text>
+            </div>
+        );
+    }
+    // --- Конец ДОБАВЛЕНО ---
+
+
+    // Если ширина экрана 320px или больше, рендерим обычное приложение
     return (
         <>
             {isInitializing
-                ? (<Loader/>)
-                : (<Router>
+                ? (<Loader/>) // Показываем лоадер при инициализации
+                : (<Router> {/* Обычная структура приложения после инициализации */}
                         <LayoutWithHeader/>
                     </Router>
                 )}
