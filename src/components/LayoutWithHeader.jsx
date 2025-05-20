@@ -25,7 +25,7 @@ export default function LayoutWithHeader() {
 
     return (
         // Основной контейнер страницы. flex-col и min-h-screen задают колонку с минимальной высотой экрана
-        <div className="flex flex-col min-h-screen bg-secondary-50">
+        <div className="flex flex-col bg-secondary-50 min-h-screen">
 
             {/* --- ДОБАВЛЕНО: Фиксированный хедер контейнер --- */}
             {/* Этот div фиксирует блок шапки вверху экрана */}
@@ -39,7 +39,7 @@ export default function LayoutWithHeader() {
                     {showRegularHeader && <Header/>}
                 </div>
             )}
-            <div className="overflow-y-auto max-w-7xl mx-auto px-4 mt-[64px] w-full min-h-[calc(100vh - 64px)]">
+            <div className="overflow-y-auto max-w-7xl mx-auto px-4 mt-[64px] w-full h-[calc(100% - 64px)]">
                 {/* Здесь рендерятся страницы приложения через Routes */}
                 <Routes>
                     {routes.map((route, index) => (
