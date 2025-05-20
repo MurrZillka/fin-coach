@@ -352,7 +352,7 @@ export default function SpendingsPage() {
     return (
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center">
                     <Text variant="h2">Мои расходы</Text>
                     <TextButton onClick={handleAddClick}>
                         Добавить расход
@@ -370,7 +370,7 @@ export default function SpendingsPage() {
                         <Text variant="body">Загрузка данных...</Text>
                     </div>
                 ) : (
-                    <div>
+                    <div className="p-4">
                         {spendings !== null && spendings.length === 0 && categories !== null ? (
                             <div className="p-4 text-center">
                                 <Text variant="body">У вас пока нет добавленных расходов.</Text>

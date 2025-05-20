@@ -298,7 +298,7 @@ export default function CreditsPage() {
     return (
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center">
                     <Text variant="h2">Мои доходы</Text>
                     <TextButton onClick={handleAddClick}>
                         Добавить доход
@@ -314,7 +314,7 @@ export default function CreditsPage() {
                 {loading && credits === null ? (
                     <Loader />
                 ) : (
-                    <div>
+                    <div className="p-4">
                         {credits !== null && credits.length === 0 ? (
                             <div className="p-4 text-center">
                                 <Text variant="body">У вас пока нет добавленных доходов.</Text>

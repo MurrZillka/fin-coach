@@ -150,7 +150,7 @@ export default function CategoriesPage() {
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
                 {/* Заголовок страницы и кнопка "Добавить категорию" */}
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center">
                     <Text variant="h2">Категории расходов</Text>
                     {/* Кнопка теперь вызывает handleAddClick */}
                     {/* Отключаем кнопку, если идет загрузка (первичная или фоновая) */}

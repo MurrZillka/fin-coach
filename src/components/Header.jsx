@@ -31,7 +31,7 @@ export default function Header() {
     ];
 
     return (
-        <header className="bg-secondary-800 text-background p-4 shadow-md flex-shrink-0">
+        <header className="bg-secondary-800 text-background p-4 shadow-md flex-shrink-0 h-[64px]">
             <div className="max-w-7xl mx-auto flex justify-between items-center h-full">
                 {/* Логотип */}
                 <Text variant="h1" className="md:text-xl">

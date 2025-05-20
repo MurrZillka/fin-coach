@@ -10,7 +10,7 @@ const HeaderAuth = () => {
     ];
 
     return (
-        <header className="bg-secondary-800 text-background p-5 shadow-md flex-shrink-0">
+        <header className="bg-secondary-800 text-background p-5 shadow-md flex-shrink-0 h-[64px]">
             <div className="max-w-7xl mx-auto flex justify-between items-center h-full">
                 <Text variant="h1">Financial Coach</Text>
                 {/* Горизонтальная навигация для больших экранов */}
