@@ -11,6 +11,7 @@ import LayoutWithHeader from './components/LayoutWithHeader';
 import Loader from "./components/ui/Loader.jsx";
 // --- Импортируем компонент Text, он понадобится для сообщения ---
 import Text from './components/ui/Text.jsx';
+
 // --- Конец импорта Text ---
 
 
@@ -63,7 +64,8 @@ function App() {
             <div className="flex items-center justify-center min-h-screen bg-secondary-50 text-center px-4">
                 {/* Используем компонент Text для сообщения */}
                 <Text variant="h3" className="text-red-600">
-                    Извините, но наше приложение рассчитано на работу с минимальным горизонтальным разрешением 400px. Войдите, пожалуйста, с другого устройства.
+                    Извините, но наше приложение рассчитано на работу с минимальным горизонтальным разрешением 400px.
+                    Войдите, пожалуйста, с другого устройства.
                 </Text>
             </div>
         );
