@@ -2,12 +2,12 @@ import React, {useState, useEffect} from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
 import Text from '../components/ui/Text';
 import creditsDesktop from '../assets/images/credits-desktop.png';
+import spendingsDesktop from '../assets/images/spendings-desktop.png';
 import mainPageChartDesktop from '../assets/images/mainPageChart-desktop.png';
 import goalsDesktop from '../assets/images/goals-desktop.png';
 import recomendationsDesktop from '../assets/images/recomendations-desktop.png';
-import mainPageChartMobile from '../assets/images/mainPageChart-mobile.png';
-import creditsMobile from '../assets/images/credits-mobile.png';
-import goalsMobile from '../assets/images/goals-mobile.png';
+import balanceDesktop from '../assets/images/balanc-desktop.png';
+import mobileDesktop from '../assets/images/mobile-vew-desktop.png';
 import {Link} from "react-router-dom";
 
 // Данные для блоков
@@ -21,12 +21,20 @@ const sections = [
         textColor: '!text-pink-800',
     },
     {
-        title: 'Учет доходов и расходов',
-        description: 'Легко добавляйте все ваши поступления и траты. Классифицируйте расходы, чтобы видеть структуру ваших трат. Наш интуитивно понятный интерфейс позволяет быстро вносить данные.',
+        title: 'Подробный учет доходов',
+        description: 'Учитывайте все свои доходы, как случайные, так и периодические. Классифицируйте расходы, чтобы видеть структуру ваших трат. Наш интуитивно понятный интерфейс позволяет быстро вносить данные.',
         image: creditsDesktop,
-        alt: 'Скриншот страницы Доходы/Расходы (Десктоп)',
+        alt: 'Скриншот страницы Доходы (Десктоп)',
         bgColor: 'bg-blue-100',
         textColor: '!text-blue-800',
+    },
+    {
+        title: 'Детальный учет расходов',
+        description: 'Легко добавляйте все ваши запланированные и непредвиденные траты. Они могут быть как разовыми, так и периодическими. Классифицируйте расходы, чтобы видеть структуру ваших трат. Наш интуитивно понятный интерфейс позволяет быстро вносить данные.',
+        image: spendingsDesktop,
+        alt: 'Скриншот страницы Расходы (Десктоп)',
+        bgColor: 'bg-red-100',
+        textColor: '!text-red-800',
     },
     {
         title: 'Управление финансовыми целями',
@@ -37,12 +45,28 @@ const sections = [
         textColor: '!text-green-800',
     },
     {
+        title: 'Следите за балансом и целью',
+        description: 'Удобный и информативный виджет баланса находится на каждой странице нашего приложения позволит вам эффективнее контролировать расходы. Он интегрирован с индикатором прогресса в достижении цели, что позволит вам избежать необдуманных, эмоциональных покупок.',
+        image: balanceDesktop,
+        alt: 'Скриншот страницы Баланса (Десктоп)',
+        bgColor: 'bg-yellow-100',
+        textColor: '!text-yellow-800',
+    },
+    {
         title: 'Персональные рекомендации',
         description: 'Получайте автоматические рекомендации на основе анализа ваших операций. Узнайте, как оптимизировать расходы и быстрее достичь целей.',
         image: recomendationsDesktop,
         alt: 'Скриншот рекомендаций (Десктоп)',
         bgColor: 'bg-purple-100',
         textColor: '!text-purple-800',
+    },
+    {
+        title: 'Версия для телефонов и планшетов',
+        description: 'Пользуйтесь нашим приложением на любых типах мобильных устройств. Это позволит вам контролировать ваши финансы в режиме реального времени и не скатиться к бесконтрольным тратам, повышая осознанность ваших действий.',
+        image: mobileDesktop,
+        alt: 'Скриншот экранов мобильных версий',
+        bgColor: 'bg-sky-100',
+        textColor: '!text-sky-800',
     },
 ];
 
@@ -127,7 +151,7 @@ const DemoPage = () => {
 
             {/* Слайдер */}
             <div className="relative flex flex-col items-center pt-5 ml-[6vw] mr-[6vw] min-h-[70vh]">
-                <AnimatePresence initial={false} custom={direction}>
+                <AnimatePresence custom={direction}>
                     <motion.div
                         key={wrappedIndex}
                         custom={direction}
