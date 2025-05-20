@@ -147,11 +147,12 @@ const DemoPage = () => {
                                 alt={sections[wrappedIndex].alt}
                                 className="rounded-lg max-w-full max-h-[60vh] mx-auto"
                             />
-                            <div className={`absolute bottom-4 shadow-2xl right-0 transform translate-x-1/4 w-1/2 z-30 ${sections[wrappedIndex].bgColor} rounded-lg p-4 text-center`}>
-                                <Text className={`text-[clamp(1.25rem,4vw,1.5rem)] font-semibold mb-2 ${sections[wrappedIndex].textColor}`}>
+                            <div className={`absolute bottom-4 shadow-2xl right-0 transform translate-x-1/4 flex flex-col ${sections[wrappedIndex].bgColor} 
+                            rounded-lg p-4 w-1/2`}>
+                                <Text className={`text-[clamp(1rem,1.3vw,1.3vw)] text-center font-semibold mb-2 ${sections[wrappedIndex].textColor}`}>
                                     {sections[wrappedIndex].title}
                                 </Text>
-                                <Text variant="body" className="text-[clamp(0.875rem,3vw,1rem)] text-gray-800">
+                                <Text variant="body" className="text-[clamp(0.7rem,1vw,1.1vw)] text-gray-800">
                                     {sections[wrappedIndex].description}
                                 </Text>
                             </div>
