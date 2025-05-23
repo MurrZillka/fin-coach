@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Text from './ui/Text';
-import IconButton from './ui/IconButton';
-import TextButton from './ui/TextButton'; // Импортируем TextButton для кнопок фильтрации
+import IconButton from './ui/IconButton.jsx';
+import TextButton from './ui/TextButton';
 import { XMarkIcon as XIcon } from '@heroicons/react/24/outline';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'; // Добавлен Legend
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 // Импортируем сторы для получения данных
 import useSpendingsStore from '../stores/spendingsStore';
@@ -25,15 +25,11 @@ const modalVariants = {
 };
 
 const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
-    // Получаем все расходы и расходы за текущий месяц из сторов
     const { spendings, loading: spendingsLoading, fetchSpendings } = useSpendingsStore();
     const { categoriesMonthSummary, loading: categoriesMonthLoading, fetchCategoriesMonthSummary } = useCategoryStore();
 
-    // Состояние для выбранного периода
-    // По умолчанию, можно выбрать 'allTime' или 'currentMonth'
-    const [selectedPeriod, setSelectedPeriod] = useState('currentMonth'); // По умолчанию текущий месяц
+    const [selectedPeriod, setSelectedPeriod] = useState('currentMonth');
 
-    // Загружаем данные при открытии модалки, если их нет
     useEffect(() => {
         if (isOpen) {
             if (!spendings && !spendingsLoading) {
@@ -45,7 +41,6 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         }
     }, [isOpen, spendings, spendingsLoading, fetchSpendings, categoriesMonthSummary, categoriesMonthLoading, fetchCategoriesMonthSummary]);
 
-    // Логика агрегации данных в зависимости от выбранного периода
     const aggregatedData = useMemo(() => {
         if (!spendings || spendings.length === 0) return {};
 
@@ -58,12 +53,9 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
 
         switch (selectedPeriod) {
             case 'currentMonth':
-                // Используем уже агрегированные данные от бэкенда
-                // Убеждаемся, что categoriesMonthSummary существует и является объектом
                 if (categoriesMonthSummary && typeof categoriesMonthSummary === 'object') {
                     summary = categoriesMonthSummary;
                 } else {
-                    // Если данных нет или они еще не загружены, возвращаем пустой объект
                     summary = {};
                 }
                 break;
@@ -74,13 +66,12 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                 filteredSpendings = spendings.filter(s => new Date(s.date) >= oneYearAgo);
                 break;
             case 'allTime':
-                filteredSpendings = spendings; // Все расходы
+                filteredSpendings = spendings;
                 break;
             default:
                 summary = {};
         }
 
-        // Агрегация для 'last30Days', 'lastYear', 'allTime'
         if (selectedPeriod !== 'currentMonth') {
             filteredSpendings.forEach(spending => {
                 if (spending.category_name && typeof spending.amount === 'number') {
@@ -89,9 +80,8 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
             });
         }
         return summary;
-    }, [spendings, selectedPeriod, categoriesMonthSummary]); // Зависимости для пересчета
+    }, [spendings, selectedPeriod, categoriesMonthSummary]);
 
-    // Преобразуем агрегированные данные в формат, понятный Recharts
     const chartData = useMemo(() => {
         return Object.entries(aggregatedData).map(([name, value]) => ({
             name,
@@ -102,7 +92,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const hasData = chartData.length > 0;
     const totalAmount = chartData.reduce((sum, entry) => sum + entry.value, 0);
 
-    const isLoading = spendingsLoading || categoriesMonthLoading; // Общая загрузка для модалки
+    const isLoading = spendingsLoading || categoriesMonthLoading;
 
     if (!isOpen) return null;
 
@@ -110,26 +100,33 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4"
+                    // ИЗМЕНЕНО: Классы для прозрачно-размытого фона из Modal.jsx
+                    className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs mx-2 bg-white/20"
                     variants={backdropVariants}
                     initial="hidden"
                     animate="visible"
                     exit="hidden"
+                    // Добавляем обработчик onClick для закрытия модалки по клику вне неё
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) {
+                            onClose();
+                        }
+                    }}
                 >
                     <motion.div
-                        className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative" // Увеличил max-w-2xl для графика
+                        // ИЗМЕНЕНО: Классы для внутреннего контейнера модалки из Modal.jsx (с небольшими корректировками)
+                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto" // max-w-2xl вместо max-w-md
                         variants={modalVariants}
+                        // Останавливаем всплытие события, чтобы клик внутри модалки не закрывал её
+                        onClick={e => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-4 border-b pb-3">
                             <Text variant="h3" className="text-2xl font-semibold text-gray-800">
                                 {title}
                             </Text>
-                            <IconButton onClick={onClose} aria-label="Закрыть модальное окно">
-                                <XIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
-                            </IconButton>
+                            <IconButton onClick={onClose} aria-label="Закрыть модальное окно" icon={XIcon} />
                         </div>
                         <div className="modal-content">
-                            {/* Кнопки выбора периода */}
                             <div className="flex flex-wrap gap-2 mb-4 justify-center">
                                 <TextButton
                                     onClick={() => setSelectedPeriod('currentMonth')}
@@ -158,31 +155,30 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                             </div>
 
                             {isLoading ? (
-                                <div className="flex justify-center items-center h-80"> {/* Увеличил высоту для лоадера */}
+                                <div className="flex justify-center items-center h-80">
                                     <Text variant="body" className="text-gray-500">Загрузка данных...</Text>
                                 </div>
                             ) : hasData ? (
-                                <ResponsiveContainer width="100%" height={300}> {/* Увеличил высоту для большой диаграммы */}
+                                <ResponsiveContainer width="100%" height={300}>
                                     <PieChart>
                                         <Pie
                                             data={chartData}
                                             cx="50%"
                                             cy="50%"
-                                            innerRadius={80} // Больше для бублика
-                                            outerRadius={120} // Больше для бублика
+                                            innerRadius={80}
+                                            outerRadius={120}
                                             fill="#8884d8"
                                             paddingAngle={3}
                                             dataKey="value"
-                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} // Показываем лейблы с процентами
-                                            labelLine={true} // Показываем линии к лейблам
+                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                            labelLine={true}
                                         >
                                             {chartData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
                                         <Tooltip formatter={(value, name) => [`${value.toLocaleString()} руб.`, name]} />
-                                        <Legend /> {/* Легенда для категорий */}
-                                        {/* Текст в центре круга */}
+                                        <Legend />
                                         <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="text-xl font-bold fill-gray-700">
                                             Всего: {totalAmount.toLocaleString()}
                                         </text>
