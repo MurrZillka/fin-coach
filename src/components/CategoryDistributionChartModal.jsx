@@ -38,15 +38,43 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
             if (!categoriesMonthSummary && !categoriesMonthLoading) {
                 fetchCategoriesMonthSummary();
             }
+            // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
+            console.log("Modal opened. Current spendings:", spendings);
+            console.log("Modal opened. Current categoriesMonthSummary:", categoriesMonthSummary);
+            // === КОНЕЦ ОТЛАДКИ ===
         }
     }, [isOpen, spendings, spendingsLoading, fetchSpendings, categoriesMonthSummary, categoriesMonthLoading, fetchCategoriesMonthSummary]);
 
     const aggregatedData = useMemo(() => {
-        if (!spendings || spendings.length === 0) return {};
+        // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
+        console.log("Aggregating data for period:", selectedPeriod);
+        console.log("Spendings available for aggregation:", spendings);
+        console.log("categoriesMonthSummary available for aggregation (for currentMonth):", categoriesMonthSummary);
+        // === КОНЕЦ ОТЛАДКИ ===
+
+        if (!spendings || spendings.length === 0) {
+            // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
+            if (selectedPeriod !== 'currentMonth') { // если текущий месяц, то spendings не нужен
+                console.warn("Spendings array is empty or null, cannot aggregate for other periods.");
+            }
+            // === КОНЕЦ ОТЛАДКИ ===
+            // Если выбран "currentMonth", а categoriesMonthSummary ещё не пришёл,
+            // или если spendings пуст, но мы выбрали не "currentMonth"
+            if (selectedPeriod === 'currentMonth' && categoriesMonthSummary && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonthSummary).length > 0) {
+                return categoriesMonthSummary;
+            }
+            return {}; // Возвращаем пустой объект, если данных нет
+        }
 
         const now = new Date();
+        // Используем начало текущего дня для 30 дней назад
         const thirtyDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+        thirtyDaysAgo.setHours(0, 0, 0, 0); // Обнуляем время для точного сравнения
+
+        // Используем начало текущего дня для года назад
         const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        oneYearAgo.setHours(0, 0, 0, 0); // Обнуляем время для точного сравнения
+
 
         let filteredSpendings = [];
         let summary = {};
@@ -60,18 +88,27 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                 }
                 break;
             case 'last30Days':
-                filteredSpendings = spendings.filter(s => new Date(s.date) >= thirtyDaysAgo);
+                filteredSpendings = spendings.filter(s => {
+                    const spendingDate = new Date(s.date);
+                    spendingDate.setHours(0, 0, 0, 0); // Обнуляем время для сравнения
+                    return spendingDate >= thirtyDaysAgo;
+                });
                 break;
             case 'lastYear':
-                filteredSpendings = spendings.filter(s => new Date(s.date) >= oneYearAgo);
+                filteredSpendings = spendings.filter(s => {
+                    const spendingDate = new Date(s.date);
+                    spendingDate.setHours(0, 0, 0, 0); // Обнуляем время для сравнения
+                    return spendingDate >= oneYearAgo;
+                });
                 break;
             case 'allTime':
-                filteredSpendings = spendings;
+                filteredSpendings = spendings; // Все расходы
                 break;
             default:
                 summary = {};
         }
 
+        // Агрегация для 'last30Days', 'lastYear', 'allTime'
         if (selectedPeriod !== 'currentMonth') {
             filteredSpendings.forEach(spending => {
                 if (spending.category_name && typeof spending.amount === 'number') {
@@ -79,6 +116,9 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                 }
             });
         }
+        // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
+        console.log("Aggregated summary for period:", selectedPeriod, summary);
+        // === КОНЕЦ ОТЛАДКИ ===
         return summary;
     }, [spendings, selectedPeriod, categoriesMonthSummary]);
 
@@ -100,13 +140,11 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    // ИЗМЕНЕНО: Классы для прозрачно-размытого фона из Modal.jsx
-                    className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs mx-2 bg-white/20"
+                    className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-black/20 opacity-40"
                     variants={backdropVariants}
                     initial="hidden"
                     animate="visible"
                     exit="hidden"
-                    // Добавляем обработчик onClick для закрытия модалки по клику вне неё
                     onClick={(event) => {
                         if (event.target === event.currentTarget) {
                             onClose();
@@ -114,10 +152,8 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                     }}
                 >
                     <motion.div
-                        // ИЗМЕНЕНО: Классы для внутреннего контейнера модалки из Modal.jsx (с небольшими корректировками)
-                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto" // max-w-2xl вместо max-w-md
+                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto"
                         variants={modalVariants}
-                        // Останавливаем всплытие события, чтобы клик внутри модалки не закрывал её
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-4 border-b pb-3">
