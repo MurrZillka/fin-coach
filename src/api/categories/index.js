@@ -103,3 +103,18 @@ export const deleteCategoryById = async (id, token) => {
         return handleError(error);
     }
 };
+
+// --- ДОБАВЛЕНО: Новый эндпоинт для получения категорий по месяцам ---
+export const getCategoriesMonth = async (token) => {
+    try {
+        const response = await api.get('/CategoriesMonth', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        // API возвращает объект, например: { "Categories": {"Еда": 200, "Одежда": 60000} }
+        // Мы хотим вернуть только содержимое "Categories"
+        return { data: response.data.Categories, error: null };
+    } catch (error) {
+        return handleError(error);
+    }
+};
+// --- КОНЕЦ ДОБАВЛЕННОГО ---

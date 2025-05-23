@@ -1,14 +1,16 @@
-// src/pages/MainPage.jsx
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 // Импортируем компоненты UI
 import Text from '../components/ui/Text';
 // Импортируем компонент Loader для плавной загрузки
 import Loader from '../components/ui/Loader';
-// Импортируем нашу универсальную модалку (хотя для рекомендаций используем другую)
-// import Modal from '../components/ui/Modal'; // Больше не используется для рекомендаций
-// --- НОВЫЙ ИМПОРТ: Модалка для рекомендаций ---
-import RecommendationsModal from '../components/RecommendationsModal'; // ИСПРАВЛЕНО: Добавлен импорт
-// --- Конец НОВОГО ИМПОРТА ---
+
+import RecommendationsModal from '../components/RecommendationsModal';
+
+// --- НОВЫЕ ИМПОРТЫ: Виджет и Модалка для распределения категорий ---
+import CategoryDistributionWidget from '../components/CategoryDistributionWidget';
+import CategoryDistributionChartModal from '../components/CategoryDistributionChartModal';
+// --- Конец НОВЫХ ИМПОРТОВ ---
+
 // Импортируем сторы для получения данных
 import useSpendingsStore from '../stores/spendingsStore';
 import useCreditStore from '../stores/creditStore';
@@ -18,10 +20,9 @@ import useBalanceStore from '../stores/balanceStore';
 import useMainPageStore from '../stores/mainPageStore';
 // Импортируем useModalStore для проверки modalType при отображении ошибок
 import useModalStore from '../stores/modalStore';
+import useCategoryStore from '../stores/categoryStore'; // Импортируем useCategoryStore
 
-// Импортируем TextButton (ты его уже добавил, оставляем)
-import TextButton from '../components/ui/TextButton'; // Убедись, что путь правильный
-
+import TextButton from '../components/ui/TextButton';
 
 // Импортируем разработанные компоненты виджетов
 import RecentIncomeWidget from '../components/RecentIncomeWidget';
@@ -45,23 +46,55 @@ export default function MainPage() {
         fetchRecommendations, fetchFinancialOverview
     } = useMainPageStore();
 
+    // Получаем данные из categoryStore, включая все категории
+    const { categoriesMonthSummary, loading: categoriesMonthLoading, fetchCategoriesMonthSummary, categories, loading: categoriesLoading, fetchCategories } = useCategoryStore();
+
     // Получаем modalType из useModalStore для правильного отображения ошибок
     const {modalType} = useModalStore();
 
     const navigate = useNavigate();
-    // Состояние для управления модалкой рекомендаций
     const [isRecommendationsModalOpen, setIsRecommendationsModalOpen] = useState(false);
+    const [isCategoryChartModalOpen, setIsCategoryChartModalOpen] = useState(false);
 
-    // --- ИСПРАВЛЕНО: Определение isLoadingData находится здесь, в начале компонента ---
-    // Определяем, идет ли какая-либо загрузка основных данных для страницы, включая данные для Main Page
-    const isLoadingData = spendingsLoading || creditsLoading || goalsLoading || isBalanceLoading || mainPageLoading;
-    // --- Конец ИСПРАВЛЕНО ---
+    // --- ДОБАВЛЕНО/ИЗМЕНЕНО: Агрегация всех расходов по категориям за все время ---
+    const allTimeCategoriesSummary = useMemo(() => {
+        // Если spendings или categories еще null/undefined, возвращаем пустой объект
+        if (!spendings || !categories) {
+            console.log('allTimeCategoriesSummary useMemo: spendings or categories is null/undefined, returning empty object.');
+            return {};
+        }
+
+        // Создаем карту категорий для быстрого поиска по category_id
+        const categoryMap = categories.reduce((map, category) => {
+            map[category.id] = category.name;
+            return map;
+        }, {});
+
+        const summary = {};
+        spendings.forEach(spending => {
+            // Используем category_id из spending для получения category_name из categoryMap
+            const categoryName = categoryMap[spending.category_id];
+
+            // Проверяем, что categoryName существует и amount является числом
+            if (categoryName && typeof spending.amount === 'number') {
+                summary[categoryName] = (summary[categoryName] || 0) + spending.amount;
+            } else {
+                console.warn('allTimeCategoriesSummary useMemo: Skipping spending due to missing/invalid category_id or invalid amount:', spending, 'Category Name looked up:', categoryName);
+            }
+        });
+        console.log('allTimeCategoriesSummary useMemo: Aggregated summary:', summary);
+        console.log('allTimeCategoriesSummary useMemo: Number of unique categories:', Object.keys(summary).length);
+        return summary;
+    }, [spendings, categories]); // Пересчитываем только когда spendings ИЛИ categories меняются
+    // --- Конец ДОБАВЛЕНО/ИЗМЕНЕНИЙ ---
+
+
+    // Определяем, идет ли какая-либо загрузка основных данных для страницы
+    const isLoadingData = spendingsLoading || creditsLoading || goalsLoading || isBalanceLoading || mainPageLoading || categoriesMonthLoading || categoriesLoading;
 
 
     // useEffect для запуска загрузки данных при монтировании компонента
     useEffect(() => {
-        // ... логика загрузки основных данных (доходы, расходы, цели) - без изменений
-
         if (!spendingsLoading && spendings === null) {
             console.log('MainPage useEffect: Fetching spendings...');
             fetchSpendings();
@@ -74,9 +107,6 @@ export default function MainPage() {
             console.log('MainPage useEffect: Fetching goals...');
             fetchGoals();
         }
-
-
-        // Логика загрузки данных для MainPageStore
         if (!mainPageLoading && recommendations === null && !mainPageError) {
             console.log('MainPage useEffect: Fetching recommendations...');
             fetchRecommendations();
@@ -85,6 +115,19 @@ export default function MainPage() {
             console.log('MainPage useEffect: Fetching financial overview...');
             fetchFinancialOverview();
         }
+
+        // Запускаем загрузку categoriesMonthSummary, она нужна для модалки, даже если виджет не отображается
+        if (!categoriesMonthLoading && categoriesMonthSummary === null) {
+            console.log('MainPage useEffect: Fetching categories month summary...');
+            fetchCategoriesMonthSummary();
+        }
+
+        // --- ДОБАВЛЕНО: Загрузка всех категорий ---
+        if (!categoriesLoading && categories === null) {
+            console.log('MainPage useEffect: Fetching all categories...');
+            fetchCategories();
+        }
+        // --- Конец ДОБАВЛЕНО ---
 
         console.log('MainPage useEffect finished checks.');
 
@@ -95,21 +138,25 @@ export default function MainPage() {
         fetchBalance, balance, isBalanceLoading,
         fetchRecommendations, recommendations,
         fetchFinancialOverview, financialEntries,
-        mainPageLoading, mainPageError
+        mainPageLoading, mainPageError,
+        fetchCategoriesMonthSummary, categoriesMonthSummary, categoriesMonthLoading,
+        fetchCategories, categories, categoriesLoading // ДОБАВЛЕНО: Зависимости для категорий
     ]);
 
-    // Определяем, полностью ли данные пустые
+    // Определяем, полностью ли данные пустые для приветственного сообщения
+    // Теперь hasAnyData будет проверять наличие данных в allTimeCategoriesSummary
     const hasAnyData =
         (spendings !== null && spendings.length > 0) ||
         (credits !== null && credits.length > 0) ||
         (goals !== null && goals.length > 0) ||
-        (recommendations !== null && recommendations.length > 0)
+        (recommendations !== null && recommendations.length > 0) ||
+        (Object.keys(allTimeCategoriesSummary).length > 0); // ИЗМЕНЕНО: Добавлена проверка на allTimeCategoriesSummary
 
 
     // Условие для показа полноэкранного лоадера
     const showFullPageLoader = isLoadingData && (
         spendings === null || credits === null || goals === null || balance === null ||
-        recommendations === null || financialEntries === null
+        recommendations === null || financialEntries === null || categoriesMonthSummary === null || categories === null // ДОБАВЛЕНО: categories === null
     );
 
 
@@ -124,7 +171,6 @@ export default function MainPage() {
         navigate('/goals')
     };
 
-    // Обработчики открытия/закрытия модалки рекомендаций
     const handleOpenRecommendationsModal = () => {
         console.log('MainPage: Opening recommendations modal.');
         setIsRecommendationsModalOpen(true);
@@ -133,8 +179,16 @@ export default function MainPage() {
     const handleCloseRecommendationsModal = () => {
         console.log('MainPage: Closing recommendations modal.');
         setIsRecommendationsModalOpen(false);
-        // Если нужно сбрасывать ошибку Main Page стора при закрытии модалки
-        // useMainPageStore.getState().clearError();
+    };
+
+    const handleOpenCategoryChartModal = () => {
+        console.log('MainPage: Opening category chart modal.');
+        setIsCategoryChartModalOpen(true);
+    };
+
+    const handleCloseCategoryChartModal = () => {
+        console.log('MainPage: Closing category chart modal.');
+        setIsCategoryChartModalOpen(false);
     };
 
 
@@ -150,8 +204,22 @@ export default function MainPage() {
     console.log('Not showing full page loader. State:', {
         isLoadingData, hasAnyData,
         spendings: spendings?.length, credits: credits?.length, goals: goals?.length, balance,
-        recommendations: recommendations?.length, financialEntries: financialEntries?.length
+        recommendations: recommendations?.length, financialEntries: financialEntries?.length,
+        categoriesMonthSummary: categoriesMonthSummary ? Object.keys(categoriesMonthSummary).length : 0,
+        allTimeCategoriesSummary: Object.keys(allTimeCategoriesSummary).length, // ИЗМЕНЕНО: Добавили allTimeCategoriesSummary в лог
+        categories: categories?.length // ДОБАВЛЕНО: Добавили категории в лог
     });
+
+    // --- ИЗМЕНЕНО: Логика для отображения виджета аналитики по категориям ---
+    // Условие:
+    // 1. spendings НЕ null (данные о расходах загружены).
+    // 2. categories НЕ null (данные о категориях загружены).
+    // 3. И количество уникальных категорий с расходами "за все время" БОЛЬШЕ или РАВНО двум.
+    const showCategoryDistributionWidget =
+        spendings !== null &&
+        categories !== null && // ДОБАВЛЕНО: Проверяем, что категории загружены
+        Object.keys(allTimeCategoriesSummary).length >= 2;
+    // --- Конец ИЗМЕНЕНО ---
 
 
     return (
@@ -161,7 +229,6 @@ export default function MainPage() {
                 {/* Header section: Title and Recommendations Button */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Обзор</Text>
-                    {/* Кнопка для открытия рекомендаций */}
                     {(recommendations !== null && recommendations.length > 0) || mainPageLoading ? (
                         <TextButton
                             onClick={handleOpenRecommendationsModal}
@@ -182,7 +249,8 @@ export default function MainPage() {
                 )}
 
                 {/* Приветственное сообщение */}
-                {!isLoadingData && !hasAnyData ? (
+                {/* Теперь также проверяем, что showCategoryDistributionWidget ложно */}
+                {!isLoadingData && !hasAnyData && !showCategoryDistributionWidget ? ( // ИЗМЕНЕНО: Добавили !showCategoryDistributionWidget
                     <div className="mb-6 p-4 bg-blue-100 border border-blue-300 text-blue-800 rounded-md shadow-sm">
                         <Text variant="body">
                             Добро пожаловать! Здесь вы сможете отслеживать свои финансы.
@@ -194,12 +262,15 @@ export default function MainPage() {
                 ) : null}
 
                 {/* Сетка виджетов и графика */}
-                {(hasAnyData || isLoadingData) && (
+                {(hasAnyData || isLoadingData || showCategoryDistributionWidget) && (
                     <div
-                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${!isLoadingData && !hasAnyData ? '' : 'mt-6'}`}>
+                        // ИЗМЕНЕНО: Заменили lg:grid-cols-3 на lg:grid-cols-4
+                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${!isLoadingData && !hasAnyData && !showCategoryDistributionWidget ? '' : 'mt-6'}`}>
 
-                                               {/* Блок для Графика Доходов/Расходов */}
-                        <div className="col-span-full md:col-span-2 lg:col-span-3">
+                        {/* Блок для Графика Доходов/Расходов */}
+                        {/* Здесь тоже нужно изменить col-span, если сетка теперь 4 колонки */}
+                        {/* col-span-full md:col-span-2 lg:col-span-4 (чтобы он занимал всю ширину новой сетки) */}
+                        <div className="col-span-full md:col-span-2 lg:col-span-4"> {/* ИЗМЕНЕНО */}
                             <IncomeExpenseChart
                                 credits={credits}
                                 spendings={spendings}
@@ -210,7 +281,7 @@ export default function MainPage() {
                         </div>
 
 
-                        {/* Блок для Виджета "Последние Доходы" */}
+                        {/* Эти виджеты уже имеют col-span-full md:col-span-1, они автоматически займут по 1 колонке из 4 */}
                         <div className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md">
                             <RecentIncomeWidget
                                 recentIncomes={credits}
@@ -220,7 +291,6 @@ export default function MainPage() {
                             />
                         </div>
 
-                        {/* Блок для Виджета "Последние Расходы" */}
                         <div className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md">
                             <RecentExpenseWidget
                                 recentSpendings={spendings}
@@ -229,7 +299,7 @@ export default function MainPage() {
                                 categoryName="Расходы"
                             />
                         </div>
-                        {/* Блок для Виджета "Финансовые Цели" */}
+
                         <div className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md">
                             <GoalsSummaryWidget
                                 goals={goals}
@@ -239,9 +309,21 @@ export default function MainPage() {
                                 categoryName="Цели"
                             />
                         </div>
+
+                        {/* Блок для Виджета "Анализ расходов по категориям" */}
+                        {showCategoryDistributionWidget && (
+                            <div className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md">
+                                <CategoryDistributionWidget
+                                    onOpenChart={handleOpenCategoryChartModal}
+                                    loading={spendingsLoading || categoriesLoading}
+                                    allTimeCategoriesSummary={allTimeCategoriesSummary}
+                                />
+                            </div>
+                        )}
+
                         {/* Индикатор фоновой загрузки */}
                         {!showFullPageLoader && isLoadingData && hasAnyData && (
-                            <div className="col-span-full text-center mt-4">
+                            <div className="col-span-full text-center mt-4"> {/* Возможно, здесь тоже col-span-4 */}
                                 <Text variant="body">Обновление данных...</Text>
                             </div>
                         )}
@@ -249,20 +331,16 @@ export default function MainPage() {
                 )}
             </main>
             {/* Модалка для отображения рекомендаций */}
-            {/* Используем новую RecommendationsModal */}
             <RecommendationsModal
                 isOpen={isRecommendationsModalOpen}
                 onClose={handleCloseRecommendationsModal}
                 title="Рекомендации"
-                // Передаем контент модалки как children
             >
                 {mainPageLoading ? (
                     <Text variant="body">Загрузка рекомендаций...</Text>
                 ) : recommendations && recommendations.length > 0 ? (
-                    // Отображаем список рекомендаций, используя поля name и description
                     <div>
                         <ul className="space-y-4">
-                            {/* Используем index как ключ */}
                             {recommendations.map((rec, index) => {
                                 return (
                                     <li key={index} className="p-3 bg-blue-50 rounded-md border border-blue-100">
@@ -293,6 +371,16 @@ export default function MainPage() {
                     ) : null
                 )}
             </RecommendationsModal>
+
+            {/* Модалка для круговой диаграммы расходов по категориям */}
+            <CategoryDistributionChartModal
+                isOpen={isCategoryChartModalOpen}
+                onClose={handleCloseCategoryChartModal}
+                title="Распределение расходов по категориям"
+            >
+                {/* Здесь будет логика для полной диаграммы и кнопок фильтрации */}
+                <Text variant="body">Здесь будет круговая диаграмма и кнопки выбора периода.</Text>
+            </CategoryDistributionChartModal>
         </div>
     );
-};
+}
