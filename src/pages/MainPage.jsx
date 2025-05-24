@@ -217,16 +217,23 @@ export default function MainPage() {
                 {/* Header section: Title and Recommendations Button */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Обзор</Text>
-                    {(recommendations !== null && recommendations.length > 0) || mainPageLoading ? (
+                    {/* --- ИЗМЕНЕННОЕ УСЛОВИЕ ДЛЯ КНОПКИ РЕКОМЕНДАЦИЙ (ПРАВИЛЬНОЕ) --- */}
+                    {/* Кнопка "Рекомендации" отображается, если:
+                        1. Идет загрузка рекомендаций (mainPageLoading)
+                        2. ИЛИ (есть текущая цель (currentGoal не null)
+                           И (есть загруженные рекомендации (recommendations не пустые)))
+                    */}
+                    {mainPageLoading || (currentGoal !== null && recommendations !== null && recommendations.length > 0) ? (
                         <TextButton
                             onClick={handleOpenRecommendationsModal}
-                            disabled={mainPageLoading}
+                            disabled={mainPageLoading} // Кнопка должна быть заблокирована во время загрузки
                         >
                             {mainPageLoading ? 'Загрузка...' : 'Рекомендации'}
                         </TextButton>
                     ) : (
                         null
                     )}
+                    {/* --- КОНЕЦ ИЗМЕНЕННОГО УСЛОВИЯ --- */}
                 </div>
 
                 {/* Display general error message */}
