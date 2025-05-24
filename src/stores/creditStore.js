@@ -1,5 +1,5 @@
 // src/stores/creditStore.js
-import { create } from 'zustand';
+import {create} from 'zustand';
 // Убедись, что путь к файлу credit/index.js корректный
 import * as creditAPI from '../api/credit/index';
 // Импортируем authStore для получения токена и подписки
@@ -15,16 +15,16 @@ const useCreditStore = create((set, get) => ({
     credits: null,
     loading: false,
     error: null,
-    setCredits: (credits) => set({ credits }),
-    setLoading: (loading) => set({ loading }),
-    setError: (error) => set({ error }),
+    setCredits: (credits) => set({credits}),
+    setLoading: (loading) => set({loading}),
+    setError: (error) => set({error}),
 
     // --- Вспомогательная функция: Получение токена ---
     getToken: () => {
         const token = useAuthStore.getState().user?.access_token;
         if (!token) {
-            const authError = { message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.' };
-            set({ error: authError, loading: false });
+            const authError = {message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.'};
+            set({error: authError, loading: false});
             console.error('Ошибка аутентификации в creditStore:', authError);
             return null;
         }
@@ -37,9 +37,9 @@ const useCreditStore = create((set, get) => ({
     fetchCredits: async () => {
         console.log('creditStore: fetchCredits started');
         if (!get().loading) {
-            set({ loading: true, error: null });
+            set({loading: true, error: null});
         } else {
-            set({ error: null });
+            set({error: null});
         }
 
         console.log('creditStore: Inside fetchCredits, get() contains:', get());
@@ -48,7 +48,7 @@ const useCreditStore = create((set, get) => ({
 
         if (!token) {
             console.log('creditStore: fetchCredits - No token, stopping fetch.');
-            if (!get().loading) set({ loading: false });
+            if (!get().loading) set({loading: false});
             return;
         }
         console.log('creditStore: fetchCredits - Token found, proceeding with API call.');
@@ -59,14 +59,14 @@ const useCreditStore = create((set, get) => ({
             console.log('creditStore: API getCredits result:', result);
 
             if (result.error) {
-                set({ error: result.error, loading: false });
+                set({error: result.error, loading: false});
                 console.error('Ошибка загрузки доходов от API:', result.error);
             } else {
-                set({ credits: result.data.Credits || [], loading: false });
+                set({credits: result.data.Credits || [], loading: false});
             }
 
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке доходов.' };
+            const unexpectedError = {message: error.message || 'Произошла непредвиденная ошибка при загрузке доходов.'};
             set({
                 error: unexpectedError,
                 loading: false
@@ -80,11 +80,11 @@ const useCreditStore = create((set, get) => ({
     // Действие для добавления нового дохода
     addCredit: async (creditData) => {
         console.log('creditStore: addCredit started');
-        set({ loading: true, error: null });
+        set({loading: true, error: null});
 
         const token = get().getToken();
         if (!token) {
-            set({ loading: false });
+            set({loading: false});
             throw new Error('Пользователь не аутентифицирован');
         }
 
@@ -93,16 +93,52 @@ const useCreditStore = create((set, get) => ({
             console.log('creditStore: API addCredit result:', result);
 
             if (result.error) {
-                // --- ИЗМЕНЕНИЕ: Обработка специфической ошибки валидации с сервера ---
-                if (result.error.message === 'credit end_date must be greater than credit date') {
-                    result.error.message = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                let originalErrorMessage = result.error.message; // Получаем оригинальное сообщение от сервера
+
+                // Существующие переводы, которые ты уже имел
+                const dateValidationErrorCreditEnglish = 'credit end_date must be greater than credit date';
+                const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                const dateValidationErrorCreditStartDateEnglish = 'credit date must be less than current date';
+                const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей';
+
+                // !!! НОВОЕ: Добавляем константы для ошибки, которая приходит от сервера (spending_end_date)
+                const spendingEndDateGreaterThanCurrentDateEnglish = 'spending end_date must be less than current date';
+                const spendingEndDateGreaterThanCurrentDateRussian = 'Дата окончания дохода должна быть не больше текущей даты.'; // Это русский текст для дохода
+
+                let userMessage = originalErrorMessage; // По умолчанию оставляем оригинальное сообщение
+
+                // Порядок приоритета:
+                // 1. Ошибка с "spending end_date..." (хотя она приходит для дохода)
+                if (originalErrorMessage === spendingEndDateGreaterThanCurrentDateEnglish) {
+                    userMessage = spendingEndDateGreaterThanCurrentDateRussian;
                 }
-                if (result.error.message === 'credit date must be less than current date') {
-                    result.error.message = 'Дата дохода должна быть не больше текущей';
+                // 2. Ошибка "credit date must be less than current date"
+                else if (originalErrorMessage === dateValidationErrorCreditStartDateEnglish) {
+                    userMessage = dateValidationErrorCreditStartDateRussian;
                 }
-                set({ error: result.error, loading: false });
-                console.error('Ошибка добавления дохода от API:', result.error);
-                throw result.error;
+                // 3. Ошибка "credit end_date must be greater than credit date"
+                else if (originalErrorMessage === dateValidationErrorCreditEnglish) {
+                    userMessage = dateValidationErrorCreditRussian;
+                }
+                    // Если ни одна из вышеперечисленных ошибок не совпала,
+                    // можно добавить общую обработку статусов, если это требуется.
+                // Например:
+                else if (result.error.status && result.error.status >= 400 && result.error.status < 500) {
+                    // Это может быть общая ошибка валидации, которую ты не распознал
+                    userMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
+                } else {
+                    // Общая ошибка, если ничего не подошло
+                    userMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
+                }
+
+
+                const processedError = {
+                    message: userMessage,
+                    status: result.error.status || 500 // Если статус отсутствует, по умолчанию 500
+                };
+                set({ error: processedError, loading: false });
+                console.error('Ошибка обработки дохода от API:', result.error);
+                throw processedError; // Выбрасываем переведенную ошибку
             } else {
                 await get().fetchCredits();
                 useBalanceStore.getState().fetchBalance(token);
@@ -113,7 +149,7 @@ const useCreditStore = create((set, get) => ({
             }
 
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при добавлении дохода.' };
+            const unexpectedError = {message: error.message || 'Произошла непредвиденная ошибка при добавлении дохода.'};
             set({
                 error: unexpectedError,
                 loading: false
@@ -128,11 +164,11 @@ const useCreditStore = create((set, get) => ({
     // Действие для обновления дохода по ID
     updateCredit: async (id, creditData) => {
         console.log('creditStore: updateCredit started');
-        set({ loading: true, error: null });
+        set({loading: true, error: null});
 
         const token = get().getToken();
         if (!token) {
-            set({ loading: false });
+            set({loading: false});
             throw new Error('Пользователь не аутентифицирован');
         }
 
@@ -141,16 +177,53 @@ const useCreditStore = create((set, get) => ({
             console.log('creditStore: API updateCredit result:', result);
 
             if (result.error) {
-                // --- ИЗМЕНЕНИЕ: Обработка специфической ошибки валидации с сервера ---
-                if (result.error.message === 'credit end_date must be greater than credit date') {
-                    result.error.message = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                // НОВОЕ: Константа для новой английской ошибки
+                let originalErrorMessage = result.error.message; // Получаем оригинальное сообщение от сервера
+
+                // Существующие переводы, которые ты уже имел
+                const dateValidationErrorCreditEnglish = 'credit end_date must be greater than credit date';
+                const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                const dateValidationErrorCreditStartDateEnglish = 'credit date must be less than current date';
+                const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей';
+
+                // !!! НОВОЕ: Добавляем константы для ошибки, которая приходит от сервера (spending_end_date)
+                const spendingEndDateGreaterThanCurrentDateEnglish = 'spending end_date must be less than current date';
+                const spendingEndDateGreaterThanCurrentDateRussian = 'Дата окончания дохода должна быть не больше текущей даты.'; // Это русский текст для дохода
+
+                let userMessage = originalErrorMessage; // По умолчанию оставляем оригинальное сообщение
+
+                // Порядок приоритета:
+                // 1. Ошибка с "spending end_date..." (хотя она приходит для дохода)
+                if (originalErrorMessage === spendingEndDateGreaterThanCurrentDateEnglish) {
+                    userMessage = spendingEndDateGreaterThanCurrentDateRussian;
                 }
-                if (result.error.message === 'credit date must be less than current date') {
-                    result.error.message = 'Дата дохода должна быть не больше текущей';
+                // 2. Ошибка "credit date must be less than current date"
+                else if (originalErrorMessage === dateValidationErrorCreditStartDateEnglish) {
+                    userMessage = dateValidationErrorCreditStartDateRussian;
                 }
-                set({ error: result.error, loading: false });
-                console.error('Ошибка обновления дохода от API:', result.error);
-                throw result.error;
+                // 3. Ошибка "credit end_date must be greater than credit date"
+                else if (originalErrorMessage === dateValidationErrorCreditEnglish) {
+                    userMessage = dateValidationErrorCreditRussian;
+                }
+                    // Если ни одна из вышеперечисленных ошибок не совпала,
+                    // можно добавить общую обработку статусов, если это требуется.
+                // Например:
+                else if (result.error.status && result.error.status >= 400 && result.error.status < 500) {
+                    // Это может быть общая ошибка валидации, которую ты не распознал
+                    userMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
+                } else {
+                    // Общая ошибка, если ничего не подошло
+                    userMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
+                }
+
+
+                const processedError = {
+                    message: userMessage,
+                    status: result.error.status || 500 // Если статус отсутствует, по умолчанию 500
+                };
+                set({error: processedError, loading: false});
+                console.error('Ошибка обработки дохода от API:', result.error);
+                throw processedError; // Выбрасываем переведенную ошибку
             } else {
                 await get().fetchCredits();
                 useBalanceStore.getState().fetchBalance(token);
@@ -161,7 +234,7 @@ const useCreditStore = create((set, get) => ({
             }
 
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при обновлении дохода.' };
+            const unexpectedError = {message: error.message || 'Произошла непредвиденная ошибка при обновлении дохода.'};
             set({
                 error: unexpectedError,
                 loading: false
@@ -176,11 +249,11 @@ const useCreditStore = create((set, get) => ({
     // Действие для удаления дохода по ID
     deleteCredit: async (id) => {
         console.log('creditStore: deleteCredit started');
-        set({ loading: true, error: null });
+        set({loading: true, error: null});
 
         const token = get().getToken();
         if (!token) {
-            set({ loading: false });
+            set({loading: false});
             throw new Error('Пользователь не аутентифицирован');
         }
 
@@ -208,13 +281,13 @@ const useCreditStore = create((set, get) => ({
     // Действие для сброса состояния стора доходов (используется при выходе пользователя)
     resetCredits: () => {
         console.log('creditStore: resetCredits called.');
-        set({ credits: null, loading: false, error: null });
+        set({credits: null, loading: false, error: null});
     },
 
     // Действие для сброса только ошибки
     clearError: () => {
         console.log('creditStore: clearError called.');
-        set({ error: null });
+        set({error: null});
     }
 }));
 

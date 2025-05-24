@@ -93,28 +93,47 @@ const Modal = ({
         // Точные сообщения об ошибке валидации дат, которые мы ожидаем от сторов (уже на русском)
         const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.'; // Для расходов
         const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.'; // Для доходов
-        const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей';
+        const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей'; // Для доходов (дата начала > текущей)
         const startDateValidationErrorRussianSpending = 'Дата расхода должна быть не больше текущей'; // Для расходов (дата начала > текущей)
+        // НОВОЕ: Русский перевод ошибки для end_date дохода
+        const endDateGreaterThanCurrentDateRussianCredit = 'Дата окончания дохода должна быть не больше текущей даты.';
+
 
         if (submissionError) {
-            // --- ИЗМЕНЕНИЕ: Проверяем, является ли submissionError одним из ожидаемых сообщений об ошибке дат ---
-            // НОВОЕ: Добавляем новое сообщение об ошибке в условие
+            // Проверяем, является ли submissionError одним из ожидаемых сообщений об ошибке дат
+            // Теперь включаем все специфические ошибки дат (для расходов и доходов)
             if (submissionError === dateValidationErrorRussianSpending ||
                 submissionError === dateValidationErrorCreditRussian ||
                 submissionError === dateValidationErrorCreditStartDateRussian ||
                 submissionError === startDateValidationErrorRussianSpending ||
-                submissionError === 'Дата окончания расхода должна быть не больше текущей даты.') { // <-- ДОБАВЛЕНО ЭТО УСЛОВИЕ
-                // Если да, устанавливаем ошибки для полей даты в локальном состоянии errors
-                setErrors(prevErrors => ({
-                    ...prevErrors,
-                    date: 'Проверьте дату', // Сообщение об ошибке для поля date
-                    ...((submissionError !== dateValidationErrorCreditStartDateRussian && submissionError !== startDateValidationErrorRussianSpending) && {
-                        end_date: 'Проверьте дату' // Сообщение об ошибке для поля end_date
-                    })
-                }));
+                submissionError === 'Дата окончания расхода должна быть не больше текущей даты.' || // Это ошибка для расходов, которую мы уже добавили ранее
+                submissionError === endDateGreaterThanCurrentDateRussianCredit) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
+
+                setErrors(prevErrors => {
+                    const newErrors = { ...prevErrors };
+
+                    // Очищаем предыдущие ошибки дат, установленные этим эффектом, чтобы избежать дублирования
+                    if (newErrors.date === 'Проверьте дату') delete newErrors.date;
+                    if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
+
+                    // Устанавливаем ошибку для поля 'date', если submissionError соответствует ошибкам начальной даты
+                    if (submissionError === dateValidationErrorCreditStartDateRussian ||
+                        submissionError === startDateValidationErrorRussianSpending) {
+                        newErrors.date = 'Проверьте дату';
+                    }
+
+                    // Устанавливаем ошибку для поля 'end_date', если submissionError соответствует ошибкам конечной даты
+                    if (submissionError === dateValidationErrorRussianSpending ||
+                        submissionError === dateValidationErrorCreditRussian ||
+                        submissionError === 'Дата окончания расхода должна быть не больше текущей даты.' ||
+                        submissionError === endDateGreaterThanCurrentDateRussianCredit) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
+                        newErrors.end_date = 'Проверьте дату';
+                    }
+
+                    return newErrors;
+                });
             } else {
                 // Если это какая-то другая submissionError, убедимся, что предыдущие ошибки дат сброшены
-                // (те, которые были установлены этим эффектом)
                 setErrors(prevErrors => {
                     const newErrors = {...prevErrors};
                     if (newErrors.date === 'Проверьте дату') delete newErrors.date;
@@ -133,6 +152,7 @@ const Modal = ({
             });
         }
     }, [submissionError]); // Запускать эффект при изменении submissionError
+    // --- КОНЕЦ ЭФФЕКТА ---
     // --- КОНЕЦ ЭФФЕКТА ---
 
     useEffect(() => {
