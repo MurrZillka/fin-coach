@@ -5,6 +5,8 @@ import useAuthStore from './authStore';
 import useBalanceStore from './balanceStore';
 // ДОБАВЛЕНО: Импортируем стор Целей
 import useGoalsStore from './goalsStore';
+// ДОБАВЛЕНО: Импортируем useCategoryStore для вызова fetchCategoriesMonthSummary
+import useCategoryStore from './categoryStore'; // <= ЭТО НОВОЕ ДОБАВЛЕНИЕ
 
 const useSpendingsStore = create((set, get) => ({
     // --- Состояние (State) ---
@@ -144,9 +146,10 @@ const useSpendingsStore = create((set, get) => ({
                 console.log('useSpendingsStore: Spending added successfully.');
                 await get().fetchSpendings();
                 useBalanceStore.getState().fetchBalance(token);
-                // ДОБАВЛЕНО: Обновляем текущую цель
                 useGoalsStore.getState().getCurrentGoal();
-                console.log('useSpendingsStore: Balance fetch triggered after adding spending.');
+                // <= ЭТО КЛЮЧЕВОЕ ДОБАВЛЕНИЕ: Вызываем fetchCategoriesMonthSummary
+                useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
+                console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after adding spending.');
             }
         } catch (error) {
             console.error('useSpendingsStore: Error caught in addSpending action:', error);
@@ -217,9 +220,10 @@ const useSpendingsStore = create((set, get) => ({
                 console.log(`useSpendingsStore: Spending ID ${id} updated successfully.`);
                 await get().fetchSpendings();
                 useBalanceStore.getState().fetchBalance(token);
-                // ДОБАВЛЕНО: Обновляем текущую цель
                 useGoalsStore.getState().getCurrentGoal();
-                console.log('useSpendingsStore: Balance fetch triggered after updating spending.');
+                // <= ЭТО КЛЮЧЕВОЕ ДОБАВЛЕНИЕ: Вызываем fetchCategoriesMonthSummary
+                useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
+                console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after updating spending.');
             }
         } catch (error) {
             console.error('useSpendingsStore: Error caught in updateSpending action:', error);
@@ -282,9 +286,10 @@ const useSpendingsStore = create((set, get) => ({
                 // При успехе обновляем список и баланс
                 await get().fetchSpendings();
                 useBalanceStore.getState().fetchBalance(token);
-                // ДОБАВЛЕНО: Обновляем текущую цель
                 useGoalsStore.getState().getCurrentGoal();
-                console.log('useSpendingsStore: Balance fetch triggered after deleting spending.');
+                // <= ЭТО КЛЮЧЕВОЕ ДОБАВЛЕНИЕ: Вызываем fetchCategoriesMonthSummary
+                useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
+                console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after deleting spending.');
             }
         } catch (error) {
             // Перехватываем ошибку (API error или непредвиденную) и обрабатываем ее сообщение
