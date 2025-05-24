@@ -13,7 +13,7 @@ import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
 
 // Импортируем нашу новую функцию агрегации
-import { aggregateSpendingsByCategory } from '../utils/spendingAggregator'; // ВОССТАНОВЛЕНО: Импорт функции агрегации
+import { aggregateSpendingsByCategory } from '../utils/spendingAggregator';
 
 // Цвета для секторов диаграммы
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A4DDED', '#C1A4DE', '#F7B7A3', '#DE5254'];
@@ -28,54 +28,67 @@ const modalVariants = {
     visible: { y: "0", opacity: 1, transition: { delay: 0.1 } },
 };
 
+// ХУК ДЛЯ ОТСЛЕЖИВАНИЯ ШИРИНЫ ОКНА
+const useWindowWidth = () => {
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    return windowWidth;
+};
+// КОНЕЦ ХУКА
+
 const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const { spendings, loading: spendingsLoading, fetchSpendings } = useSpendingsStore();
-    // ВОССТАНОВЛЕНО: Импорт categories, categoriesLoading и fetchCategories
     const { categories, categoriesLoading, fetchCategories, categoriesMonthSummary, loading: categoriesMonthSummaryLoading, fetchCategoriesMonthSummary } = useCategoryStore();
 
     const [selectedPeriod, setSelectedPeriod] = useState('currentMonth');
+    const windowWidth = useWindowWidth(); // ИСПОЛЬЗУЕМ ХУК
 
     const handleClose = useCallback(() => {
         onClose();
     }, [onClose]);
 
     const aggregatedData = useMemo(() => {
-        // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
         console.log("Aggregating data for period:", selectedPeriod);
         console.log("Spendings available for aggregation:", spendings);
         console.log("Categories available for aggregation:", categories);
         console.log("categoriesMonthSummary available for aggregation (for currentMonth):", categoriesMonthSummary);
-        // === КОНЕЦ ОТЛАДКИ ===
 
         if (selectedPeriod === 'currentMonth') {
-            // Если выбран "currentMonth", используем categoriesMonthSummary напрямую
             if (categoriesMonthSummary && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonthSummary).length > 0) {
                 return categoriesMonthSummary;
             }
             return {};
         } else {
-            // Для других периодов агрегируем spendings с помощью нашей функции
-            if (spendings && categories) { // Убедимся, что spendings и categories доступны
+            if (spendings && categories) {
                 return aggregateSpendingsByCategory(spendings, categories, selectedPeriod);
             }
             return {};
         }
-    }, [spendings, categories, selectedPeriod, categoriesMonthSummary]); // ВОССТАНОВЛЕНО: Добавлены categories в зависимости useMemo
+    }, [spendings, categories, selectedPeriod, categoriesMonthSummary]);
 
     const chartData = useMemo(() => {
-        // Преобразуем объект в массив и сортируем по имени категории
         return Object.entries(aggregatedData)
             .map(([name, value]) => ({
                 name,
                 value: Number(value)
             }))
-            .sort((a, b) => a.name.localeCompare(b.name)); // СОРТИРОВКА ПО ИМЕНИ КАТЕГОРИИ
+            .sort((a, b) => a.name.localeCompare(b.name));
     }, [aggregatedData]);
 
     const hasData = chartData.length > 0;
     const totalAmount = chartData.reduce((sum, entry) => sum + entry.value, 0);
 
-    // ВОССТАНОВЛЕНО: isLoading учитывает categoriesLoading
     const isLoading = spendingsLoading || categoriesLoading || categoriesMonthSummaryLoading;
 
     const periodText = useMemo(() => {
@@ -93,14 +106,11 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         }
     }, [selectedPeriod]);
 
-    // УДАЛЕНО: renderTotalAmountLabel, так как ты хочешь использовать прямой текст.
-
     useEffect(() => {
         if (isOpen) {
             if (!spendings && !spendingsLoading) {
                 fetchSpendings();
             }
-            // ВОССТАНОВЛЕНО: fetchCategories
             if (!categories && !categoriesLoading) {
                 fetchCategories();
             }
@@ -124,9 +134,9 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         spendings,
         spendingsLoading,
         fetchSpendings,
-        categories, // ВОССТАНОВЛЕНО: Добавлено в зависимости useEffect
-        categoriesLoading, // ВОССТАНОВЛЕНО: Добавлено в зависимости useEffect
-        fetchCategories, // ВОССТАНОВЛЕНО: Добавлено в зависимости useEffect
+        categories,
+        categoriesLoading,
+        fetchCategories,
         categoriesMonthSummary,
         categoriesMonthSummaryLoading,
         fetchCategoriesMonthSummary,
@@ -134,6 +144,11 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     ]);
 
     if (!isOpen) return null;
+
+    // ОПРЕДЕЛЯЕМ, ПОКАЗЫВАТЬ ЛИ ЛЕЙБЛЫ
+    // TailwindCSS 'md' breakpoint обычно 768px.
+    // Если меньше, не показываем лейблы, только тултип.
+    const showLabels = windowWidth >= 768; // Можно настроить это значение
 
     return (
         <AnimatePresence>
@@ -151,7 +166,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                     }}
                 >
                     <motion.div
-                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-yellow-50 border border-gray-300 relative max-h-[80vh] my-4 overflow-y-auto"
+                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-yellow-50 border border-gray-300 relative max-h-[80vh] mx-4 overflow-y-auto"
                         variants={modalVariants}
                         onClick={e => e.stopPropagation()}
                     >
@@ -205,16 +220,17 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                             fill="#8884d8"
                                             paddingAngle={3}
                                             dataKey="value"
-                                            label={({ name, percent }) => {
+                                            // УСЛОВНОЕ ОТОБРАЖЕНИЕ ЛЕЙБЛОВ
+                                            label={showLabels ? ({ name, percent }) => {
                                                 const displayPercent = (percent * 100).toFixed(0);
-                                                const maxLength = 15; // Можно настроить эту длину
+                                                const maxLength = 15;
                                                 const displayedName = name.length > maxLength
-                                                    ? `${name.substring(0, maxLength - 3)}...` // Обрезаем и добавляем "..."
-                                                    : name; // Если короткое, используем как есть
+                                                    ? `${name.substring(0, maxLength - 3)}...`
+                                                    : name;
 
                                                 return `${displayedName} ${displayPercent}%`;
-                                            }}
-                                            labelLine={true}
+                                            } : null} // Если showLabels false, label равен null (не отображается)
+                                            labelLine={showLabels} // labelLine также зависит от showLabels
                                         >
                                             {chartData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -227,7 +243,6 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                             height={36}
                                             wrapperStyle={{ paddingTop: '20px' }}
                                         />
-                                        {/* ОСТАВЛЕНО ТВОЯ РЕАЛИЗАЦИЯ ТЕКСТА В ЦЕНТРЕ */}
                                         <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
                                               className="text-xl font-bold fill-gray-700">
                                             {`₽${totalAmount.toLocaleString()}`}
