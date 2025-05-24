@@ -110,3 +110,16 @@ input {
 .animate-menu-slide-in {
     animation: menu-slide-in 0.5s ease-out forwards;
 }
+
+/* Скрываем стандартный outline для SVG-элементов внутри rechart,
+   но только если они могут получить фокус. */
+.recharts-pie-sector:focus {
+    outline: none; /* Убираем стандартную синюю обводку */
+    box-shadow: 0 0 0 2px rgba(136, 132, 216, 0.7); /* Пример: фиолетовая тень */
+    /* или border: 2px solid rgba(136, 132, 216, 0.7); если хочешь рамку */
+}
+
+/* Можно добавить transition для плавного эффекта */
+.recharts-pie-sector {
+    transition: box-shadow 0.2s ease-in-out;
+}

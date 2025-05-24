@@ -1,16 +1,21 @@
 // src/stores/categoryStore.js
 import { create } from 'zustand';
-// Убедись, что путь к файлу categories/index.js корректный
 import * as categoriesAPI from '../api/categories/index';
-// Импортируем authStore для получения токена
-import useAuthStore from './authStore'; // Этот импорт остаётся, так как getToken его использует
+import useAuthStore from './authStore';
+
+// Импортируем централизованный массив цветов
+import { CHART_COLORS } from '../constants/colors';
 
 const useCategoryStore = create((set, get) => ({
     // Состояние
-    categories: null, // Список категорий
-    categoriesMonthSummary: null, // --- ДОБАВЛЕНО: Новое состояние для сумм по категориям за месяц
+    categories: null, // Список категорий, загруженных из API (справочник)
+    categoriesMonthSummary: null, // Суммы по категориям за текущий месяц
     loading: false,
     error: null,
+    // НОВОЕ: Объект для хранения маппинга имени категории к её цвету
+    categoryColorMap: {},
+    // НОВОЕ: Индекс для выдачи следующего цвета из CHART_COLORS для новых категорий
+    nextColorIndex: 0,
 
     // Вспомогательная функция для получения токена и обработки ошибок аутентификации
     getToken: () => {
@@ -32,7 +37,7 @@ const useCategoryStore = create((set, get) => ({
         if (!get().loading) {
             set({ loading: true, error: null });
         } else {
-            set({ error: null });
+            set({ error: null }); // Сбрасываем только ошибку, если загрузка уже идет
         }
 
         const token = get().getToken();
@@ -51,8 +56,12 @@ const useCategoryStore = create((set, get) => ({
                 set({ error: result.error, loading: false });
                 console.error('Ошибка загрузки категорий от API:', result.error);
             } else {
-                set({ categories: result.data.categories || [], loading: false });
+                const fetchedCategories = result.data.categories || [];
+                set({ categories: fetchedCategories, loading: false });
                 console.log('categoryStore: Categories updated successfully.');
+
+                // НОВОЕ: Обновляем маппинг цветов после получения полного списка категорий
+                get()._updateCategoryColorMap(fetchedCategories);
             }
 
         } catch (error) {
@@ -66,36 +75,32 @@ const useCategoryStore = create((set, get) => ({
         console.log('categoryStore: fetchCategories finished.');
     },
 
-    // --- ДОБАВЛЕНО: Новое действие для загрузки сумм по категориям за месяц ---
+    // Загрузка сумм по категориям за текущий месяц
     fetchCategoriesMonthSummary: async () => {
         console.log('categoryStore: fetchCategoriesMonthSummary started');
-        // Эта загрузка может идти параллельно с другими, поэтому не обязательно сбрасывать loading всего стора,
-        // если он уже true из-за другой CUD-операции.
-        // Однако, если это единственная загрузка, то loading: true, error: null.
         if (!get().loading) {
             set({ loading: true, error: null });
         } else {
-            set({ error: null }); // Сбрасываем только ошибку
+            set({ error: null });
         }
 
         const token = get().getToken();
         if (!token) {
             console.log('categoryStore: fetchCategoriesMonthSummary - No token, stopping fetch.');
-            if (!get().loading) set({ loading: false }); // Устанавливаем loading=false только если не было активной CUD операции
+            if (!get().loading) set({ loading: false });
             return;
         }
         console.log('categoryStore: fetchCategoriesMonthSummary - Token found, proceeding with API call.');
 
         try {
-            const result = await categoriesAPI.getCategoriesMonth(token); // Вызываем новую API-функцию
+            const result = await categoriesAPI.getCategoriesMonth(token);
             console.log('categoryStore: API getCategoriesMonth result:', result);
 
             if (result.error) {
                 set({ error: result.error, loading: false });
                 console.error('Ошибка загрузки сумм по категориям за месяц от API:', result.error);
             } else {
-                // Предполагаем, что result.data - это объект, например: { "Еда": 200, "Одежда": 60000 }
-                set({ categoriesMonthSummary: result.data || {}, loading: false }); // Если данных нет, устанавливаем пустой объект
+                set({ categoriesMonthSummary: result.data || {}, loading: false });
                 console.log('categoryStore: Categories month summary updated successfully.');
             }
         } catch (error) {
@@ -108,7 +113,28 @@ const useCategoryStore = create((set, get) => ({
         }
         console.log('categoryStore: fetchCategoriesMonthSummary finished.');
     },
-    // --- КОНЕЦ ДОБАВЛЕННОГО ---
+
+    // НОВОЕ: Внутренняя функция для создания/обновления маппинга цветов категорий
+    // Она вызывается при изменении списка категорий, чтобы гарантировать, что
+    // каждая категория имеет постоянный цвет.
+    _updateCategoryColorMap: (allCategories) => {
+        const currentMap = get().categoryColorMap;
+        let currentIndex = get().nextColorIndex;
+        const updatedMap = { ...currentMap }; // Создаем изменяемую копию текущего маппинга
+
+        // Проходим по всем известным категориям
+        allCategories.forEach(category => {
+            // Если этой категории еще нет в нашем маппинге, назначаем ей новый цвет
+            if (!updatedMap[category.name]) {
+                updatedMap[category.name] = CHART_COLORS[currentIndex % CHART_COLORS.length];
+                currentIndex++; // Переходим к следующему цвету в массиве CHART_COLORS
+            }
+        });
+
+        // Обновляем состояние стора с новым маппингом и индексом
+        set({ categoryColorMap: updatedMap, nextColorIndex: currentIndex });
+        console.log('categoryStore: categoryColorMap updated', updatedMap);
+    },
 
     // Добавление новой категории
     addCategory: async (categoryData) => {
@@ -131,10 +157,11 @@ const useCategoryStore = create((set, get) => ({
                 console.error('Ошибка добавления категории от API:', result.error);
                 throw result.error;
             } else {
-                await get().fetchCategories(); // Перезагружаем список категорий
-                // --- ДОБАВЛЕНО: Перезагружаем также сводку по месяцу, т.к. новая категория может влиять на нее ---
+                // После успешного добавления, перезагружаем список категорий.
+                // fetchCategories сам вызовет _updateCategoryColorMap, чтобы обновить цвета.
+                await get().fetchCategories();
+                // Перезагружаем также сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
-                // --- КОНЕЦ ДОБАВЛЕННОГО ---
 
                 console.log('categoryStore: addCategory success, fetching categories and month summary.');
                 return result.data;
@@ -174,10 +201,11 @@ const useCategoryStore = create((set, get) => ({
                 console.error('Ошибка обновления категории от API:', result.error);
                 throw result.error;
             } else {
-                await get().fetchCategories(); // Перезагружаем список
-                // --- ДОБАВЛЕНО: Перезагружаем сводку по месяцу, т.к. изменение категории может влиять ---
+                // После успешного обновления, перезагружаем список категорий.
+                // fetchCategories сам вызовет _updateCategoryColorMap, чтобы обновить цвета.
+                await get().fetchCategories();
+                // Перезагружаем сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
-                // --- КОНЕЦ ДОБАВЛЕННОГО ---
 
                 console.log('categoryStore: updateCategory success, fetching categories and month summary.');
                 return result.data;
@@ -217,10 +245,11 @@ const useCategoryStore = create((set, get) => ({
                 console.error('Ошибка удаления категории от API:', result.error);
                 throw result.error;
             } else {
-                await get().fetchCategories(); // Перезагружаем список
-                // --- ДОБАВЛЕНО: Перезагружаем сводку по месяцу, т.к. удаление категории может влиять ---
+                // После успешного удаления, перезагружаем список категорий.
+                // fetchCategories сам вызовет _updateCategoryColorMap.
+                await get().fetchCategories();
+                // Перезагружаем сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
-                // --- КОНЕЦ ДОБАВЛЕННОГО ---
 
                 console.log(`categoryStore: Категория ${id} успешно удалена, fetching categories and month summary.`);
                 return result.data;
@@ -239,14 +268,19 @@ const useCategoryStore = create((set, get) => ({
         }
     },
 
-    // --- Добавлено: Действие для сброса состояния стора категорий ---
+    // Действие для сброса состояния стора категорий (например, при выходе пользователя)
     resetCategories: () => {
         console.log('categoryStore: resetCategories called.');
-        // --- ИЗМЕНЕНО: Сбрасываем и categoriesMonthSummary тоже ---
-        set({ categories: null, categoriesMonthSummary: null, loading: false, error: null });
+        set({
+            categories: null,
+            categoriesMonthSummary: null,
+            loading: false,
+            error: null,
+            // НОВОЕ: Сбрасываем также маппинг цветов и индекс при сбросе стора
+            categoryColorMap: {},
+            nextColorIndex: 0,
+        });
     },
-    // --- Конец добавления ---
-
 
     // Сброс ошибки
     clearError: () => {

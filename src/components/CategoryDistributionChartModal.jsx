@@ -1,6 +1,6 @@
 // src/components/CategoryDistributionChartModal.jsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-//eslint-disable-next-line
+// eslint-disable-next-line
 import { motion, AnimatePresence } from 'framer-motion';
 import Text from './ui/Text';
 import IconButton from './ui/IconButton.jsx';
@@ -10,13 +10,18 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 
 // Импортируем сторы для получения данных
 import useSpendingsStore from '../stores/spendingsStore';
-import useCategoryStore from '../stores/categoryStore';
+import useCategoryStore from '../stores/categoryStore'; // НОВОЕ: Импортируем categoryStore
 
-// Импортируем нашу новую функцию агрегации
+// Импортируем нашу функцию агрегации
 import { aggregateSpendingsByCategory } from '../utils/spendingAggregator';
 
-// Цвета для секторов диаграммы
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A4DDED', '#C1A4DE', '#F7B7A3', '#DE5254'];
+// УДАЛЯЕМ старую константу COLORS, она теперь в constants/colors.js и управляется стором
+// const COLORS = [
+//     '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042',
+//     '#A4DDED', '#C1A4DE', '#8A2BE2', '#DEB887', '#5F9EA0', '#D2691E', '#FF7F50', '#6495ED',
+//     '#DC143C', '#00FFFF', '#00008B', '#008B8B', '#B8860B', '#A9A9A9', '#006400', '#BDB76B'
+// ];
+
 
 const backdropVariants = {
     visible: { opacity: 1 },
@@ -26,32 +31,6 @@ const backdropVariants = {
 const modalVariants = {
     hidden: { y: "-100vh", opacity: 0 },
     visible: { y: "0", opacity: 1, transition: { delay: 0.1 } },
-};
-
-const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-        // payload[0] содержит данные первого элемента (твоей категории)
-        const data = payload[0];
-        return (
-            <div className="
-                bg-white
-                p-2             // Уменьшаем паддинг (было p-2, можно сделать p-1 или p-x)
-                border
-                border-gray-300
-                rounded-md      // Закругляем углы (было rounded, теперь rounded-md)
-                shadow-lg       // Делаем тень более выраженной, или shadow-sm для меньшей
-                text-sm         // Уменьшаем размер текста
-                flex flex-col   // Используем flexbox для аккуратного размещения элементов
-                items-start     // Выравнивание текста по левому краю
-            ">
-                {/* name - это название категории (например, "Дети"), value - это сумма */}
-                <p className="font-semibold text-gray-800">{`${data.name}: ${data.value.toLocaleString()} руб.`}</p>
-                {/* Если хочешь, можешь добавить процент или другую информацию */}
-                {/* <p className="text-gray-600">{`Доля: ${(data.percent * 100).toFixed(0)}%`}</p> */}
-            </div>
-        );
-    }
-    return null;
 };
 
 // ХУК ДЛЯ ОТСЛЕЖИВАНИЯ ШИРИНЫ ОКНА
@@ -73,16 +52,47 @@ const useWindowWidth = () => {
 };
 // КОНЕЦ ХУКА
 
+// Кастомный компонент для тултипа Recharts
+const CustomRechartsTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+        const data = payload[0];
+        return (
+            <div className="
+                bg-white
+                p-2
+                border
+                border-gray-300
+                rounded-md
+                shadow-lg
+                text-sm
+                flex flex-col
+                items-start
+            ">
+                <p className="font-semibold text-gray-800">{`${data.name}: ${data.value.toLocaleString()} руб.`}</p>
+            </div>
+        );
+    }
+    return null;
+};
+
+
 const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const { spendings, loading: spendingsLoading, fetchSpendings } = useSpendingsStore();
-    const { categories, categoriesLoading, fetchCategories, categoriesMonthSummary, loading: categoriesMonthSummaryLoading, fetchCategoriesMonthSummary } = useCategoryStore();
+    // НОВОЕ: Получаем categoryColorMap из useCategoryStore
+    const { categories, categoriesLoading, fetchCategories, categoriesMonthSummary, loading: categoriesMonthSummaryLoading, fetchCategoriesMonthSummary, categoryColorMap } = useCategoryStore();
 
     const [selectedPeriod, setSelectedPeriod] = useState('currentMonth');
-    const windowWidth = useWindowWidth(); // ИСПОЛЬЗУЕМ ХУК
+    const windowWidth = useWindowWidth();
 
     const handleClose = useCallback(() => {
         onClose();
     }, [onClose]);
+
+    // УДАЛЯЕМ: Локальный маппинг цветов, он теперь в сторе
+    // const categoryColorMap = useRef({});
+    // const colorIndex = useRef(0);
+    // const getCategoryColor = useCallback((categoryName) => { /* ... */ }, []);
+
 
     const aggregatedData = useMemo(() => {
         console.log("Aggregating data for period:", selectedPeriod);
@@ -138,7 +148,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                 fetchSpendings();
             }
             if (!categories && !categoriesLoading) {
-                fetchCategories();
+                fetchCategories(); // Это вызовет обновление categoryColorMap в сторе
             }
             if (!categoriesMonthSummary && !categoriesMonthSummaryLoading) {
                 fetchCategoriesMonthSummary();
@@ -171,10 +181,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
 
     if (!isOpen) return null;
 
-    // ОПРЕДЕЛЯЕМ, ПОКАЗЫВАТЬ ЛИ ЛЕЙБЛЫ
-    // TailwindCSS 'md' breakpoint обычно 768px.
-    // Если меньше, не показываем лейблы, только тултип.
-    const showLabels = windowWidth >= 768; // Можно настроить это значение
+    const showLabels = windowWidth >= 768;
 
     return (
         <AnimatePresence>
@@ -246,7 +253,6 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                             fill="#8884d8"
                                             paddingAngle={3}
                                             dataKey="value"
-                                            // УСЛОВНОЕ ОТОБРАЖЕНИЕ ЛЕЙБЛОВ
                                             label={showLabels ? ({ name, percent }) => {
                                                 const displayPercent = (percent * 100).toFixed(0);
                                                 const maxLength = 15;
@@ -255,14 +261,19 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                                     : name;
 
                                                 return `${displayedName} ${displayPercent}%`;
-                                            } : null} // Если showLabels false, label равен null (не отображается)
-                                            labelLine={showLabels} // labelLine также зависит от showLabels
+                                            } : null}
+                                            labelLine={showLabels}
                                         >
-                                            {chartData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            {chartData.map((entry) => (
+                                                <Cell
+                                                    key={entry.name} // Используем имя категории как ключ для стабильности
+                                                    // НОВОЕ: Получаем цвет из categoryColorMap, переданного из стора
+                                                    // Предоставляем резервный цвет (#CCCCCC) на случай, если категория не найдена в маппинге
+                                                    fill={categoryColorMap[entry.name] || '#CCCCCC'}
+                                                />
                                             ))}
                                         </Pie>
-                                        <Tooltip content={<CustomTooltip />} />
+                                        <Tooltip content={<CustomRechartsTooltip />} />
                                         <Legend
                                             verticalAlign="bottom"
                                             align="center"
