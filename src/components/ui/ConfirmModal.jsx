@@ -60,7 +60,7 @@ const ConfirmModal = ({isOpen, onClose, onConfirm, title, message, confirmText =
 
     return (
         // Подложка модала (используем стили, которые обсуждали)
-        <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50 backdrop-blur-xs bg-white/20"
+        <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50 backdrop-blur-xs bg-black/20"
              onClick={(event) => {
                  // Проверяем, был ли клик именно по этому элементу (оверлею),
                  // а не по одному из его дочерних элементов (содержимому модалки).

@@ -1,6 +1,22 @@
 /* src/index.css */
 @import "tailwindcss";
 
+html::-webkit-scrollbar {
+    display: none; /* Полностью скрывает визуальную полосу прокрутки */
+    width: 0;      /* Делает ее ширину нулевой */
+    height: 0;     /* Делает ее высоту нулевой */
+}
+
+/* Скрываем полосу прокрутки для Firefox */
+html{
+    scrollbar-width: none; /* Указывает Firefox не отображать полосу прокрутки */
+}
+
+/* Для Internet Explorer/старых версий Edge */
+html {
+    -ms-overflow-style: none; /* Скрывает полосу прокрутки */
+}
+
 @theme {
     --color-primary-500: #3b82f6; /* blue-500 */
     --color-primary-600: #2563eb; /* blue-600 */
@@ -19,9 +35,6 @@
     /* --- Конец переменной --- */
 }
 
-body {
-overflow-y: scroll;
-}
 
 /* --- Новые кастомные классы для баланса --- */
 /* Эти классы будут использоваться в BalanceWidget.jsx для установки цвета и жирности */
