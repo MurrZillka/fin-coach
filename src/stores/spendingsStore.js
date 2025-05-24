@@ -115,23 +115,38 @@ const useSpendingsStore = create((set, get) => ({
                 let originalErrorMessage = result.error.message || 'Ошибка при добавлении расхода с сервера.';
                 const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
                 const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
+
+                // НОВОЕ: Ошибка - дата окончания расхода больше текущей
+                const endDateGreaterThanCurrentDateEnglish = 'spending end_date must be less than current date';
+                const endDateGreaterThanCurrentDateRussian = 'Дата окончания расхода должна быть не больше текущей даты.';
+
                 const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
-                // --- ДОБАВЛЕНО: Новая английская ошибка даты начала ---
                 const startDateValidationErrorEnglish = 'spending date must be less than current date';
-                // --- ДОБАВЛЕНО: Русский текст для новой ошибки даты начала ---
                 const startDateValidationErrorRussian = 'Дата расхода должна быть не больше текущей';
 
-                let userMessage = genericErrorMessage;
-                if (originalErrorMessage === startDateValidationErrorEnglish) {
-                    userMessage = startDateValidationErrorRussian; // Используем новое русское сообщение
-                } // --- Конец ИЗМЕНЕНИЯ ---
+                let userMessage = genericErrorMessage; // <-- Здесь userMessage ИНИЦИАЛИЗИРУЕТСЯ ОБЩИМ СООБЩЕНИЕМ
+
+                // Затем идут проверки от СПЕЦИФИЧЕСКИХ к МЕНЕЕ СПЕЦИФИЧЕСКИМ
+                // Если originalErrorMessage совпадает с endDateGreaterThanCurrentDateEnglish,
+                // то userMessage будет перезаписано на endDateGreaterThanCurrentDateRussian.
+                // Иначе, проверяется следующее условие, и так далее.
+                // Если ни одно из if/else if не сработает, userMessage останется genericErrorMessage.
+
+                if (originalErrorMessage === endDateGreaterThanCurrentDateEnglish) {
+                    userMessage = endDateGreaterThanCurrentDateRussian;
+                }
+                else if (originalErrorMessage === startDateValidationErrorEnglish) {
+                    userMessage = startDateValidationErrorRussian;
+                }
                 else if (originalErrorMessage === dateValidationErrorEnglish) {
                     userMessage = dateValidationErrorRussianSpending;
-                } else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
+                }
+                else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;
-                } else if (result.error.status >= 400 && result.error.status < 500) {
+                }
+                else if (result.error.status >= 400 && result.error.status < 500) {
                     userMessage = formInputErrorMessage;
                 }
 
@@ -184,28 +199,41 @@ const useSpendingsStore = create((set, get) => ({
             console.log(`useSpendingsStore: API updateSpendingById result for ID ${id}:`, result);
 
             if (result.error) {
-                let originalErrorMessage = result.error.message || 'Ошибка при обновлении расхода с сервера.';
+                let originalErrorMessage = result.error.message || 'Ошибка при добавлении расхода с сервера.';
                 const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
                 const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
+
+                // НОВОЕ: Ошибка - дата окончания расхода больше текущей
+                const endDateGreaterThanCurrentDateEnglish = 'spending end_date must be less than current date';
+                const endDateGreaterThanCurrentDateRussian = 'Дата окончания расхода должна быть не больше текущей даты.';
+
                 const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
-                // --- ДОБАВЛЕНО: Новая английская ошибка даты начала ---
                 const startDateValidationErrorEnglish = 'spending date must be less than current date';
-                // --- ДОБАВЛЕНО: Русский текст для новой ошибки даты начала ---
                 const startDateValidationErrorRussian = 'Дата расхода должна быть не больше текущей';
 
+                let userMessage = genericErrorMessage; // <-- Здесь userMessage ИНИЦИАЛИЗИРУЕТСЯ ОБЩИМ СООБЩЕНИЕМ
 
-                let userMessage = genericErrorMessage;
-                // --- ИЗМЕНЕНИЕ: Добавляем проверку на новую ошибку даты начала с высоким приоритетом ---
-                if (originalErrorMessage === startDateValidationErrorEnglish) {
-                    userMessage = startDateValidationErrorRussian; // Используем новое русское сообщение
-                } // --- Конец ИЗМЕНЕНИЯ ---
+                // Затем идут проверки от СПЕЦИФИЧЕСКИХ к МЕНЕЕ СПЕЦИФИЧЕСКИМ
+                // Если originalErrorMessage совпадает с endDateGreaterThanCurrentDateEnglish,
+                // то userMessage будет перезаписано на endDateGreaterThanCurrentDateRussian.
+                // Иначе, проверяется следующее условие, и так далее.
+                // Если ни одно из if/else if не сработает, userMessage останется genericErrorMessage.
+
+                if (originalErrorMessage === endDateGreaterThanCurrentDateEnglish) {
+                    userMessage = endDateGreaterThanCurrentDateRussian;
+                }
+                else if (originalErrorMessage === startDateValidationErrorEnglish) {
+                    userMessage = startDateValidationErrorRussian;
+                }
                 else if (originalErrorMessage === dateValidationErrorEnglish) {
                     userMessage = dateValidationErrorRussianSpending;
-                } else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
+                }
+                else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;
-                } else if (result.error.status >= 400 && result.error.status < 500) {
+                }
+                else if (result.error.status >= 400 && result.error.status < 500) {
                     userMessage = formInputErrorMessage;
                 }
 
@@ -247,26 +275,41 @@ const useSpendingsStore = create((set, get) => ({
 
             if (result.error) {
                 // --- ИЗМЕНЕНИЕ: Исправленная логика обработки и замена сообщения об ошибке ---
-                let originalErrorMessage = result.error.message || 'Ошибка при удалении расхода с сервера.';
+                let originalErrorMessage = result.error.message || 'Ошибка при добавлении расхода с сервера.';
                 const dateValidationErrorEnglish = 'spending end_date must be greater than spending date';
                 const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.';
+
+                // НОВОЕ: Ошибка - дата окончания расхода больше текущей
+                const endDateGreaterThanCurrentDateEnglish = 'spending end_date must be less than current date';
+                const endDateGreaterThanCurrentDateRussian = 'Дата окончания расхода должна быть не больше текущей даты.';
+
                 const authErrorMessage = 'Сессия истекла. Попробуйте, пожалуйста, позже.';
                 const formInputErrorMessage = 'Ошибка в данных формы. Проверьте введенные значения.';
                 const genericErrorMessage = 'Ошибка связи или сервера. Попробуйте, пожалуйста, позже.';
+                const startDateValidationErrorEnglish = 'spending date must be less than current date';
+                const startDateValidationErrorRussian = 'Дата расхода должна быть не больше текущей';
 
-                let userMessage = genericErrorMessage; // Начинаем с универсального по умолчанию
+                let userMessage = genericErrorMessage; // <-- Здесь userMessage ИНИЦИАЛИЗИРУЕТСЯ ОБЩИМ СООБЩЕНИЕМ
 
-                // **ПРИОРИТЕТ 1:** В первую очередь проверяем на специфическую ошибку валидации даты от сервера (английскую)
-                if (originalErrorMessage === dateValidationErrorEnglish) {
-                    userMessage = dateValidationErrorRussianSpending; // Если совпало, используем наш русский текст для даты
+                // Затем идут проверки от СПЕЦИФИЧЕСКИХ к МЕНЕЕ СПЕЦИФИЧЕСКИМ
+                // Если originalErrorMessage совпадает с endDateGreaterThanCurrentDateEnglish,
+                // то userMessage будет перезаписано на endDateGreaterThanCurrentDateRussian.
+                // Иначе, проверяется следующее условие, и так далее.
+                // Если ни одно из if/else if не сработает, userMessage останется genericErrorMessage.
+
+                if (originalErrorMessage === endDateGreaterThanCurrentDateEnglish) {
+                    userMessage = endDateGreaterThanCurrentDateRussian;
                 }
-                // **ПРИОРИТЕТ 2:** Если это НЕ специфическая ошибка даты, проверяем на ошибки аутентификации/авторизации
+                else if (originalErrorMessage === startDateValidationErrorEnglish) {
+                    userMessage = startDateValidationErrorRussian;
+                }
+                else if (originalErrorMessage === dateValidationErrorEnglish) {
+                    userMessage = dateValidationErrorRussianSpending;
+                }
                 else if (result.error.status === 401 || result.error.status === 403 || (originalErrorMessage && (originalErrorMessage.toLowerCase().includes('token') || originalErrorMessage.toLowerCase().includes('unauthorized') || originalErrorMessage.toLowerCase().includes('forbidden')))) {
                     userMessage = authErrorMessage;
                 }
-                // **ПРИОРИТЕТ 3:** Если это НЕ ошибка даты и НЕ ошибка аутентификации/авторизации, проверяем на другие клиентские ошибки (4хх)
                 else if (result.error.status >= 400 && result.error.status < 500) {
-                    // Используем общее сообщение для ошибок в данных формы
                     userMessage = formInputErrorMessage;
                 }
                 // **ПРИОРИТЕТ 4:** Для всех остальных ошибок (серверные 5хх, сетевые, неизвестные) оставляем универсальное сообщение

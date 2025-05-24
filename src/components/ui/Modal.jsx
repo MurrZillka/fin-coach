@@ -98,11 +98,12 @@ const Modal = ({
 
         if (submissionError) {
             // --- ИЗМЕНЕНИЕ: Проверяем, является ли submissionError одним из ожидаемых сообщений об ошибке дат ---
+            // НОВОЕ: Добавляем новое сообщение об ошибке в условие
             if (submissionError === dateValidationErrorRussianSpending ||
                 submissionError === dateValidationErrorCreditRussian ||
                 submissionError === dateValidationErrorCreditStartDateRussian ||
-                submissionError === startDateValidationErrorRussianSpending) {
-                // --- Конец ИЗМЕНЕНИЯ ---
+                submissionError === startDateValidationErrorRussianSpending ||
+                submissionError === 'Дата окончания расхода должна быть не больше текущей даты.') { // <-- ДОБАВЛЕНО ЭТО УСЛОВИЕ
                 // Если да, устанавливаем ошибки для полей даты в локальном состоянии errors
                 setErrors(prevErrors => ({
                     ...prevErrors,
