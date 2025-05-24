@@ -25,7 +25,7 @@ export default function LayoutWithHeader() {
 
     return (
         // Основной контейнер страницы. flex-col и min-h-screen задают колонку с минимальной высотой экрана
-        <div className="flex flex-col bg-secondary-50 min-h-screen">
+        <div className="flex flex-col bg-secondary-50 min-h-screen pb-28">
 
             {/* --- ДОБАВЛЕНО: Фиксированный хедер контейнер --- */}
             {/* Этот div фиксирует блок шапки вверху экрана */}
