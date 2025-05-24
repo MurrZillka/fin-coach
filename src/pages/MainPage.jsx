@@ -31,6 +31,7 @@ import GoalsSummaryWidget from '../components/GoalsSummaryWidget';
 // Импортируем компонент графика
 import IncomeExpenseChart from '../components/IncomeExpenseChart';
 import {useNavigate} from "react-router-dom";
+import {aggregateSpendingsByCategory} from "../utils/spendingAggregator.js";
 
 
 export default function MainPage() {
@@ -63,29 +64,16 @@ export default function MainPage() {
             console.log('allTimeCategoriesSummary useMemo: spendings or categories is null/undefined, returning empty object.');
             return {};
         }
+        // --- Ключевое изменение: Используем существующую функцию aggregateSpendingsByCategory ---
+        // Эта функция, по твоим словам, уже правильно "разворачивает" периодические расходы,
+        // как это делает модалка для периода "Все время".
+        const summary = aggregateSpendingsByCategory(spendings, categories, 'allTime');
 
-        // Создаем карту категорий для быстрого поиска по category_id
-        const categoryMap = categories.reduce((map, category) => {
-            map[category.id] = category.name;
-            return map;
-        }, {});
-
-        const summary = {};
-        spendings.forEach(spending => {
-            // Используем category_id из spending для получения category_name из categoryMap
-            const categoryName = categoryMap[spending.category_id];
-
-            // Проверяем, что categoryName существует и amount является числом
-            if (categoryName && typeof spending.amount === 'number') {
-                summary[categoryName] = (summary[categoryName] || 0) + spending.amount;
-            } else {
-                console.warn('allTimeCategoriesSummary useMemo: Skipping spending due to missing/invalid category_id or invalid amount:', spending, 'Category Name looked up:', categoryName);
-            }
-        });
-        console.log('allTimeCategoriesSummary useMemo: Aggregated summary:', summary);
+        console.log('allTimeCategoriesSummary useMemo: Aggregated summary using aggregateSpendingsByCategory:', summary);
         console.log('allTimeCategoriesSummary useMemo: Number of unique categories:', Object.keys(summary).length);
         return summary;
     }, [spendings, categories]); // Пересчитываем только когда spendings ИЛИ categories меняются
+// --- Конец ИЗМЕНЕНИЙ ---
     // --- Конец ДОБАВЛЕНО/ИЗМЕНЕНИЙ ---
 
 
