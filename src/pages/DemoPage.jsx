@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+// eslint-disable-next-line
 import {motion, AnimatePresence} from 'framer-motion';
 import Text from '../components/ui/Text';
 import creditsDesktop from '../assets/images/credits-desktop.png';
@@ -114,7 +115,7 @@ const DemoPage = () => {
     }, [currentIndex]);
 
     return (
-        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+        <div className="max-w-7xl mx-auto px-2">
             {/* Заголовок страницы и описание */}
             <motion.div
                 className="text-center py-4 relative"
@@ -122,11 +123,11 @@ const DemoPage = () => {
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.8, ease: 'easeOut'}}
             >
-                <Text className="text-2xl md:text-3xl font-bold text-blue-800">
+                <span className="text-2xl md:text-3xl text-blue-800">
                     Ваш личный финансовый наставник
-                </Text>
+                </span>
                 <div className="mt-4">
-                    <Text variant="body" className="text-gray-600 max-w-2xl mx-auto text-[clamp(0.875rem,3vw,1rem)]">
+                    <span className="text-gray-600 max-w-2xl mx-auto text-sm md:text-[clamp(0.875rem,3vw,1rem)]">
                         Financial Coach - ваш надёжный помощник в управлении личными финансами. Отслеживайте доходы и
                         расходы, ставьте цели и получайте персональные рекомендации, чтобы достичь финансовой
                         стабильности.{' '}
@@ -144,7 +145,7 @@ const DemoPage = () => {
                             зарегистрируйтесь
                         </Link>{' '}
                         прямо сейчас, чтобы начать путь к финансовой свободе.
-                    </Text>
+                    </span>
                 </div>
             </motion.div>
 
@@ -173,7 +174,18 @@ const DemoPage = () => {
                                 className="rounded-lg max-w-full max-h-[60vh] mx-auto"
                             />
                             <div
-                                className={`absolute bottom-4 shadow-2xl right-0 transform translate-x-1/4 flex flex-col ${sections[wrappedIndex].bgColor} 
+                                className={`hidden absolute bottom-4 shadow-2xl right-0 transform translate-x-1/4 md:flex mr-4 flex-col ${sections[wrappedIndex].bgColor} 
+                            rounded-lg p-4 w-1/2`}>
+                                <Text
+                                    className={`text-[clamp(1rem,1.3vw,1.3vw)] text-center font-semibold mb-2 ${sections[wrappedIndex].textColor}`}>
+                                    {sections[wrappedIndex].title}
+                                </Text>
+                                <Text variant="body" className="text-[clamp(0.7rem,1.1vw,1rem)] text-gray-800">
+                                    {sections[wrappedIndex].description}
+                                </Text>
+                            </div>
+                            <div
+                                className={`md:hidden mt-4 shadow-2xl flex mr-4 flex-col w-full ${sections[wrappedIndex].bgColor} 
                             rounded-lg p-4 w-1/2`}>
                                 <Text
                                     className={`text-[clamp(1rem,1.3vw,1.3vw)] text-center font-semibold mb-2 ${sections[wrappedIndex].textColor}`}>
