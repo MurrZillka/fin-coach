@@ -28,6 +28,32 @@ const modalVariants = {
     visible: { y: "0", opacity: 1, transition: { delay: 0.1 } },
 };
 
+const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+        // payload[0] содержит данные первого элемента (твоей категории)
+        const data = payload[0];
+        return (
+            <div className="
+                bg-white
+                p-2             // Уменьшаем паддинг (было p-2, можно сделать p-1 или p-x)
+                border
+                border-gray-300
+                rounded-md      // Закругляем углы (было rounded, теперь rounded-md)
+                shadow-lg       // Делаем тень более выраженной, или shadow-sm для меньшей
+                text-sm         // Уменьшаем размер текста
+                flex flex-col   // Используем flexbox для аккуратного размещения элементов
+                items-start     // Выравнивание текста по левому краю
+            ">
+                {/* name - это название категории (например, "Дети"), value - это сумма */}
+                <p className="font-semibold text-gray-800">{`${data.name}: ${data.value.toLocaleString()} руб.`}</p>
+                {/* Если хочешь, можешь добавить процент или другую информацию */}
+                {/* <p className="text-gray-600">{`Доля: ${(data.percent * 100).toFixed(0)}%`}</p> */}
+            </div>
+        );
+    }
+    return null;
+};
+
 // ХУК ДЛЯ ОТСЛЕЖИВАНИЯ ШИРИНЫ ОКНА
 const useWindowWidth = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -236,7 +262,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
-                                        <Tooltip formatter={(value, name) => [`${value.toLocaleString()} руб.`, name]} />
+                                        <Tooltip content={<CustomTooltip />} />
                                         <Legend
                                             verticalAlign="bottom"
                                             align="center"
