@@ -1,5 +1,6 @@
 // src/components/CategoryDistributionChartModal.jsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+//eslint-disable-next-line
 import { motion, AnimatePresence } from 'framer-motion';
 import Text from './ui/Text';
 import IconButton from './ui/IconButton.jsx';
@@ -66,13 +67,13 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const periodText = useMemo(() => {
         switch (selectedPeriod) {
             case 'currentMonth':
-                return ' (в текущем месяце)';
+                return ' в текущем месяце';
             case 'last30Days':
-                return ' (за последние 30 дней)';
+                return ' за последние 30 дней';
             case 'lastYear':
-                return ' (за последний год)';
+                return ' за последний год';
             case 'allTime':
-                return ' (за все время)';
+                return ' за все время';
             default:
                 return '';
         }

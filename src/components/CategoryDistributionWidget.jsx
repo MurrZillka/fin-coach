@@ -18,7 +18,7 @@ const CategoryDistributionWidget = ({ onOpenChart, loading, allTimeCategoriesSum
     }));
 
     const hasData = chartData.length > 0;
-    const totalAmount = chartData.reduce((sum, entry) => sum + entry.value, 0);
+   // const totalAmount = chartData.reduce((sum, entry) => sum + entry.value, 0);
 
     return (
         <div
