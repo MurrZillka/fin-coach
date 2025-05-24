@@ -63,10 +63,13 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     }, [spendings, categories, selectedPeriod, categoriesMonthSummary]); // ВОССТАНОВЛЕНО: Добавлены categories в зависимости useMemo
 
     const chartData = useMemo(() => {
-        return Object.entries(aggregatedData).map(([name, value]) => ({
-            name,
-            value: Number(value)
-        }));
+        // Преобразуем объект в массив и сортируем по имени категории
+        return Object.entries(aggregatedData)
+            .map(([name, value]) => ({
+                name,
+                value: Number(value)
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name)); // СОРТИРОВКА ПО ИМЕНИ КАТЕГОРИИ
     }, [aggregatedData]);
 
     const hasData = chartData.length > 0;
