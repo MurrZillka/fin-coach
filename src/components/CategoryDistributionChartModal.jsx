@@ -205,7 +205,15 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                             fill="#8884d8"
                                             paddingAngle={3}
                                             dataKey="value"
-                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                            label={({ name, percent }) => {
+                                                const displayPercent = (percent * 100).toFixed(0);
+                                                const maxLength = 15; // Можно настроить эту длину
+                                                const displayedName = name.length > maxLength
+                                                    ? `${name.substring(0, maxLength - 3)}...` // Обрезаем и добавляем "..."
+                                                    : name; // Если короткое, используем как есть
+
+                                                return `${displayedName} ${displayPercent}%`;
+                                            }}
                                             labelLine={true}
                                         >
                                             {chartData.map((entry, index) => (
