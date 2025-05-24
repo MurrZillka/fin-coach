@@ -115,7 +115,7 @@ const DemoPage = () => {
     }, [currentIndex]);
 
     return (
-        <div className="max-w-7xl mx-auto px-2">
+        <div className="max-w-7xl mx-auto px-2  overflow-x-hidden">
             {/* Заголовок страницы и описание */}
             <motion.div
                 className="text-center py-4 relative"
