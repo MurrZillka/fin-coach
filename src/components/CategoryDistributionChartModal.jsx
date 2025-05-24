@@ -67,13 +67,13 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const periodText = useMemo(() => {
         switch (selectedPeriod) {
             case 'currentMonth':
-                return ' в текущем месяце';
+                return ' (в текущем месяце)';
             case 'last30Days':
-                return ' за последние 30 дней';
+                return ' (за последние 30 дней)';
             case 'lastYear':
-                return ' за последний год';
+                return ' (за последний год)';
             case 'allTime':
-                return ' за все время';
+                return ' (за все время)';
             default:
                 return '';
         }
@@ -147,7 +147,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                     }}
                 >
                     <motion.div
-                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-yellow-50 border border-gray-300 relative max-h-[80vh] my-4 overflow-y-auto"
+                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto"
                         variants={modalVariants}
                         onClick={e => e.stopPropagation()}
                     >
