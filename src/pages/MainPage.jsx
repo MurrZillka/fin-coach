@@ -264,9 +264,7 @@ export default function MainPage() {
                 {/* Сетка виджетов и графика */}
                 {(hasAnyData || isLoadingData || showCategoryDistributionWidget) && (
                     <div
-                        // ИЗМЕНЕНО: Заменили lg:grid-cols-3 на lg:grid-cols-4
-                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${!isLoadingData && !hasAnyData && !showCategoryDistributionWidget ? '' : 'mt-6'}`}>
-
+                        className={`grid grid-cols-1 md:grid-cols-2 ${showCategoryDistributionWidget ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 ${!isLoadingData && !hasAnyData && !showCategoryDistributionWidget ? '' : 'mt-6'}`}>
                         {/* Блок для Графика Доходов/Расходов */}
                         {/* Здесь тоже нужно изменить col-span, если сетка теперь 4 колонки */}
                         {/* col-span-full md:col-span-2 lg:col-span-4 (чтобы он занимал всю ширину новой сетки) */}
