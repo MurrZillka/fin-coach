@@ -1,17 +1,20 @@
 // src/components/CategoryDistributionChartModal.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Text from './ui/Text';
 import IconButton from './ui/IconButton.jsx';
 import TextButton from './ui/TextButton';
 import { XMarkIcon as XIcon } from '@heroicons/react/24/outline';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'; // Добавлен Legend
 
 // Импортируем сторы для получения данных
 import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
 
-// Цвета для секторов диаграммы (можно использовать те же, что и в виджете, или расширить)
+// Импортируем нашу новую функцию агрегации
+import { aggregateSpendingsByCategory } from '../utils/spendingAggregator';
+
+// Цвета для секторов диаграммы
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A4DDED', '#C1A4DE', '#F7B7A3', '#DE5254'];
 
 const backdropVariants = {
@@ -26,101 +29,27 @@ const modalVariants = {
 
 const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const { spendings, loading: spendingsLoading, fetchSpendings } = useSpendingsStore();
-    const { categoriesMonthSummary, loading: categoriesMonthLoading, fetchCategoriesMonthSummary } = useCategoryStore();
+    const { categories, categoriesLoading, fetchCategories, categoriesMonthSummary, loading: categoriesMonthSummaryLoading, fetchCategoriesMonthSummary } = useCategoryStore();
 
     const [selectedPeriod, setSelectedPeriod] = useState('currentMonth');
 
-    useEffect(() => {
-        if (isOpen) {
-            if (!spendings && !spendingsLoading) {
-                fetchSpendings();
-            }
-            if (!categoriesMonthSummary && !categoriesMonthLoading) {
-                fetchCategoriesMonthSummary();
-            }
-            // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
-            console.log("Modal opened. Current spendings:", spendings);
-            console.log("Modal opened. Current categoriesMonthSummary:", categoriesMonthSummary);
-            // === КОНЕЦ ОТЛАДКИ ===
-        }
-    }, [isOpen, spendings, spendingsLoading, fetchSpendings, categoriesMonthSummary, categoriesMonthLoading, fetchCategoriesMonthSummary]);
+    const handleClose = useCallback(() => {
+        onClose();
+    }, [onClose]);
 
     const aggregatedData = useMemo(() => {
-        // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
-        console.log("Aggregating data for period:", selectedPeriod);
-        console.log("Spendings available for aggregation:", spendings);
-        console.log("categoriesMonthSummary available for aggregation (for currentMonth):", categoriesMonthSummary);
-        // === КОНЕЦ ОТЛАДКИ ===
-
-        if (!spendings || spendings.length === 0) {
-            // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
-            if (selectedPeriod !== 'currentMonth') { // если текущий месяц, то spendings не нужен
-                console.warn("Spendings array is empty or null, cannot aggregate for other periods.");
-            }
-            // === КОНЕЦ ОТЛАДКИ ===
-            // Если выбран "currentMonth", а categoriesMonthSummary ещё не пришёл,
-            // или если spendings пуст, но мы выбрали не "currentMonth"
-            if (selectedPeriod === 'currentMonth' && categoriesMonthSummary && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonthSummary).length > 0) {
+        if (selectedPeriod === 'currentMonth') {
+            if (categoriesMonthSummary && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonthSummary).length > 0) {
                 return categoriesMonthSummary;
             }
-            return {}; // Возвращаем пустой объект, если данных нет
+            return {};
+        } else {
+            if (spendings && categories) {
+                return aggregateSpendingsByCategory(spendings, categories, selectedPeriod);
+            }
+            return {};
         }
-
-        const now = new Date();
-        // Используем начало текущего дня для 30 дней назад
-        const thirtyDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
-        thirtyDaysAgo.setHours(0, 0, 0, 0); // Обнуляем время для точного сравнения
-
-        // Используем начало текущего дня для года назад
-        const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-        oneYearAgo.setHours(0, 0, 0, 0); // Обнуляем время для точного сравнения
-
-
-        let filteredSpendings = [];
-        let summary = {};
-
-        switch (selectedPeriod) {
-            case 'currentMonth':
-                if (categoriesMonthSummary && typeof categoriesMonthSummary === 'object') {
-                    summary = categoriesMonthSummary;
-                } else {
-                    summary = {};
-                }
-                break;
-            case 'last30Days':
-                filteredSpendings = spendings.filter(s => {
-                    const spendingDate = new Date(s.date);
-                    spendingDate.setHours(0, 0, 0, 0); // Обнуляем время для сравнения
-                    return spendingDate >= thirtyDaysAgo;
-                });
-                break;
-            case 'lastYear':
-                filteredSpendings = spendings.filter(s => {
-                    const spendingDate = new Date(s.date);
-                    spendingDate.setHours(0, 0, 0, 0); // Обнуляем время для сравнения
-                    return spendingDate >= oneYearAgo;
-                });
-                break;
-            case 'allTime':
-                filteredSpendings = spendings; // Все расходы
-                break;
-            default:
-                summary = {};
-        }
-
-        // Агрегация для 'last30Days', 'lastYear', 'allTime'
-        if (selectedPeriod !== 'currentMonth') {
-            filteredSpendings.forEach(spending => {
-                if (spending.category_name && typeof spending.amount === 'number') {
-                    summary[spending.category_name] = (summary[spending.category_name] || 0) + spending.amount;
-                }
-            });
-        }
-        // === ДОБАВЛЕНО ДЛЯ ОТЛАДКИ ===
-        console.log("Aggregated summary for period:", selectedPeriod, summary);
-        // === КОНЕЦ ОТЛАДКИ ===
-        return summary;
-    }, [spendings, selectedPeriod, categoriesMonthSummary]);
+    }, [spendings, categories, selectedPeriod, categoriesMonthSummary]);
 
     const chartData = useMemo(() => {
         return Object.entries(aggregatedData).map(([name, value]) => ({
@@ -132,7 +61,72 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const hasData = chartData.length > 0;
     const totalAmount = chartData.reduce((sum, entry) => sum + entry.value, 0);
 
-    const isLoading = spendingsLoading || categoriesMonthLoading;
+    const isLoading = spendingsLoading || categoriesLoading || categoriesMonthSummaryLoading;
+
+    const periodText = useMemo(() => {
+        switch (selectedPeriod) {
+            case 'currentMonth':
+                return ' (в текущем месяце)';
+            case 'last30Days':
+                return ' (за последние 30 дней)';
+            case 'lastYear':
+                return ' (за последний год)';
+            case 'allTime':
+                return ' (за все время)';
+            default:
+                return '';
+        }
+    }, [selectedPeriod]);
+
+    const renderTotalAmountLabel = useCallback(({ cx, cy }) => {
+        return (
+            <>
+                <text x={cx} y={cy - 10} textAnchor="middle" dominantBaseline="middle" className="text-xl font-bold fill-gray-700">
+                    Всего:
+                </text>
+                <text x={cx} y={cy + 15} textAnchor="middle" dominantBaseline="middle" className="text-xl font-bold fill-gray-700">
+                    {totalAmount.toLocaleString()} руб.
+                </text>
+            </>
+        );
+    }, [totalAmount]);
+
+    useEffect(() => {
+        if (isOpen) {
+            if (!spendings && !spendingsLoading) {
+                fetchSpendings();
+            }
+            if (!categories && !categoriesLoading) {
+                fetchCategories();
+            }
+            if (!categoriesMonthSummary && !categoriesMonthSummaryLoading) {
+                fetchCategoriesMonthSummary();
+            }
+
+            const handleEscape = (event) => {
+                if (event.key === 'Escape') {
+                    handleClose();
+                }
+            };
+            window.addEventListener('keydown', handleEscape);
+
+            return () => {
+                window.removeEventListener('keydown', handleEscape);
+            };
+        }
+    }, [
+        isOpen,
+        spendings,
+        spendingsLoading,
+        fetchSpendings,
+        categories,
+        categoriesLoading,
+        fetchCategories,
+        categoriesMonthSummary,
+        categoriesMonthSummaryLoading,
+        fetchCategoriesMonthSummary,
+        handleClose
+    ]);
 
     if (!isOpen) return null;
 
@@ -140,27 +134,27 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-black/20 opacity-40"
+                    className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-black/20"
                     variants={backdropVariants}
                     initial="hidden"
                     animate="visible"
                     exit="hidden"
                     onClick={(event) => {
                         if (event.target === event.currentTarget) {
-                            onClose();
+                            handleClose();
                         }
                     }}
                 >
                     <motion.div
-                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto"
+                        className="p-4 rounded-lg shadow-2xl w-full max-w-2xl bg-yellow-50 border border-gray-300 relative max-h-[80vh] my-4 overflow-y-auto"
                         variants={modalVariants}
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-4 border-b pb-3">
                             <Text variant="h3" className="text-2xl font-semibold text-gray-800">
-                                {title}
+                                {title} {periodText}
                             </Text>
-                            <IconButton onClick={onClose} aria-label="Закрыть модальное окно" icon={XIcon} />
+                            <IconButton onClick={handleClose} aria-label="Закрыть модальное окно" icon={XIcon} />
                         </div>
                         <div className="modal-content">
                             <div className="flex flex-wrap gap-2 mb-4 justify-center">
@@ -195,8 +189,8 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                     <Text variant="body" className="text-gray-500">Загрузка данных...</Text>
                                 </div>
                             ) : hasData ? (
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
+                                <ResponsiveContainer width="100%" height={380}> {/* Увеличили высоту для легенды */}
+                                    <PieChart margin={{ top: 20, right: 30, left: 30, bottom: 20 }}> {/* Добавили отступы */}
                                         <Pie
                                             data={chartData}
                                             cx="50%"
@@ -214,10 +208,13 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
                                             ))}
                                         </Pie>
                                         <Tooltip formatter={(value, name) => [`${value.toLocaleString()} руб.`, name]} />
-                                        <Legend />
-                                        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="text-xl font-bold fill-gray-700">
-                                            Всего: {totalAmount.toLocaleString()}
-                                        </text>
+                                        <Legend
+                                            verticalAlign="bottom" // Легенда снизу
+                                            align="center"      // По центру
+                                            height={36}         // Высота легенды, чтобы было место
+                                            wrapperStyle={{ paddingTop: '20px' }} // Отступ сверху для легенды
+                                        />
+                                        {totalAmount > 0 && renderTotalAmountLabel({ cx: 250, cy: 150 })}
                                     </PieChart>
                                 </ResponsiveContainer>
                             ) : (

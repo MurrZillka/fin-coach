@@ -22,7 +22,7 @@ const CategoryDistributionWidget = ({ onOpenChart, loading, allTimeCategoriesSum
 
     return (
         <div
-            className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md flex flex-col justify-between cursor-pointer hover:shadow-lg transition-shadow duration-200"
+            className="flex flex-col justify-between cursor"
             onClick={onOpenChart}
             aria-disabled={loading}
         >
