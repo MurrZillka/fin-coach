@@ -58,6 +58,10 @@ export default function CategoriesPage() {
             onSubmit: handleAddSubmit,
             submitText: 'Добавить',
             submissionError: error ? error.message : null,
+            onClose: () => {
+                closeModal(); // Закрываем модалку через useModalStore
+                useCategoryStore.getState().clearError(); // Очищаем ошибку в categoryStore
+            }
         });
         // console.log('CategoriesPage: Add Category button clicked, openModal called.');
     }
@@ -70,6 +74,10 @@ export default function CategoriesPage() {
             initialData: category,
             onSubmit: (formData) => handleEditSubmit(category.id, formData),
             submitText: 'Сохранить изменения',
+            onClose: () => {
+                closeModal(); // Закрываем модалку через useModalStore
+                useCategoryStore.getState().clearError(); // Очищаем ошибку в categoryStore
+            }
         });
         // console.log('CategoriesPage: Edit button clicked for category ID:', category.id, ', openModal called.');
     };
