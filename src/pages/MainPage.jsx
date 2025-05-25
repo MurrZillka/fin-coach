@@ -38,7 +38,15 @@ export default function MainPage() {
     // Получаем данные и статусы загрузки из сторов
     const {spendings, loading: spendingsLoading, fetchSpendings, error: spendingsError} = useSpendingsStore();
     const {credits, loading: creditsLoading, fetchCredits, error: creditsError} = useCreditStore();
-    const {goals, currentGoal, loading: goalsLoading, fetchGoals, error: goalsError} = useGoalsStore();
+    const {
+        goals,
+        currentGoal,
+        loading: goalsLoading,
+        fetchGoals,
+        currentGoalLoading,
+        getCurrentGoal,
+        error: goalsError
+    } = useGoalsStore();
     const {balance, isLoading: isBalanceLoading, fetchBalance, error: balanceError} = useBalanceStore();
     // Получаем из стора Main Page (рекомендации, обзор)
     const {
@@ -48,7 +56,14 @@ export default function MainPage() {
     } = useMainPageStore();
 
     // Получаем данные из categoryStore, включая все категории
-    const { categoriesMonthSummary, loading: categoriesMonthLoading, fetchCategoriesMonthSummary, categories, loading: categoriesLoading, fetchCategories } = useCategoryStore();
+    const {
+        categoriesMonthSummary,
+        loading: categoriesMonthLoading,
+        fetchCategoriesMonthSummary,
+        categories,
+        loading: categoriesLoading,
+        fetchCategories
+    } = useCategoryStore();
 
     // Получаем modalType из useModalStore для правильного отображения ошибок
     const {modalType} = useModalStore();
@@ -78,7 +93,7 @@ export default function MainPage() {
 
 
     // Определяем, идет ли какая-либо загрузка основных данных для страницы
-    const isLoadingData = spendingsLoading || creditsLoading || goalsLoading || isBalanceLoading || mainPageLoading || categoriesMonthLoading || categoriesLoading;
+    const isLoadingData = spendingsLoading || creditsLoading || goalsLoading || isBalanceLoading || mainPageLoading || categoriesMonthLoading || categoriesLoading || currentGoalLoading; // <-- ИЗМЕНЕНО
 
 
     // useEffect для запуска загрузки данных при монтировании компонента
@@ -115,6 +130,10 @@ export default function MainPage() {
             console.log('MainPage useEffect: Fetching all categories...');
             fetchCategories();
         }
+        if (!currentGoalLoading && currentGoal === null) {
+            console.log('MainPage useEffect: Fetching current goal...');
+            getCurrentGoal();
+        }
         // --- Конец ДОБАВЛЕНО ---
 
         console.log('MainPage useEffect finished checks.');
@@ -123,6 +142,9 @@ export default function MainPage() {
         fetchSpendings, spendings, spendingsLoading,
         fetchCredits, credits, creditsLoading,
         fetchGoals, goals, goalsLoading,
+        // --- ДОБАВЛЕНО: Зависимости для getCurrentGoal ---
+        getCurrentGoal, currentGoal, currentGoalLoading,
+        // --- КОНЕЦ ДОБАВЛЕНО ---
         fetchBalance, balance, isBalanceLoading,
         fetchRecommendations, recommendations,
         fetchFinancialOverview, financialEntries,
