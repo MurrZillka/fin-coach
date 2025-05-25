@@ -201,7 +201,7 @@ const DemoPage = () => {
 
                 {/* Стрелки */}
                 <motion.div
-                    className="fixed right-4 top-1/3 transform -translate-y-1/2 cursor-pointer"
+                    className="fixed right-4 cursor-pointer"
                     onClick={nextSlide}
                     initial={{opacity: 0}}
                     animate={{opacity: 1}}
@@ -223,7 +223,7 @@ const DemoPage = () => {
 
                 {currentIndex !== 0 && (
                     <motion.div
-                        className="fixed left-4 top-1/3 transform -translate-y-1/2 cursor-pointer"
+                        className="fixed left-4 cursor-pointer"
                         onClick={prevSlide}
                         initial={{opacity: 0}}
                         animate={{opacity: 1}}
