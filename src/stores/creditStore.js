@@ -97,7 +97,7 @@ const useCreditStore = create((set, get) => ({
 
                 // Существующие переводы, которые ты уже имел
                 const dateValidationErrorCreditEnglish = 'credit end_date must be greater than credit date';
-                const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                const dateValidationErrorCreditRussian = 'Дата окончания дохода должна быть больше или равна дате начала.';
                 const dateValidationErrorCreditStartDateEnglish = 'credit date must be less than current date';
                 const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей';
 
@@ -182,7 +182,7 @@ const useCreditStore = create((set, get) => ({
 
                 // Существующие переводы, которые ты уже имел
                 const dateValidationErrorCreditEnglish = 'credit end_date must be greater than credit date';
-                const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.';
+                const dateValidationErrorCreditRussian = 'Дата окончания дохода должна быть больше или равна дате начала.';
                 const dateValidationErrorCreditStartDateEnglish = 'credit date must be less than current date';
                 const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей';
 
