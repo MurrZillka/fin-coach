@@ -5,6 +5,7 @@ import useAuthStore from './authStore';
 
 // Импортируем централизованный массив цветов
 import { CHART_COLORS } from '../constants/colors';
+import useSpendingsStore from "./spendingsStore.js";
 
 const useCategoryStore = create((set, get) => ({
     // Состояние
@@ -214,6 +215,8 @@ const useCategoryStore = create((set, get) => ({
                 // Перезагружаем сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
 
+                useSpendingsStore.getState().fetchSpendings();
+
                 console.log('categoryStore: updateCategory success, fetching categories and month summary.');
                 return result.data;
             }
@@ -257,6 +260,8 @@ const useCategoryStore = create((set, get) => ({
                 await get().fetchCategories();
                 // Перезагружаем сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
+
+                useSpendingsStore.getState().fetchSpendings();
 
                 console.log(`categoryStore: Категория ${id} успешно удалена, fetching categories and month summary.`);
                 return result.data;
