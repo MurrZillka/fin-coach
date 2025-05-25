@@ -6,7 +6,8 @@ import useBalanceStore from './balanceStore';
 // ДОБАВЛЕНО: Импортируем стор Целей
 import useGoalsStore from './goalsStore';
 // ДОБАВЛЕНО: Импортируем useCategoryStore для вызова fetchCategoriesMonthSummary
-import useCategoryStore from './categoryStore'; // <= ЭТО НОВОЕ ДОБАВЛЕНИЕ
+import useCategoryStore from './categoryStore';
+import useMainPageStore from "./mainPageStore.js"; // <= ЭТО НОВОЕ ДОБАВЛЕНИЕ
 
 const useSpendingsStore = create((set, get) => ({
     // --- Состояние (State) ---
@@ -165,6 +166,8 @@ const useSpendingsStore = create((set, get) => ({
                 // <= ЭТО КЛЮЧЕВОЕ ДОБАВЛЕНИЕ: Вызываем fetchCategoriesMonthSummary
                 useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
                 console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after adding spending.');
+                useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                console.log('useSpendingsStore: Recommendations fetch triggered after adding spending.');
             }
         } catch (error) {
             console.error('useSpendingsStore: Error caught in addSpending action:', error);
@@ -252,6 +255,8 @@ const useSpendingsStore = create((set, get) => ({
                 // <= ЭТО КЛЮЧЕВОЕ ДОБАВЛЕНИЕ: Вызываем fetchCategoriesMonthSummary
                 useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
                 console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after updating spending.');
+                useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                console.log('useSpendingsStore: Recommendations fetch triggered after adding spending.');
             }
         } catch (error) {
             console.error('useSpendingsStore: Error caught in updateSpending action:', error);
@@ -333,6 +338,8 @@ const useSpendingsStore = create((set, get) => ({
                 // <= ЭТО КЛЮЧЕВОЕ ДОБАВЛЕНИЕ: Вызываем fetchCategoriesMonthSummary
                 useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
                 console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after deleting spending.');
+                useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                console.log('useSpendingsStore: Recommendations fetch triggered after adding spending.');
             }
         } catch (error) {
             // Перехватываем ошибку (API error или непредвиденную) и обрабатываем ее сообщение
