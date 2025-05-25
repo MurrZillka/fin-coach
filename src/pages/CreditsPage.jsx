@@ -8,7 +8,7 @@ import useCreditStore from '../stores/creditStore';
 import useModalStore from '../stores/modalStore.js';
 import Loader from "../components/ui/Loader.jsx";
 import { isDateTodayOrEarlier } from "../utils/dateUtils.js";
-import CreditCardList from '../components/CreditCardList'; // Новый импорт
+import CreditCardList from '../components/mobile/CreditCardList.jsx'; // Новый импорт
 
 // Динамическое формирование полей (без изменений)
 function getCreditFields(formData) {

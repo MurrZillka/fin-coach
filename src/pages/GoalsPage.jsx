@@ -12,7 +12,7 @@ import useModalStore from '../stores/modalStore.js';
 // --- ДОБАВЛЕНО: Импорт стора Баланса для расчета процента и цвета иконки ---
 import useBalanceStore from '../stores/balanceStore';
 // --- ДОБАВЛЕНО: Импорт нового компонента для мобильной раскладки ---
-import GoalsCardList from '../components/GoalsCardList'; // Убедись, что путь корректен
+import GoalsCardList from '../components/mobile/GoalsCardList.jsx'; // Убедись, что путь корректен
 // --- Конец ИМПОРТОВ ---
 
 

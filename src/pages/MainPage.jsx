@@ -4,11 +4,11 @@ import Text from '../components/ui/Text';
 // Импортируем компонент Loader для плавной загрузки
 import Loader from '../components/ui/Loader';
 
-import RecommendationsModal from '../components/RecommendationsModal';
+import RecommendationsModal from '../components/ui/RecommendationsModal.jsx';
 
 // --- НОВЫЕ ИМПОРТЫ: Виджет и Модалка для распределения категорий ---
-import CategoryDistributionWidget from '../components/CategoryDistributionWidget';
-import CategoryDistributionChartModal from '../components/CategoryDistributionChartModal';
+import CategoryDistributionWidget from '../components/widgets/CategoryDistributionWidget.jsx';
+import CategoryDistributionChartModal from '../components/charts/CategoryDistributionChartModal.jsx';
 // --- Конец НОВЫХ ИМПОРТОВ ---
 
 // Импортируем сторы для получения данных
@@ -25,11 +25,11 @@ import useCategoryStore from '../stores/categoryStore'; // Импортируе�
 import TextButton from '../components/ui/TextButton';
 
 // Импортируем разработанные компоненты виджетов
-import RecentIncomeWidget from '../components/RecentIncomeWidget';
-import RecentExpenseWidget from '../components/RecentExpenseWidget';
-import GoalsSummaryWidget from '../components/GoalsSummaryWidget';
+import RecentIncomeWidget from '../components/widgets/RecentIncomeWidget.jsx';
+import RecentExpenseWidget from '../components/widgets/RecentExpenseWidget.jsx';
+import GoalsSummaryWidget from '../components/widgets/GoalsSummaryWidget.jsx';
 // Импортируем компонент графика
-import IncomeExpenseChart from '../components/IncomeExpenseChart';
+import IncomeExpenseChart from '../components/charts/IncomeExpenseChart.jsx';
 import {useNavigate} from "react-router-dom";
 import {aggregateSpendingsByCategory} from "../utils/spendingAggregator.js";
 

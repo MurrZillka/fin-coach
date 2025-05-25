@@ -2,18 +2,18 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 // eslint-disable-next-line
 import { motion, AnimatePresence } from 'framer-motion';
-import Text from './ui/Text';
-import IconButton from './ui/IconButton.jsx';
-import TextButton from './ui/TextButton';
+import Text from '../ui/Text.jsx';
+import IconButton from '../ui/IconButton.jsx';
+import TextButton from '../ui/TextButton.jsx';
 import { XMarkIcon as XIcon } from '@heroicons/react/24/outline';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 // Импортируем сторы для получения данных
-import useSpendingsStore from '../stores/spendingsStore';
-import useCategoryStore from '../stores/categoryStore'; // НОВОЕ: Импортируем categoryStore
+import useSpendingsStore from '../../stores/spendingsStore.js';
+import useCategoryStore from '../../stores/categoryStore.js'; // НОВОЕ: Импортируем categoryStore
 
 // Импортируем нашу функцию агрегации
-import { aggregateSpendingsByCategory } from '../utils/spendingAggregator';
+import { aggregateSpendingsByCategory } from '../../utils/spendingAggregator.js';
 
 // УДАЛЯЕМ старую константу COLORS, она теперь в constants/colors.js и управляется стором
 // const COLORS = [

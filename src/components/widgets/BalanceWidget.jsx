@@ -1,11 +1,11 @@
 // src/components/BalanceWidget.jsx
 import React from 'react';
 // Убедись, что путь к useBalanceStore корректный
-import useBalanceStore from '../stores/balanceStore'; // Импортируем стор баланса
+import useBalanceStore from '../../stores/balanceStore.js'; // Импортируем стор баланса
 // Убедись, что путь к Text корректный относительно этой папки components
-import Text from './ui/Text'; // Импортируем компонент Text
+import Text from '../ui/Text.jsx'; // Импортируем компонент Text
 // --- ДОБАВЛЕНО: Импортируем новый компонент виджета прогресса цели ---
-import GoalProgressWidget from './GoalProgressWidget'; // Убедись, что путь к GoalProgressWidget.jsx корректен
+import GoalProgressWidget from './GoalProgressWidget.jsx'; // Убедись, что путь к GoalProgressWidget.jsx корректен
 // --- Конец ДОБАВЛЕННОГО ---
 
 
