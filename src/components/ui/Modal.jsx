@@ -97,6 +97,7 @@ const Modal = ({
         const startDateValidationErrorRussianSpending = 'Дата расхода должна быть не больше текущей'; // Для расходов (дата начала > текущей)
         // НОВОЕ: Русский перевод ошибки для end_date дохода
         const endDateGreaterThanCurrentDateRussianCredit = 'Дата окончания дохода должна быть не больше текущей даты.';
+        const categoryNameUniqueError = 'Категория с таким именем уже существует. Выберите другое, пожалуйста.';
 
 
         if (submissionError) {
@@ -107,14 +108,17 @@ const Modal = ({
                 submissionError === dateValidationErrorCreditStartDateRussian ||
                 submissionError === startDateValidationErrorRussianSpending ||
                 submissionError === 'Дата окончания расхода должна быть не больше текущей даты.' || // Это ошибка для расходов, которую мы уже добавили ранее
-                submissionError === endDateGreaterThanCurrentDateRussianCredit) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
+                submissionError === endDateGreaterThanCurrentDateRussianCredit ||
+                submissionError === categoryNameUniqueError
+            ) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
 
                 setErrors(prevErrors => {
-                    const newErrors = { ...prevErrors };
+                    const newErrors = {...prevErrors};
 
                     // Очищаем предыдущие ошибки дат, установленные этим эффектом, чтобы избежать дублирования
                     if (newErrors.date === 'Проверьте дату') delete newErrors.date;
                     if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
+                    if (newErrors.name === 'Измените имя категории') delete newErrors.name;
 
                     // Устанавливаем ошибку для поля 'date', если submissionError соответствует ошибкам начальной даты
                     if (submissionError === dateValidationErrorCreditStartDateRussian ||
@@ -129,6 +133,9 @@ const Modal = ({
                         submissionError === endDateGreaterThanCurrentDateRussianCredit) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
                         newErrors.end_date = 'Проверьте дату';
                     }
+                    if (submissionError === categoryNameUniqueError) {
+                        newErrors.name = 'Измените имя категории'; // Устанавливаем специфичное сообщение как ошибку для поля 'name'
+                    }
 
                     return newErrors;
                 });
@@ -138,6 +145,7 @@ const Modal = ({
                     const newErrors = {...prevErrors};
                     if (newErrors.date === 'Проверьте дату') delete newErrors.date;
                     if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
+                    if (newErrors.name === categoryNameUniqueError) delete newErrors.name; // <-- ДОБАВЛЕНО
                     return newErrors;
                 });
             }
@@ -148,6 +156,7 @@ const Modal = ({
                 const newErrors = {...prevErrors};
                 if (newErrors.date === 'Проверьте дату') delete newErrors.date;
                 if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
+                if (newErrors.name === categoryNameUniqueError) delete newErrors.name; // <-- ДОБАВЛЕНО
                 return newErrors;
             });
         }
@@ -173,7 +182,7 @@ const Modal = ({
         };
     }, [isOpen, onClose]); // Зависимости: isOpen (чтобы активировать/деактивировать слушатель) и onClose (чтобы использовать его в обработчике)
 
-        if (!isOpen) return null;
+    if (!isOpen) return null;
     // Универсальный обработчик для всех Input (ожидает name, value)
     // --- Убеждаемся, что здесь нет параметра 'e' ---
     const handleChange = (name, value) => { // --- ИСПРАВЛЕННАЯ СИГНАТУРА ---
@@ -343,14 +352,15 @@ const Modal = ({
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-black/20 w-full"
-             onClick={(event) => {
-                 // Проверяем, был ли клик именно по этому элементу (оверлею),
-                 // а не по одному из его дочерних элементов (содержимому модалки).
-                 if (event.target === event.currentTarget) {
-                     onClose(); // Вызываем функцию закрытия модалки
-                 }
-             }}>
+        <div
+            className="fixed inset-0 flex justify-center z-50 items-start pt-[10vh] backdrop-blur-xs bg-black/20 w-full"
+            onClick={(event) => {
+                // Проверяем, был ли клик именно по этому элементу (оверлею),
+                // а не по одному из его дочерних элементов (содержимому модалки).
+                if (event.target === event.currentTarget) {
+                    onClose(); // Вызываем функцию закрытия модалки
+                }
+            }}>
             {/* Классы из предоставленного тобой "рабочего" кода */}
             <div
                 className="p-4 rounded-lg shadow-2xl w-full max-w-md bg-green-100 border border-gray-300 relative max-h-[80vh] overflow-y-auto">

@@ -5,6 +5,7 @@ import useAuthStore from './authStore';
 
 // Импортируем централизованный массив цветов
 import { CHART_COLORS } from '../constants/colors';
+import useSpendingsStore from "./spendingsStore.js";
 
 const useCategoryStore = create((set, get) => ({
     // Состояние
@@ -153,9 +154,16 @@ const useCategoryStore = create((set, get) => ({
             console.log('categoryStore: API addCategory result:', result);
 
             if (result.error) {
-                set({ error: result.error, loading: false });
-                console.error('Ошибка добавления категории от API:', result.error);
-                throw result.error;
+                let errorMessage = result.error.message;
+
+                // Проверяем, является ли ошибка уникальности имени
+                if (errorMessage === 'Category name must be unique') {
+                    errorMessage = 'Категория с таким именем уже существует. Выберите другое, пожалуйста.';
+                }
+
+                set({ error: { message: errorMessage, status: result.error.status }, loading: false });
+                console.error('Ошибка добавления категории от API:', { message: errorMessage, status: result.error.status });
+                throw { message: errorMessage, status: result.error.status }; // Выбрасываем ошибку с новым сообщением
             } else {
                 // После успешного добавления, перезагружаем список категорий.
                 // fetchCategories сам вызовет _updateCategoryColorMap, чтобы обновить цвета.
@@ -207,6 +215,8 @@ const useCategoryStore = create((set, get) => ({
                 // Перезагружаем сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
 
+                useSpendingsStore.getState().fetchSpendings();
+
                 console.log('categoryStore: updateCategory success, fetching categories and month summary.');
                 return result.data;
             }
@@ -250,6 +260,8 @@ const useCategoryStore = create((set, get) => ({
                 await get().fetchCategories();
                 // Перезагружаем сводку по месяцу
                 await get().fetchCategoriesMonthSummary();
+
+                useSpendingsStore.getState().fetchSpendings();
 
                 console.log(`categoryStore: Категория ${id} успешно удалена, fetching categories and month summary.`);
                 return result.data;

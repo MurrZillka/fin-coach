@@ -36,7 +36,7 @@ export default function CategoriesPage() {
         clearError
     } = useCategoryStore();
 
-    const {openModal, closeModal} = useModalStore();
+    const {openModal, closeModal, setModalSubmissionError, modalType} = useModalStore(); // <-- ДОБАВЛЕНО setModalSubmissionError, modalType
 
 
     useEffect(() => {
@@ -57,6 +57,11 @@ export default function CategoriesPage() {
             initialData: {},
             onSubmit: handleAddSubmit,
             submitText: 'Добавить',
+            submissionError: error ? error.message : null,
+            onClose: () => {
+                closeModal(); // Закрываем модалку через useModalStore
+                useCategoryStore.getState().clearError(); // Очищаем ошибку в categoryStore
+            }
         });
         // console.log('CategoriesPage: Add Category button clicked, openModal called.');
     }
@@ -69,6 +74,10 @@ export default function CategoriesPage() {
             initialData: category,
             onSubmit: (formData) => handleEditSubmit(category.id, formData),
             submitText: 'Сохранить изменения',
+            onClose: () => {
+                closeModal(); // Закрываем модалку через useModalStore
+                useCategoryStore.getState().clearError(); // Очищаем ошибку в categoryStore
+            }
         });
         // console.log('CategoriesPage: Edit button clicked for category ID:', category.id, ', openModal called.');
     };
@@ -96,8 +105,12 @@ export default function CategoriesPage() {
             // console.log('CategoriesPage Logic: addCategory successful, modal closed.');
         } catch (err) {
             console.error('CategoriesPage Logic: Error during add category (after form submit):', err);
-            closeModal();
-            throw err;
+            // --- НАЧАЛО ИЗМЕНЕНИЙ В handleAddSubmit ---
+            // Сообщение об ошибке уже будет понятным благодаря изменению в categoryStore
+            setModalSubmissionError(err.message || 'Произошла ошибка при добавлении категории.');
+            // Важно: closeModal() здесь не вызывается, чтобы модалка осталась открытой
+            // console.log('CategoriesPage Logic: addCategory failed, setting modal error.');
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
         }
         // console.log('CategoriesPage Logic: handleAddSubmit finished.');
     };
@@ -109,9 +122,12 @@ export default function CategoriesPage() {
             closeModal();
             // console.log(`CategoriesPage Logic: updateCategory ID ${id} successful, modal closed.`);
         } catch (err) {
-            console.error(`CategoriesPage Logic: Error during edit category ID ${id} (after form submit):', err);`);
-            closeModal();
-            throw err;
+            // --- НАЧАЛО ИЗМЕНЕНИЙ В handleEditSubmit ---
+            // Сообщение об ошибке уже будет понятным благодаря изменению в categoryStore
+            setModalSubmissionError(err.message || 'Произошла ошибка при сохранении изменений.');
+            // Важно: closeModal() здесь не вызывается, чтобы модалка осталась открытой
+            // console.log(`CategoriesPage Logic: updateCategory ID ${id} failed, setting modal error.`);
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
         }
         // console.log(`CategoriesPage Logic: handleEditSubmit finished for ID: ${id}.`);
     };
@@ -162,7 +178,7 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Отображаем общую ошибку из стора */}
-                {displayError && (
+                {displayError && modalType === null && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
                     </div>
