@@ -1,12 +1,69 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# FinCoach - Персональный финансовый коуч
 
-Currently, two official plugins are available:
+Проект представляет собой клиентскую часть веб-приложения для управления личными финансами, разработанную как дипломная работа. Система помогает пользователям отслеживать доходы/расходы, управлять финансовыми целями и анализировать денежные потоки через интуитивный интерфейс.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Ключевые возможности
 
-## Expanding the ESLint configuration
+### Управление финансами
+- Трекинг разовых и регулярных доходов/расходов
+- Категоризация операций с гибкими настройками
+- История операций с фильтрацией по дате и типу
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Планирование целей
+- Создание краткосрочных и долгосрочных финансовых целей
+- Визуализация прогресса достижения целей
+- Возможность корректировки целей в процессе выполнения
+
+### Аналитика
+- Интерактивные диаграммы распределения средств
+- Автоматические рекомендации по оптимизации бюджета
+- Сравнительный анализ расходов за разные периоды
+
+## Технологический стек
+- **Frontend**:
+    - React 19 + Vite
+    - Zustand для управления состоянием
+    - Recharts для визуализации данных
+    - Tailwind CSS для стилизации
+
+- **Инструменты**:
+    - Axios для HTTP-запросов
+    - Framer Motion для анимаций
+    - React Router для навигации
+
+## Архитектурные особенности
+
+### Модульная структура
+- Разделение на независимые функциональные блоки:
+    - `src/api` - слой работы с API
+    - `src/stores` - управление состоянием приложения
+    - `src/components` - библиотека UI-компонентов
+    - `src/pages` - контейнеры страниц
+
+### Клиент-серверное взаимодействие
+- REST API с JWT-аутентификацией
+- Поддержка мок-данных для разработки
+- Автоматическая синхронизация состояния между вкладками
+
+### Безопасность
+- Защищенные маршруты через HOC ProtectedRoute
+- Автоматический сброс состояния при выходе
+- Шифрование чувствительных данных в localStorage
+
+## Установка и запуск
+
+1. Клонировать репозиторий;
+
+2. Установить зависимости:
+   `npm install`
+
+4. Запустить разработку:
+   `npm run dev`
+
+## Конфигурация
+- `API_BASE_URL` - адрес backend-сервера
+- `useMocks` - флаг использования тестовых данных
+- `VITE_APP_VERSION` - версия приложения
+
+Проект демонстрирует современные подходы к разработке SPA-приложений, сочетая производительность и удобство использования. Архитектура позволяет легко расширять функционал за счет модульной структуры и четкого разделения ответственности между компонентами.

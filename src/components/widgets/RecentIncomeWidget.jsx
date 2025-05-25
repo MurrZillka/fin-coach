@@ -1,9 +1,9 @@
 // src/components/RecentIncomeWidget.jsx
 import React from 'react';
-import Text from './ui/Text';
+import Text from '../ui/Text.jsx';
 // import TextButton from './ui/TextButton'; // TextButton больше не нужен для добавления здесь
 import { ChevronRightIcon } from '@heroicons/react/24/outline'; // Импортируем иконку стрелки
-import Tooltip from './ui/Tooltip'; // Импортируем компонент Tooltip
+import Tooltip from '../ui/Tooltip.jsx'; // Импортируем компонент Tooltip
 
 // Вспомогательная функция для форматирования суммы
 const formatAmount = (amount) => {

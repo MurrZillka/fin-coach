@@ -8,7 +8,7 @@ import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
 import { isDateTodayOrEarlier } from '../utils/dateUtils.js';
-import SpendingCardList from '../components/SpendingCardList'; // Новый импорт
+import SpendingCardList from '../components/mobile/SpendingCardList.jsx'; // Новый импорт
 
 // Формируем динамические поля для модалки расходов
 function getSpendingFields(formData, categories) {

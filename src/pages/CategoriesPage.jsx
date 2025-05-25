@@ -7,7 +7,7 @@ import Text from '../components/ui/Text';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
 // --- НОВЫЙ ИМПОРТ: Мобильный компонент для карточек категорий ---
-import CategoriesCardList from '../components/CategoriesCardList';
+import CategoriesCardList from '../components/mobile/CategoriesCardList.jsx';
 // --- Конец НОВОГО ИМПОРТА ---
 
 

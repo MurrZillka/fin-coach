@@ -1,7 +1,7 @@
 // src/components/CategoriesCardList.jsx
 import React from 'react';
-import Text from './ui/Text';
-import IconButton from './ui/IconButton';
+import Text from '../ui/Text.jsx';
+import IconButton from '../ui/IconButton.jsx';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const CategoriesCardList = ({

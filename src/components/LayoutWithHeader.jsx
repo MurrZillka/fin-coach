@@ -8,7 +8,7 @@ import useAuthStore from '../stores/authStore.js';
 import useModalStore from '../stores/modalStore.js';
 import Modal from './ui/Modal.jsx';
 import ConfirmModal from './ui/ConfirmModal.jsx';
-import BalanceWidget from './BalanceWidget.jsx'; // Футер с балансом (уже фиксированный)
+import BalanceWidget from './widgets/BalanceWidget.jsx'; // Футер с балансом (уже фиксированный)
 
 export default function LayoutWithHeader() {
     const location = useLocation();

@@ -1,12 +1,12 @@
 // src/components/CategoryDistributionWidget.jsx
 import React, { useMemo } from 'react';
-import Text from './ui/Text';
+import Text from '../ui/Text.jsx';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import TooltipCustom from './ui/Tooltip'; // Переименованный импорт UI-тултипа
+import TooltipCustom from '../ui/Tooltip.jsx'; // Переименованный импорт UI-тултипа
 
 // НОВОЕ: Импортируем useCategoryStore
-import useCategoryStore from '../stores/categoryStore';
+import useCategoryStore from '../../stores/categoryStore.js';
 
 // УДАЛЯЕМ старую константу COLORS
 // const COLORS = [

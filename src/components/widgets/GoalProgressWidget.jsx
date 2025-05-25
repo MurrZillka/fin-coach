@@ -1,8 +1,8 @@
 // src/components/GoalProgressWidget.jsx
 import React from 'react';
-import useGoalsStore from '../stores/goalsStore'; // Импортируем стор Целей
-import useBalanceStore from '../stores/balanceStore'; // Импортируем стор Баланса
-import Text from './ui/Text'; // Импортируем компонент Text
+import useGoalsStore from '../../stores/goalsStore.js'; // Импортируем стор Целей
+import useBalanceStore from '../../stores/balanceStore.js'; // Импортируем стор Баланса
+import Text from '../ui/Text.jsx'; // Импортируем компонент Text
 
 
 // --- Вспомогательная функция для правильного склонения слова "день" ---
