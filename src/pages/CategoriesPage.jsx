@@ -1,6 +1,6 @@
 // src/pages/CategoriesPage.jsx
 import {useEffect} from 'react';
-import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {PencilIcon, TrashIcon, InformationCircleIcon} from '@heroicons/react/24/outline';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 import Text from '../components/ui/Text';
@@ -8,8 +8,10 @@ import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
 // --- НОВЫЙ ИМПОРТ: Мобильный компонент для карточек категорий ---
 import CategoriesCardList from '../components/mobile/CategoriesCardList.jsx';
+import Tooltip from "../components/ui/Tooltip.jsx";
 // --- Конец НОВОГО ИМПОРТА ---
 
+const DEFAULT_CATEGORY_NAME = 'Разное';
 
 const categoryFields = [
     {name: 'name', label: 'Название', required: true, type: 'text', placeholder: 'Например: Еда'},
@@ -192,25 +194,37 @@ export default function CategoriesPage() {
                                     </thead>
                                     <tbody>
                                     {/* Маппинг по категориям для создания строк таблицы */}
-                                    {/* Убраны пробелы между <td> */}
                                     {categories.map((category, index) => (
                                         <tr key={category.id}
                                             className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                            <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td><td className="p-4"><Text variant="tdPrimary">{category.name}</Text></td><td className="p-4"><Text
-                                            variant="tdSecondary">{category.description}</Text></td><td className="px-2 py-4 flex gap-1"> {/* Отступы и зазор как в финальной SpendingTable Actions */}
-                                            <IconButton
-                                                icon={PencilIcon}
-                                                tooltip="Редактировать"
-                                                className="p-1 text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                onClick={() => handleEditClick(category)}
-                                            />
-                                            <IconButton
-                                                icon={TrashIcon}
-                                                tooltip="Удалить"
-                                                className="p-1 text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                onClick={() => handleDeleteClick(category.id)}
-                                            />
-                                        </td>
+                                            <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
+                                            <td className="p-4"><Text variant="tdPrimary">{category.name}</Text></td>
+                                            <td className="p-4"><Text variant="tdSecondary">{category.description}</Text></td>
+                                            <td className="px-2 py-4 flex gap-1">
+                                                {/* ДОБАВЛЕНО: Условный рендеринг для кнопок редактирования и удаления */}
+                                                {category.name !== DEFAULT_CATEGORY_NAME ? (
+                                                    // Если это НЕ категория по умолчанию, показываем кнопки редактирования/удаления
+                                                    <>
+                                                        <IconButton
+                                                            icon={PencilIcon}
+                                                            tooltip="Редактировать"
+                                                            className="p-1 text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
+                                                            onClick={() => handleEditClick(category)}
+                                                        />
+                                                        <IconButton
+                                                            icon={TrashIcon}
+                                                            tooltip="Удалить"
+                                                            className="p-1 text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
+                                                            onClick={() => handleDeleteClick(category.id)}
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    // Если это категория по умолчанию, показываем иконку информации с тултипом
+                                                    <Tooltip text="Эту категорию нельзя удалить.">
+                                                        <InformationCircleIcon className="h-6 w-6 text-gray-500 cursor-help" />
+                                                    </Tooltip>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                     </tbody>
@@ -223,6 +237,7 @@ export default function CategoriesPage() {
                                     loading={loading} // Передаем статус загрузки для индикатора обновления внутри
                                     handleEditClick={handleEditClick}
                                     handleDeleteClick={handleDeleteClick}
+                                    defaultCategoryName={DEFAULT_CATEGORY_NAME}
                                 />
                             </>
                         )}

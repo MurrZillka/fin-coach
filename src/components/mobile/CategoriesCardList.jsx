@@ -2,13 +2,15 @@
 import React from 'react';
 import Text from '../ui/Text.jsx';
 import IconButton from '../ui/IconButton.jsx';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import Tooltip from '../ui/Tooltip.jsx';
 
 const CategoriesCardList = ({
                                 categories,
                                 loading, // Получаем статус загрузки для индикатора "Обновление"
                                 handleEditClick,
                                 handleDeleteClick,
+                                defaultCategoryName,
                                 className // Для применения внешних классов видимости (block md:hidden) и отступов
                             }) => {
 
@@ -43,21 +45,28 @@ const CategoriesCardList = ({
                         {/* Действия */}
                         {/* flex gap-1 mt-auto для размещения кнопок внизу с небольшим отступом */}
                         <div className="flex gap-1 mt-auto"> {/* mt-auto выталкивает блок вниз */}
-                            {/* Кнопка Редактировать - вызывает handleEditClick */}
-                            {/* p-1 для небольшого отступа вокруг иконки внутри кнопки */}
-                            <IconButton
-                                icon={PencilIcon}
-                                tooltip="Редактировать"
-                                className="p-1 text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                onClick={() => handleEditClick(category)} // Передаем всю категорию
-                            />
-                            {/* Кнопка Удалить - вызывает handleDeleteClick */}
-                            <IconButton
-                                icon={TrashIcon}
-                                tooltip="Удалить"
-                                className="p-1 text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                onClick={() => handleDeleteClick(category.id)} // Передаем ID
-                            />
+                            {category.name !== defaultCategoryName ? (
+                                // Если это НЕ категория по умолчанию, показываем кнопки редактирования/удаления
+                                <>
+                                    <IconButton
+                                        icon={PencilIcon}
+                                        tooltip="Редактировать"
+                                        className="p-1 text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
+                                        onClick={() => handleEditClick(category)}
+                                    />
+                                    <IconButton
+                                        icon={TrashIcon}
+                                        tooltip="Удалить"
+                                        className="p-1 text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
+                                        onClick={() => handleDeleteClick(category.id)}
+                                    />
+                                </>
+                            ) : (
+                                // Если это категория по умолчанию, показываем иконку информации с тултипом
+                                <Tooltip text="Нельзя удалить.">
+                                    <InformationCircleIcon className="h-5 w-5 text-gray-500 cursor-help" /> {/* Размеры h-5 w-5 для мобильных */}
+                                </Tooltip>
+                            )}
                         </div>
                     </div>
                 ))
