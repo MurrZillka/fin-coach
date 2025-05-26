@@ -356,7 +356,7 @@ export default function MainPage() {
                                     </li>
                                 );
                             })}
-                        </ul>
+                        </ul>Npm
                     </div>
                 ) : (
                     !mainPageLoading && (recommendations === null || recommendations.length === 0) ? (

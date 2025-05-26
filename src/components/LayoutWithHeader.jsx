@@ -18,10 +18,16 @@ export default function LayoutWithHeader() {
     // Определяем, какая шапка должна быть показана и является ли страница публичной
     const isAuthPage = ['/login', '/signup', '/demo'].includes(location.pathname);
     const showAuthHeader = isAuthPage; // Показываем HeaderAuth на страницах авторизации
-    const showRegularHeader = isAuthenticated && !isAuthPage; // Показываем обычный Header, если авторизован и не на страницах авторизации
+    const showRegularHeader = isAuthenticated && !isAuthPage;
 
     // Получаем состояние модальных окон
     const {modalType, modalProps, closeModal, submissionError} = useModalStore();
+
+    const validPaths = routes
+        .filter(route => route.path !== '*') // Исключаем путь для 404
+        .map(route => route.path);
+
+    const isNotFoundPage = !validPaths.includes(location.pathname);
 
     return (
         // Основной контейнер страницы. flex-col и min-h-screen задают колонку с минимальной высотой экрана
@@ -57,7 +63,7 @@ export default function LayoutWithHeader() {
             </div>
 
             {/* Футер с балансом: остается фиксированным внизу */}
-            {isAuthenticated && !isAuthPage && (
+            {isAuthenticated && !isAuthPage && !isNotFoundPage && (
                 <div className="fixed bottom-2 left-0 right-0 z-10">
                     <div className="max-w-7xl mx-auto px-4">
                         <BalanceWidget/>

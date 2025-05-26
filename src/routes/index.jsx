@@ -9,6 +9,7 @@ import DemoPage from '../pages/DemoPage';
 import MainPage from '../pages/MainPage';
 // --- ДОБАВЛЕНО: Импортируем страницу Целей ---
 import GoalsPage from '../pages/GoalsPage.jsx';
+import PageNotFound from "../pages/PageNotFound.jsx";
 // --- Конец ДОБАВЛЕННОГО ---
 
 const routes = [
@@ -23,7 +24,8 @@ const routes = [
     { path: '/credits', element: <CreditsPage />, isProtected: true },
     { path: '/spendings', element: <SpendingsPage />, isProtected: true },
     // --- ДОБАВЛЕНО: Маршрут для страницы Целей ---
-    { path: '/goals', element: <GoalsPage />, isProtected: true }, // Добавляем маршрут для страницы Целей
+    { path: '/goals', element: <GoalsPage />, isProtected: true },
+    { path: '*', element: <PageNotFound /> }// Добавляем маршрут для страницы Целей
     // --- Конец ДОБАВЛЕННОГО ---
 ];
 
