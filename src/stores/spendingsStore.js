@@ -7,7 +7,8 @@ import useBalanceStore from './balanceStore';
 import useGoalsStore from './goalsStore';
 // ДОБАВЛЕНО: Импортируем useCategoryStore для вызова fetchCategoriesMonthSummary
 import useCategoryStore from './categoryStore';
-import useMainPageStore from "./mainPageStore.js"; // <= ЭТО НОВОЕ ДОБАВЛЕНИЕ
+import useMainPageStore from "./mainPageStore.js";
+import useRemindersStore from "./remindersStore.js"; // <= ЭТО НОВОЕ ДОБАВЛЕНИЕ
 
 const useSpendingsStore = create((set, get) => ({
     // --- Состояние (State) ---
@@ -167,6 +168,7 @@ const useSpendingsStore = create((set, get) => ({
                 useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
                 console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after adding spending.');
                 useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                useRemindersStore.getState().fetchTodayReminder();
                 console.log('useSpendingsStore: Recommendations fetch triggered after adding spending.');
             }
         } catch (error) {
@@ -256,6 +258,7 @@ const useSpendingsStore = create((set, get) => ({
                 useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
                 console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after updating spending.');
                 useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                useRemindersStore.getState().fetchTodayReminder();
                 console.log('useSpendingsStore: Recommendations fetch triggered after adding spending.');
             }
         } catch (error) {
@@ -339,6 +342,7 @@ const useSpendingsStore = create((set, get) => ({
                 useCategoryStore.getState().fetchCategoriesMonthSummary(); // <= НОВОЕ ДОБАВЛЕНИЕ
                 console.log('useSpendingsStore: Balance and Category Month Summary fetch triggered after deleting spending.');
                 useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                useRemindersStore.getState().fetchTodayReminder();
                 console.log('useSpendingsStore: Recommendations fetch triggered after adding spending.');
             }
         } catch (error) {

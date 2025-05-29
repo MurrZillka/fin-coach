@@ -9,6 +9,7 @@ import useBalanceStore from './balanceStore';
 // ДОБАВЛЕНО: Импортируем стор Целей
 import useGoalsStore from './goalsStore';
 import useMainPageStore from "./mainPageStore.js";
+import useRemindersStore from "./remindersStore.js";
 
 
 const useCreditStore = create((set, get) => ({
@@ -147,6 +148,7 @@ const useCreditStore = create((set, get) => ({
                 useGoalsStore.getState().getCurrentGoal();
                 console.log('creditStore: addCredit success, fetching credits and balance.');
                 useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                useRemindersStore.getState().fetchTodayReminder();
                 console.log('creditStore: Recommendations fetch triggered after adding credit.');
                 return result.data;
             }
@@ -234,6 +236,7 @@ const useCreditStore = create((set, get) => ({
                 useGoalsStore.getState().getCurrentGoal();
                 console.log('creditStore: updateCredit success, fetching credits and balance.');
                 useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
+                useRemindersStore.getState().fetchTodayReminder();
                 console.log('creditStore: Recommendations fetch triggered after adding credit.');
                 return result.data;
             }
@@ -276,6 +279,7 @@ const useCreditStore = create((set, get) => ({
                 console.log(`creditStore: Доход ${id} успешно удален, fetching credits and balance.`);
                 useMainPageStore.getState().fetchRecommendations(); // <-- Добавляем здесь
                 console.log('creditStore: Recommendations fetch triggered after adding credit.');
+                useRemindersStore.getState().fetchTodayReminder();
                 return result.data;
             }
         } catch (error) {

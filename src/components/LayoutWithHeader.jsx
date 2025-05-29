@@ -10,6 +10,7 @@ import Modal from './ui/Modal.jsx';
 import ConfirmModal from './ui/ConfirmModal.jsx';
 import ReminderModal from './ui/ReminderModal.jsx'; // Убедимся, что ReminderModal импортирован
 import BalanceWidget from './widgets/BalanceWidget.jsx';
+import {useEffect} from "react";
 
 export default function LayoutWithHeader() {
     const location = useLocation();
@@ -23,15 +24,15 @@ export default function LayoutWithHeader() {
     // Получаем состояние модальных окон
     const {modalType, modalProps, closeModal, submissionError} = useModalStore();
 
-    // Логи для отладки
-    console.log('LayoutWithHeader: RENDERING. Current modalType in store:', modalType);
-    console.log('LayoutWithHeader: Current modalProps in store:', modalProps);
-
     const validPaths = routes
         .filter(route => route.path !== '*')
         .map(route => route.path);
 
     const isNotFoundPage = !validPaths.includes(location.pathname);
+
+    useEffect(() => {
+
+    }, []);
 
     return (
         <div className="flex flex-col bg-secondary-50 min-h-screen pb-28">

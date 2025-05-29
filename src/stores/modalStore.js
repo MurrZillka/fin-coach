@@ -25,9 +25,6 @@ const useModalStore = create((set) => ({
      * @param {object} props - Свойства, которые будут переданы компоненту модального окна.
      */
     openModal: (type, props = {}) => { // <-- ИЗМЕНЕНО: Добавлена обертка, чтобы добавить лог
-        console.log('modalStore: openModal called. Received type:', type); // <-- НОВЫЙ ЛОГ
-        console.log('modalStore: openModal called. Received props:', props); // <-- НОВЫЙ ЛОГ
-
         set({
             modalType: type,
             modalProps: props,
@@ -37,14 +34,10 @@ const useModalStore = create((set) => ({
         // --- ДОБАВЛЕНО: Проверка состояния стора СРАЗУ ПОСЛЕ set() ---
         // Получаем текущее состояние store, чтобы проверить, что установилось
         const currentState = useModalStore.getState();
-        console.log('modalStore: State AFTER openModal call. modalType:', currentState.modalType);
-        console.log('modalStore: State AFTER openModal call. modalProps:', currentState.modalProps);
-        // --- КОНЕЦ ДОБАВЛЕНИЯ ---
+        console.log(currentState)
+                // --- КОНЕЦ ДОБАВЛЕНИЯ ---
     },
 
-    /**
-     * Закрывает текущее модальное окно и сбрасывает его состояние.
-     */
     closeModal: () => set({
         modalType: null,
         modalProps: {},

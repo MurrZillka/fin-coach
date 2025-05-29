@@ -14,9 +14,12 @@ import Tooltip from "./ui/Tooltip.jsx";
 export default function Header() {
     const navigate = useNavigate();
     const {isAuthenticated, user, logout} = useAuthStore();
-    // Деструктурируем todayReminder, loading, fetchTodayReminder, clearError
-    const {todayReminder, loading: reminderLoading, fetchTodayReminder, clearError} = useRemindersStore();
-    const {openModal} = useModalStore();
+
+    const needRemind = useRemindersStore(state => state.todayReminder?.TodayRemind?.need_remind);
+    const reminderLoading = useRemindersStore(state => state.loading);
+    const fetchTodayReminder = useRemindersStore(state => state.fetchTodayReminder);
+    const clearError = useRemindersStore(state => state.clearError);
+    const openModal = useModalStore(state => state.openModal);
 
     const [isBlinking, setIsBlinking] = useState(false);
     const blinkIntervalRef = useRef(null);
@@ -38,6 +41,7 @@ export default function Header() {
             console.log('Header: Authenticated, fetching today reminder...');
             fetchTodayReminder();
         } else {
+            // При отсутствии аутентификации, убедимся, что моргание остановлено
             setIsBlinking(false);
             if (blinkIntervalRef.current) {
                 clearInterval(blinkIntervalRef.current);
@@ -46,70 +50,79 @@ export default function Header() {
         }
     }, [isAuthenticated, user?.access_token, fetchTodayReminder]);
 
-    // --- ЛОГИКА МОРГАНИЯ ЛАМПОЧКИ ---
+    // --- ИСПРАВЛЕННАЯ ЛОГИКА МОРГАНИЯ ЛАМПОЧКИ ---
     useEffect(() => {
-        // --- ИЗМЕНЕНО: Правильный доступ к todayReminder.TodayRemind.need_remind ---
-        if (todayReminder?.TodayRemind?.need_remind && !reminderLoading) {
-            const startBlinking = () => {
-                if (blinkIntervalRef.current) {
-                    clearInterval(blinkIntervalRef.current);
-                }
+        // Очищаем предыдущий интервал при каждом перезапуске эффекта
+        if (blinkIntervalRef.current) {
+            clearInterval(blinkIntervalRef.current);
+            blinkIntervalRef.current = null;
+        }
 
-                const toggleBlink = () => setIsBlinking(prev => !prev);
-                let currentIntervalTime = 0;
+        // Если нужно моргать и нет загрузки
+        if (needRemind && !reminderLoading) {
+            // Устанавливаем isBlinking в true, чтобы начать моргание сразу
+            // (или в false, если хотим начать с невидимой)
+            setIsBlinking(true);
 
-                const createNextBlink = () => {
-                    currentIntervalTime = Math.random() * (3000 - 2000) + 2000;
-                    blinkIntervalRef.current = setTimeout(() => {
-                        toggleBlink();
-                        createNextBlink();
-                    }, currentIntervalTime);
-                };
+            // Запускаем интервал
+            const toggleBlink = () => setIsBlinking(prev => !prev);
+            let currentIntervalTime = 0; // Определяем здесь, чтобы можно было использовать
 
-                createNextBlink();
+            // Вместо setTimeout, будем использовать setInterval для постоянного моргания
+            // или можно оставить setTimeout, но тогда его нужно постоянно перезапускать
+            // Давайте сделаем через setInterval, это проще для постоянного моргания
+            blinkIntervalRef.current = setInterval(() => {
+                // Если хотим рандомное время, то тут сложнее,
+                // тогда каждый раз надо очищать и ставить новый setTimeout.
+                // Давай пока сделаем фиксированное, а потом можно усложнить.
+                toggleBlink();
+            }, 1500); // Моргание каждые 1.5 секунды
+            // Или если нужно именно рандомное время, тогда так:
+            /*
+            const createNextBlink = () => {
+                currentIntervalTime = Math.random() * (3000 - 2000) + 2000;
+                blinkIntervalRef.current = setTimeout(() => {
+                    toggleBlink();
+                    createNextBlink(); // Рекурсивный вызов для следующего моргания
+                }, currentIntervalTime);
             };
-
-            startBlinking();
+            createNextBlink();
+            */
         } else {
+            // Если моргать не нужно, убеждаемся, что isBlinking false и интервал очищен
             setIsBlinking(false);
+        }
+
+        // Функция очистки, которая будет вызвана при размонтировании компонента
+        // или перед каждым новым запуском эффекта
+        return () => {
             if (blinkIntervalRef.current) {
                 clearInterval(blinkIntervalRef.current);
                 blinkIntervalRef.current = null;
             }
-        }
-
-        return () => {
-            if (blinkIntervalRef.current) {
-                clearInterval(blinkIntervalRef.current);
-            }
         };
-    }, [todayReminder, reminderLoading]);
+    }, [needRemind, reminderLoading]); // Зависимости: эти значения управляют запуском/остановкой моргания
 
     // --- ОБРАБОТЧИК КЛИКА ПО ЛАМПОЧКЕ ---
     const handleReminderClick = () => {
         console.log('Header: Reminder icon clicked. Opening reminder modal.');
         clearError();
 
-        // --- ИЗМЕНЕНИЕ ЗДЕСЬ: ПРАВИЛЬНЫЙ ВЫЗОВ openModal ---
         openModal(
-            'reminderNotification', // <-- ПЕРВЫЙ АРГУМЕНТ: СТРОКА (тип модалки)
-            { // <-- ВТОРОЙ АРГУМЕНТ: ОБЪЕКТ (пропсы для модалки)
+            'reminderNotification',
+            {
                 title: 'Важное напоминание!',
                 message: 'Пора обновить доходы и расходы, иначе может нарушиться точность учета финансов.',
                 confirmText: 'Внести расходы',
                 cancelText: 'Внести доходы',
                 onConfirm: () => {
                     navigate('/spendings');
-                    // closeModal(); // Удаляем это, так как модалка сама закрывается
                 },
                 onCancel: () => {
                     navigate('/credits');
-                    // closeModal(); // Удаляем это, так как модалка сама закрывается
                 },
                 thirdButtonText: 'Закрыть',
-                onThirdButtonClick: () => {
-                    // closeModal(); // Удаляем это, так как модалка сама закрывается
-                }
+                onThirdButtonClick: () => {}
             }
         );
     };
@@ -130,9 +143,12 @@ export default function Header() {
                     Financial Coach
                 </Text>
 
-                {/* --- НОВОЕ МЕСТО ДЛЯ КОЛОКОЛЬЧИКА: ВСЕГДА ВИДЕН --- */}
                 <div className="flex justify-center md:justify-end w-auto ml-4">
-                    {todayReminder?.TodayRemind?.need_remind && !reminderLoading && (
+                    {/* --- ЛОГ ДЛЯ ОТЛАДКИ (можно оставить, он не мешает) --- */}
+                    {console.log('Header Render Check: needRemind:', needRemind, 'reminderLoading:', reminderLoading)}
+
+                    {/* Условие рендеринга теперь использует needRemind */}
+                    {needRemind && !reminderLoading && (
                         <IconButton
                             icon={BellAlertIcon}
                             onClick={handleReminderClick}
@@ -143,16 +159,12 @@ export default function Header() {
                             rounded-full p-1
                             hover:text-red-500 hover:border-red-500 transition-all duration-100
                             cursor-pointer
-                            // ml-auto // <-- УДАЛЕН ЭТОТ КЛАСС
                         `}
                             tooltip="Есть напоминание!"
                         />
                     )}
 
-                    {/* --- КОНЕЦ НОВОГО МЕСТА --- */}
-
-
-                    {/* Навигация и пользователь (для больших экранов) - скрывается на мобилке */}
+                    {/* Навигация и пользователь (для больших экранов) */}
                     {isAuthenticated && (
                         <div className="hidden md:flex items-center space-x-4">
                             <nav className="flex items-center space-x-4">
@@ -164,7 +176,6 @@ export default function Header() {
                                     />
                                 ))}
                             </nav>
-                            {/* Здесь колокольчик был раньше, теперь его убрали */}
                             <Text variant="body" className="text-background">
                                 {getUserName()}
                             </Text>
@@ -177,17 +188,14 @@ export default function Header() {
                         </div>
                     )}
 
-                    {/* Мобильное меню (для малых экранов) */}
+                    {/* Мобильное меню */}
                     {isAuthenticated && (
                         <MobileMenu
                             links={links}
                             userName={getUserName()}
                             onLogout={handleLogout}
-                            hasReminder={todayReminder?.TodayRemind?.need_remind && !reminderLoading}
+                            hasReminder={needRemind}
                             onReminderClick={handleReminderClick}
-                            // isBlinking пока не передаем в MobileMenu, если он теперь не рендерит сам колокольчик.
-                            // Если MobileMenu внутри себя тоже что-то показывает про напоминание, тогда надо будет передать.
-                            // Но если MobileMenu просто содержит бургер, то не надо.
                         />
                     )}
                 </div>
