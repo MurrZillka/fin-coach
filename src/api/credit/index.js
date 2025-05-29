@@ -10,7 +10,6 @@ const api = axios.create({
 
 export const addCredit = async (data, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCredit.addCredit(), error: null };
         const response = await api.post('/AddCredit', data, {
             headers: { Authorization: `Bearer ${token}` },
         });

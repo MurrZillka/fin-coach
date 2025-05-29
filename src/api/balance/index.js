@@ -1,7 +1,6 @@
 //src/api/balance/index.js
 import axios from 'axios';
-import { getUseMocks, API_BASE_URL } from '../config';
-import { mockBalance } from './mocks';
+import {API_BASE_URL} from '../config';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -10,7 +9,6 @@ const api = axios.create({
 
 export const getBalance = async (token) => {
     try {
-        if (getUseMocks()) return { data: await mockBalance.getBalance(), error: null };
         const response = await api.get('/Balance', {
             headers: { Authorization: `Bearer ${token}` },
         });
