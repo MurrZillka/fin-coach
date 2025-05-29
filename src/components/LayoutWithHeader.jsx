@@ -1,62 +1,48 @@
 // src/components/LayoutWithHeader.jsx
 import {useLocation, Routes, Route} from 'react-router-dom';
-import Header from './Header.jsx'; // Обычный хедер
-import HeaderAuth from './HeaderAuth.jsx'; // Хедер для страниц авторизации
+import Header from './Header.jsx';
+import HeaderAuth from './HeaderAuth.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import routes from '../routes';
 import useAuthStore from '../stores/authStore.js';
 import useModalStore from '../stores/modalStore.js';
-import Modal from './ui/Modal.jsx'; // Твоя "универсальная" модалка
-import ConfirmModal from './ui/ConfirmModal.jsx'; // Твоя "модалка предупреждения"
-import ReminderModal from './ui/ReminderModal.jsx'; // <-- ИМПОРТИРУЕМ НОВУЮ МОДАЛКУ
-import BalanceWidget from './widgets/BalanceWidget.jsx'; // Футер с балансом (уже фиксированный)
+import Modal from './ui/Modal.jsx';
+import ConfirmModal from './ui/ConfirmModal.jsx';
+import ReminderModal from './ui/ReminderModal.jsx'; // Убедимся, что ReminderModal импортирован
+import BalanceWidget from './widgets/BalanceWidget.jsx';
 
 export default function LayoutWithHeader() {
     const location = useLocation();
     console.log('LayoutWithHeader: Accessing useAuthStore');
     const {isAuthenticated} = useAuthStore();
 
-    // Определяем, какая шапка должна быть показана и является ли страница публичной
     const isAuthPage = ['/login', '/signup', '/demo'].includes(location.pathname);
-    const showAuthHeader = isAuthPage; // Показываем HeaderAuth на страницах авторизации
+    const showAuthHeader = isAuthPage;
     const showRegularHeader = isAuthenticated && !isAuthPage;
 
     // Получаем состояние модальных окон
-    // modalType теперь точно строка (или null), как в твоем store
-    const {modalType, modalProps, closeModal, submissionError} = useModalStore(); // <-- ВОЗВРАЩЕНО К ИЗНАЧАЛЬНОМУ
+    const {modalType, modalProps, closeModal, submissionError} = useModalStore();
 
-
-    // --- ДОБАВЛЕНО: ЛОГИ ДЛЯ ОТЛАДКИ РЕНДЕРА И СОСТОЯНИЯ ---
-    // Этот лог будет срабатывать при каждом рендере LayoutWithHeader
-    console.log('LayoutWithHeader: RENDERING. Current modalType in store:', modalType); // Лог для проверки, что modalType - строка
+    // Логи для отладки
+    console.log('LayoutWithHeader: RENDERING. Current modalType in store:', modalType);
     console.log('LayoutWithHeader: Current modalProps in store:', modalProps);
-    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
-
 
     const validPaths = routes
-        .filter(route => route.path !== '*') // Исключаем путь для 404
+        .filter(route => route.path !== '*')
         .map(route => route.path);
 
     const isNotFoundPage = !validPaths.includes(location.pathname);
 
     return (
-        // Основной контейнер страницы. flex-col и min-h-screen задают колонку с минимальной высотой экрана
         <div className="flex flex-col bg-secondary-50 min-h-screen pb-28">
 
-            {/* --- ДОБАВЛЕНО: Фиксированный хедер контейнер --- */}
-            {/* Этот div фиксирует блок шапки вверху экрана */}
-            {/* fixed: позиционирование, top-0 left-0 right-0: растягивает по всей ширине вверху */}
-            {/* z-10: устанавливает порядок наслоения (хедер выше контента) */}
-            {/* w-full: убеждаемся, что занимает всю ширину */}
-            {/* bg-white shadow-md: добавляем фон и тень, чтобы хедер был виден над контентом */}
-            {(showAuthHeader || showRegularHeader) && ( // Рендерим фиксированный контейнер только если какая-то шапка должна быть видна
+            {(showAuthHeader || showRegularHeader) && (
                 <div className="fixed top-0 left-0 right-0 z-20 w-full bg-white shadow-md">
-                    {showAuthHeader && <HeaderAuth/>} {/* Рендерим нужный хедер внутри */}
+                    {showAuthHeader && <HeaderAuth/>}
                     {showRegularHeader && <Header/>}
                 </div>
             )}
             <div className="overflow-y-auto max-w-7xl mx-auto mt-[64px] w-full h-[calc(100% - 64px)]">
-                {/* Здесь рендерятся страницы приложения через Routes */}
                 <Routes>
                     {routes.map((route, index) => (
                         <Route
@@ -72,7 +58,6 @@ export default function LayoutWithHeader() {
                 </Routes>
             </div>
 
-            {/* Футер с балансом: остается фиксированным внизу */}
             {isAuthenticated && !isAuthPage && !isNotFoundPage && (
                 <div className="fixed bottom-2 left-0 right-0 z-10">
                     <div className="max-w-7xl mx-auto px-4">
@@ -81,9 +66,9 @@ export default function LayoutWithHeader() {
                 </div>
             )}
 
-            {/* Модальные окна */}
-            {modalType && ( // Если modalType не null, пытаемся рендерить
-                // Если тип модалки соответствует "универсальным" модалкам
+            {/* Модальные окна: КОРРЕКТНЫЙ РЕНДЕРИНГ */}
+            {modalType && (
+                // Если тип модалки для форм (использует универсальный Modal.jsx)
                 ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'].includes(modalType) ? (
                         <Modal
                             isOpen={true}
@@ -91,15 +76,24 @@ export default function LayoutWithHeader() {
                             {...modalProps}
                             submissionError={submissionError}
                         />
-                    ) : // Если тип модалки - 'reminderNotification'
-                    modalType === 'reminderNotification' ? ( // <-- ИСПОЛЬЗУЕМ modalType НАПРЯМУЮ, как строку
+                    ) : // Если тип модалки - 'reminderNotification' (использует ReminderModal.jsx)
+                    modalType === 'reminderNotification' ? (
                             <ReminderModal
-                                modalProps={modalProps} // Передаем modalProps целиком
+                                modalProps={modalProps}
                             />
-                        ) : // Если тип модалки соответствует ConfirmModal (старые типы)
+                        ) : // Если тип модалки для подтверждения (использует ConfirmModal.jsx)
                         ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? (
+                            // ConfirmModal требует пропсы напрямую, а не через modalProps={}
+                            // Если modalProps содержит все нужные пропсы, просто разворачиваем их.
                             <ConfirmModal
-                                modalProps={modalProps} // Передаем modalProps целиком
+                                isOpen={true} // ConfirmModal использует проп isOpen, который мы передаем явно
+                                onClose={closeModal}
+                                onConfirm={modalProps.onConfirm}
+                                title={modalProps.title}
+                                message={modalProps.message}
+                                confirmText={modalProps.confirmText}
+                                // Если ConfirmModal также принимает cancelText, передай его здесь
+                                // cancelText={modalProps.cancelText}
                             />
                         ) : null
             )}
