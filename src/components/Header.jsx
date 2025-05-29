@@ -1,23 +1,24 @@
 // src/components/Header.jsx
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react'; // Добавляем useEffect, useState, useRef
+import { useEffect, useState, useRef } from 'react';
 import useAuthStore from '../stores/authStore';
-import useRemindersStore from '../stores/remindersStore'; // ДОБАВЛЕНО
-import useModalStore from '../stores/modalStore'; // ДОБАВЛЕНО
+import useRemindersStore from '../stores/remindersStore';
+import useModalStore from '../stores/modalStore';
 import Text from './ui/Text';
 import IconButton from './ui/IconButton';
 import NavLinkItem from './ui/NavLinkItem';
 import MobileMenu from './ui/MobileMenu';
-import { ArrowRightStartOnRectangleIcon, BellAlertIcon } from '@heroicons/react/24/outline'; // Добавляем BellAlertIcon
+import { ArrowRightStartOnRectangleIcon, BellAlertIcon } from '@heroicons/react/24/outline';
 
 export default function Header() {
     const navigate = useNavigate();
-    const { isAuthenticated, user, logout } = useAuthStore(); // Добавляем user для проверки токена
-    const { todayReminder, loading: reminderLoading, error: reminderError, fetchTodayReminder, clearError } = useRemindersStore(); // ДОБАВЛЕНО
-    const { openModal } = useModalStore(); // ДОБАВЛЕНО
+    const { isAuthenticated, user, logout } = useAuthStore();
+    // Деструктурируем todayReminder, loading, fetchTodayReminder, clearError
+    const { todayReminder, loading: reminderLoading, fetchTodayReminder, clearError } = useRemindersStore();
+    const { openModal } = useModalStore();
 
-    const [isBlinking, setIsBlinking] = useState(false); // Состояние для моргания лампочки
-    const blinkIntervalRef = useRef(null); // Ref для хранения ID интервала
+    const [isBlinking, setIsBlinking] = useState(false);
+    const blinkIntervalRef = useRef(null);
 
     const getUserName = () => {
         const storedName = localStorage.getItem('userName');
@@ -32,50 +33,43 @@ export default function Header() {
 
     // --- ЛОГИКА ФЕТЧИНГА НАПОМИНАНИЙ ---
     useEffect(() => {
-        // Фетчим напоминания, если пользователь аутентифицирован и токен есть
         if (isAuthenticated && user?.access_token) {
             console.log('Header: Authenticated, fetching today reminder...');
             fetchTodayReminder();
         } else {
-            // Если пользователь не аутентифицирован, останавливаем моргание и очищаем данные
             setIsBlinking(false);
             if (blinkIntervalRef.current) {
                 clearInterval(blinkIntervalRef.current);
                 blinkIntervalRef.current = null;
             }
-            // Возможно, здесь также нужно очистить состояние remindersStore,
-            // но это уже делается через storeInitializer при логауте.
         }
-    }, [isAuthenticated, user?.access_token, fetchTodayReminder]); // Зависимости: isAuthenticated и токен
+    }, [isAuthenticated, user?.access_token, fetchTodayReminder]);
 
     // --- ЛОГИКА МОРГАНИЯ ЛАМПОЧКИ ---
     useEffect(() => {
-        if (todayReminder?.need_remind && !reminderLoading) {
-            // Если нужно напоминать и не идет загрузка
+        // --- ИЗМЕНЕНО: Правильный доступ к todayReminder.TodayRemind.need_remind ---
+        if (todayReminder?.TodayRemind?.need_remind && !reminderLoading) {
             const startBlinking = () => {
                 if (blinkIntervalRef.current) {
-                    clearInterval(blinkIntervalRef.current); // Очищаем предыдущий интервал
+                    clearInterval(blinkIntervalRef.current);
                 }
 
                 const toggleBlink = () => setIsBlinking(prev => !prev);
                 let currentIntervalTime = 0;
 
-                // Запускаем первый интервал, который будет менять состояние и запускать следующий
                 const createNextBlink = () => {
-                    currentIntervalTime = Math.random() * (6000 - 3000) + 3000; // От 3 до 6 секунд
+                    currentIntervalTime = Math.random() * (2000 - 1000) + 1000;
                     blinkIntervalRef.current = setTimeout(() => {
                         toggleBlink();
-                        createNextBlink(); // Рекурсивно запускаем следующий таймаут
+                        createNextBlink();
                     }, currentIntervalTime);
                 };
 
-                // Запускаем первый цикл
                 createNextBlink();
             };
 
-            startBlinking(); // Начинаем моргание
+            startBlinking();
         } else {
-            // Если напоминание не нужно, или идет загрузка, или произошла ошибка, останавливаем моргание
             setIsBlinking(false);
             if (blinkIntervalRef.current) {
                 clearInterval(blinkIntervalRef.current);
@@ -83,38 +77,36 @@ export default function Header() {
             }
         }
 
-        // Очистка интервала при размонтировании компонента или изменении условий
         return () => {
             if (blinkIntervalRef.current) {
                 clearInterval(blinkIntervalRef.current);
             }
         };
-    }, [todayReminder, reminderLoading]); // Зависимости: todayReminder и reminderLoading
+    }, [todayReminder, reminderLoading]);
 
     // --- ОБРАБОТЧИК КЛИКА ПО ЛАМПОЧКЕ ---
     const handleReminderClick = () => {
         console.log('Header: Reminder icon clicked. Opening reminder modal.');
-        clearError(); // Сбрасываем ошибку в remindersStore, если она была
+        clearError();
 
         openModal({
-            modalType: 'reminderNotification', // Укажем уникальный тип модалки
+            modalType: 'reminderNotification',
             modalProps: {
                 title: 'Важное напоминание!',
                 message: 'Пора бы расходы и доходы внести, иначе может нарушиться точность учета финансов.',
                 confirmText: 'Внести расходы',
                 cancelText: 'Внести доходы',
                 onConfirm: () => {
-                    navigate('/spendings'); // Переход на страницу расходов
-                    useModalStore.getState().closeModal(); // Закрываем модалку
+                    navigate('/spendings');
+                    useModalStore.getState().closeModal();
                 },
                 onCancel: () => {
-                    navigate('/credits'); // Переход на страницу доходов
-                    useModalStore.getState().closeModal(); // Закрываем модалку
+                    navigate('/credits');
+                    useModalStore.getState().closeModal();
                 },
-                // Добавляем третью кнопку для закрытия
                 thirdButtonText: 'Закрыть',
                 onThirdButtonClick: () => {
-                    useModalStore.getState().closeModal(); // Просто закрываем модалку
+                    useModalStore.getState().closeModal();
                 }
             }
         });
@@ -138,7 +130,23 @@ export default function Header() {
 
                 {/* Навигация и пользователь (для больших экранов) */}
                 {isAuthenticated && (
+                    // !!! ВЕРНИТЕ "hidden md:flex" ОБРАТНО, ЕСЛИ ТЕСТИРОВАНИЕ ПОКАЗАЛО, ЧТО ОНО РАБОТАЕТ НА БОЛЬШИХ ЭКРАНАХ !!!
+                    // ИЛИ ОСТАВЬ "flex" ЕСЛИ ВЫ ХОТИТЕ ВИДЕТЬ НА ВСЕХ ЭКРАНАХ НА ДАННЫЙ МОМЕНТ
                     <div className="hidden md:flex items-center space-x-4">
+                        {/* --- ИЗМЕНЕНО: Правильный доступ к todayReminder.TodayRemind.need_remind --- */}
+                        {todayReminder?.TodayRemind?.need_remind && !reminderLoading && (
+                            <IconButton
+                                icon={BellAlertIcon}
+                                onClick={handleReminderClick}
+                                className={`
+                                    ${isBlinking ? 'text-red-400 animate-pulse' : 'text-yellow-300'}
+                                    hover:text-red-500 transition-colors
+                                    ml-4
+                                `}
+                                tooltip="Есть напоминание!"
+                            />
+                        )}
+                        {/* --- Конец ИЗМЕНЕНИЙ --- */}
                         <nav className="flex items-center space-x-4">
                             {links.map((link) => (
                                 <NavLinkItem
@@ -148,21 +156,7 @@ export default function Header() {
                                 />
                             ))}
                         </nav>
-                        {/* --- ДОБАВЛЕНО: Кнопка-лампочка для напоминаний --- */}
-                        {todayReminder?.need_remind && !reminderLoading && (
-                            <IconButton
-                                icon={BellAlertIcon} // Используем BellAlertIcon для лампочки
-                                onClick={handleReminderClick}
-                                className={`
-                                    ${isBlinking ? 'text-red-400 animate-pulse' : 'text-yellow-300'} // Цвет и анимация
-                                    hover:text-red-500 transition-colors
-                                    ml-4
-                                `}
-                                tooltip="Есть напоминание!"
-                            />
-                        )}
-                        {/* --- Конец ДОБАВЛЕННОГО --- */}
-                        <Text variant="body" className="text-background">
+                                                <Text variant="body" className="text-background">
                             {getUserName()}
                         </Text>
                         <IconButton
@@ -180,10 +174,9 @@ export default function Header() {
                         links={links}
                         userName={getUserName()}
                         onLogout={handleLogout}
-                        // --- ДОБАВЛЕНО: Передаем параметры напоминания в MobileMenu ---
-                        hasReminder={todayReminder?.need_remind && !reminderLoading}
+                        // --- ИЗМЕНЕНО: Правильный доступ к todayReminder.TodayRemind.need_remind ---
+                        hasReminder={todayReminder?.TodayRemind?.need_remind && !reminderLoading}
                         onReminderClick={handleReminderClick}
-                        // --- Конец ДОБАВЛЕННОГО ---
                     />
                 )}
             </div>
