@@ -9,6 +9,7 @@ const api = axios.create({
 
 // Хелпер для обработки ответов
 const handleResponse = (response) => {
+    // Здесь мы ожидаем, что response - это полный объект от axios, у которого есть response.data
     return { data: response.data, error: null };
 };
 
@@ -49,8 +50,10 @@ export const getTodayReminder = async (token) => {
         const response = await api.get('/Reminder', {
             headers: { Authorization: `Bearer ${token}` },
         });
-        // Ожидаем формат ответа: { "TodayRemind": { "need_remind": true/false } }
-        return handleResponse(response.data.TodayRemind); // Возвращаем только содержимое TodayRemind
+        // --- ИЗМЕНЕНО: Передаем ВЕСЬ объект response в handleResponse ---
+        // handleResponse сам извлечет response.data,
+        // а useRemindersStore уже будет работать с TodayRemind.
+        return handleResponse(response);
     } catch (error) {
         return handleError(error);
     }
