@@ -11,6 +11,8 @@ import useCategoryStore from './categoryStore';
 import useGoalsStore from './goalsStore';
 import useMainPageStore from './mainPageStore'; // ДОБАВЛЕНО: Импорт mainPageStore
 // --- Конец ДОБАВЛЕНИЯ ---
+import useRemindersStore from './remindersStore'; // Убедись, что путь корректен
+// --- Конец ДОБАВЛЕНИЯ ---
 
 
 console.log('storeInitializer: Initializing store subscriptions...'); // Лог начала инициализации
@@ -100,6 +102,23 @@ useAuthStore.subscribe(
     (state) => ({ isAuthenticated: state.isAuthenticated })
 );
 console.log('storeInitializer: MainPageStore subscription set up.');
+
+// --- ДОБАВЛЕНО: Настройка подписки для RemindersStore ---
+useAuthStore.subscribe(
+    (authState) => {
+        console.log('storeInitializer: RemindersStore subscription triggered by auth state change.', authState);
+        const remindersStoreState = useRemindersStore.getState();
+        // Сбрасываем напоминания, если пользователь становится не аутентифицирован
+        // И если в сторе напоминаний есть данные (todayReminder не null).
+        if (!authState.isAuthenticated && remindersStoreState.todayReminder !== null) {
+            console.log('storeInitializer: User became unauthenticated, triggering remindersStore reset.');
+            remindersStoreState.resetReminders(); // Вызываем действие сброса в remindersStore
+        }
+    },
+    (state) => ({ isAuthenticated: state.isAuthenticated })
+);
+console.log('storeInitializer: RemindersStore subscription set up.');
+// --- Конец ДОБАВЛЕНИЯ ---
 
 
 console.log('storeInitializer: Store subscriptions initialization finished.'); // Лог завершения
