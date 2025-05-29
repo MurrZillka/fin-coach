@@ -9,6 +9,7 @@ import IconButton from './ui/IconButton';
 import NavLinkItem from './ui/NavLinkItem';
 import MobileMenu from './ui/MobileMenu';
 import { ArrowRightStartOnRectangleIcon, BellAlertIcon } from '@heroicons/react/24/outline';
+import Tooltip from "./ui/Tooltip.jsx";
 
 export default function Header() {
     const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function Header() {
                 let currentIntervalTime = 0;
 
                 const createNextBlink = () => {
-                    currentIntervalTime = Math.random() * (2000 - 1000) + 1000;
+                    currentIntervalTime = Math.random() * (3000 - 2000) + 2000;
                     blinkIntervalRef.current = setTimeout(() => {
                         toggleBlink();
                         createNextBlink();
@@ -139,11 +140,13 @@ export default function Header() {
                                 icon={BellAlertIcon}
                                 onClick={handleReminderClick}
                                 className={`
-                                    ${isBlinking ? 'text-red-400 animate-pulse' : 'text-yellow-300'}
-                                    hover:text-red-500 transition-colors
+                                    ${isBlinking
+                                    ? 'text-red-400 animate-pulse border-red-500 border-2' // Если мигает: красный цвет, красная рамка (видима)
+                                    : 'text-yellow-300 border-transparent border-2'} // Если не мигает: желтый цвет, прозрачная рамка (невидима)
+                                    rounded-full p-1 // Добавляем отступ и скругление
+                                    hover:text-red-500 hover:border-red-500 transition-colors
                                     ml-4
                                 `}
-                                tooltip="Есть напоминание!"
                             />
                         )}
                         {/* --- Конец ИЗМЕНЕНИЙ --- */}
