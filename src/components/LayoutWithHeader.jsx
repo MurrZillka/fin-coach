@@ -6,8 +6,9 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import routes from '../routes';
 import useAuthStore from '../stores/authStore.js';
 import useModalStore from '../stores/modalStore.js';
-import Modal from './ui/Modal.jsx';
-import ConfirmModal from './ui/ConfirmModal.jsx';
+import Modal from './ui/Modal.jsx'; // Твоя "универсальная" модалка
+import ConfirmModal from './ui/ConfirmModal.jsx'; // Твоя "модалка предупреждения"
+import ReminderModal from './ui/ReminderModal.jsx'; // <-- ИМПОРТИРУЕМ НОВУЮ МОДАЛКУ
 import BalanceWidget from './widgets/BalanceWidget.jsx'; // Футер с балансом (уже фиксированный)
 
 export default function LayoutWithHeader() {
@@ -21,7 +22,16 @@ export default function LayoutWithHeader() {
     const showRegularHeader = isAuthenticated && !isAuthPage;
 
     // Получаем состояние модальных окон
-    const {modalType, modalProps, closeModal, submissionError} = useModalStore();
+    // modalType теперь точно строка (или null), как в твоем store
+    const {modalType, modalProps, closeModal, submissionError} = useModalStore(); // <-- ВОЗВРАЩЕНО К ИЗНАЧАЛЬНОМУ
+
+
+    // --- ДОБАВЛЕНО: ЛОГИ ДЛЯ ОТЛАДКИ РЕНДЕРА И СОСТОЯНИЯ ---
+    // Этот лог будет срабатывать при каждом рендере LayoutWithHeader
+    console.log('LayoutWithHeader: RENDERING. Current modalType in store:', modalType); // Лог для проверки, что modalType - строка
+    console.log('LayoutWithHeader: Current modalProps in store:', modalProps);
+    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
+
 
     const validPaths = routes
         .filter(route => route.path !== '*') // Исключаем путь для 404
@@ -71,22 +81,27 @@ export default function LayoutWithHeader() {
                 </div>
             )}
 
-            {/* Модальные окна (остаются без изменений) */}
-            {modalType && (
+            {/* Модальные окна */}
+            {modalType && ( // Если modalType не null, пытаемся рендерить
+                // Если тип модалки соответствует "универсальным" модалкам
                 ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'].includes(modalType) ? (
-                    <Modal
-                        isOpen={true}
-                        onClose={closeModal}
-                        {...modalProps}
-                        submissionError={submissionError}
-                    />
-                ) : ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? (
-                    <ConfirmModal
-                        isOpen={true}
-                        onClose={closeModal}
-                        {...modalProps}
-                    />
-                ) : null
+                        <Modal
+                            isOpen={true}
+                            onClose={closeModal}
+                            {...modalProps}
+                            submissionError={submissionError}
+                        />
+                    ) : // Если тип модалки - 'reminderNotification'
+                    modalType === 'reminderNotification' ? ( // <-- ИСПОЛЬЗУЕМ modalType НАПРЯМУЮ, как строку
+                            <ReminderModal
+                                modalProps={modalProps} // Передаем modalProps целиком
+                            />
+                        ) : // Если тип модалки соответствует ConfirmModal (старые типы)
+                        ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? (
+                            <ConfirmModal
+                                modalProps={modalProps} // Передаем modalProps целиком
+                            />
+                        ) : null
             )}
         </div>
     );

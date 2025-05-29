@@ -90,27 +90,28 @@ export default function Header() {
         console.log('Header: Reminder icon clicked. Opening reminder modal.');
         clearError();
 
-        openModal({
-            modalType: 'reminderNotification',
-            modalProps: {
+        // --- ИЗМЕНЕНИЕ ЗДЕСЬ: ПРАВИЛЬНЫЙ ВЫЗОВ openModal ---
+        openModal(
+            'reminderNotification', // <-- ПЕРВЫЙ АРГУМЕНТ: СТРОКА (тип модалки)
+            { // <-- ВТОРОЙ АРГУМЕНТ: ОБЪЕКТ (пропсы для модалки)
                 title: 'Важное напоминание!',
-                message: 'Пора бы расходы и доходы внести, иначе может нарушиться точность учета финансов.',
+                message: 'Пора обновить доходы и расходы, иначе может нарушиться точность учета финансов.',
                 confirmText: 'Внести расходы',
                 cancelText: 'Внести доходы',
                 onConfirm: () => {
                     navigate('/spendings');
-                    useModalStore.getState().closeModal();
+                    // closeModal(); // Удаляем это, так как модалка сама закрывается
                 },
                 onCancel: () => {
                     navigate('/credits');
-                    useModalStore.getState().closeModal();
+                    // closeModal(); // Удаляем это, так как модалка сама закрывается
                 },
                 thirdButtonText: 'Закрыть',
                 onThirdButtonClick: () => {
-                    useModalStore.getState().closeModal();
+                    // closeModal(); // Удаляем это, так как модалка сама закрывается
                 }
             }
-        });
+        );
     };
 
     const links = [
@@ -129,27 +130,31 @@ export default function Header() {
                     Financial Coach
                 </Text>
 
-                {/* Навигация и пользователь (для больших экранов) */}
+                {/* --- НОВОЕ МЕСТО ДЛЯ КОЛОКОЛЬЧИКА: ВСЕГДА ВИДЕН --- */}
+                <div className="flex justify-center md:justify-end w-full">
+                {todayReminder?.TodayRemind?.need_remind && !reminderLoading && (
+                    <IconButton
+                        icon={BellAlertIcon}
+                        onClick={handleReminderClick}
+                        className={`
+                            ${isBlinking
+                            ? 'text-red-400 animate-pulse border-red-500 border-2 border-opacity-100'
+                            : 'text-yellow-300 border-red-500 border-2 border-opacity-0'}
+                            rounded-full p-1
+                            hover:text-red-500 hover:border-red-500 transition-all duration-100
+                            cursor-pointer
+                            // ml-auto // <-- УДАЛЕН ЭТОТ КЛАСС
+                        `}
+                        tooltip="Есть напоминание!"
+                    />
+                )}
+                </div>
+                {/* --- КОНЕЦ НОВОГО МЕСТА --- */}
+
+
+                {/* Навигация и пользователь (для больших экранов) - скрывается на мобилке */}
                 {isAuthenticated && (
-                    // !!! ВЕРНИТЕ "hidden md:flex" ОБРАТНО, ЕСЛИ ТЕСТИРОВАНИЕ ПОКАЗАЛО, ЧТО ОНО РАБОТАЕТ НА БОЛЬШИХ ЭКРАНАХ !!!
-                    // ИЛИ ОСТАВЬ "flex" ЕСЛИ ВЫ ХОТИТЕ ВИДЕТЬ НА ВСЕХ ЭКРАНАХ НА ДАННЫЙ МОМЕНТ
                     <div className="hidden md:flex items-center space-x-4">
-                        {/* --- ИЗМЕНЕНО: Правильный доступ к todayReminder.TodayRemind.need_remind --- */}
-                        {todayReminder?.TodayRemind?.need_remind && !reminderLoading && (
-                            <IconButton
-                                icon={BellAlertIcon}
-                                onClick={handleReminderClick}
-                                className={`
-                                    ${isBlinking
-                                    ? 'text-red-400 animate-pulse border-red-500 border-2' // Если мигает: красный цвет, красная рамка (видима)
-                                    : 'text-yellow-300 border-transparent border-2'} // Если не мигает: желтый цвет, прозрачная рамка (невидима)
-                                    rounded-full p-1 // Добавляем отступ и скругление
-                                    hover:text-red-500 hover:border-red-500 transition-colors
-                                    ml-4
-                                `}
-                            />
-                        )}
-                        {/* --- Конец ИЗМЕНЕНИЙ --- */}
                         <nav className="flex items-center space-x-4">
                             {links.map((link) => (
                                 <NavLinkItem
@@ -159,7 +164,8 @@ export default function Header() {
                                 />
                             ))}
                         </nav>
-                                                <Text variant="body" className="text-background">
+                        {/* Здесь колокольчик был раньше, теперь его убрали */}
+                        <Text variant="body" className="text-background">
                             {getUserName()}
                         </Text>
                         <IconButton
@@ -177,9 +183,11 @@ export default function Header() {
                         links={links}
                         userName={getUserName()}
                         onLogout={handleLogout}
-                        // --- ИЗМЕНЕНО: Правильный доступ к todayReminder.TodayRemind.need_remind ---
                         hasReminder={todayReminder?.TodayRemind?.need_remind && !reminderLoading}
                         onReminderClick={handleReminderClick}
+                        // isBlinking пока не передаем в MobileMenu, если он теперь не рендерит сам колокольчик.
+                        // Если MobileMenu внутри себя тоже что-то показывает про напоминание, тогда надо будет передать.
+                        // Но если MobileMenu просто содержит бургер, то не надо.
                     />
                 )}
             </div>
