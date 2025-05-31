@@ -6,7 +6,7 @@ import Loader from './components/ui/Loader.jsx';
 import Text from './components/ui/Text.jsx';
 
 function App() {
-    const { initAuth, isAuthenticated, isInitializing } = useAuthStore();
+    const { initAuth, isAuthenticated, status } = useAuthStore();
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ function App() {
         initAuth();
     }, [initAuth]);
 
-    console.log('App.jsx: Rendering, isInitializing:', isInitializing, 'isAuthenticated:', isAuthenticated);
+    console.log('App.jsx: Rendering, status:', status, 'isAuthenticated:', isAuthenticated);
 
     if (screenWidth < 350) {
         return (
@@ -39,7 +39,7 @@ function App() {
 
     return (
         <>
-            {isInitializing ? (
+            {status === 'initializing' ? (
                 <Loader />
             ) : (
                 <Router>
