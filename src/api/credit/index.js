@@ -1,7 +1,6 @@
 //src/api/credit/index.js
 import axios from 'axios';
-import { getUseMocks, API_BASE_URL } from '../config';
-import { mockCredit } from './mocks';
+import {API_BASE_URL } from '../config';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -27,7 +26,6 @@ export const addCredit = async (data, token) => {
 
 export const getCredits = async (token) => {
     try {
-        if (getUseMocks()) return { data: await mockCredit.getCredits(), error: null };
         const response = await api.get('/Credits', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -45,7 +43,6 @@ export const getCredits = async (token) => {
 
 export const getCreditsPermanent = async (token) => {
     try {
-        if (getUseMocks()) return { data: await mockCredit.getCreditsPermanent(), error: null };
         const response = await api.get('/Credits?permanent=true', {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,7 +60,6 @@ export const getCreditsPermanent = async (token) => {
 
 export const getCreditById = async (id, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCredit.getCreditById(id), error: null };
         const response = await api.get(`/Credit/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -81,7 +77,6 @@ export const getCreditById = async (id, token) => {
 
 export const updateCreditById = async (id, data, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCredit.updateCreditById(), error: null };
         const response = await api.put(`/Credit/${id}`, data, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -99,7 +94,6 @@ export const updateCreditById = async (id, data, token) => {
 
 export const deleteCreditById = async (id, token) => {
     try {
-        if (getUseMocks()) return { data: await mockCredit.deleteCreditById(), error: null };
         const response = await api.delete(`/Credit/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });

@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { getUseMocks, API_BASE_URL } from '../config';
-import { mockRecommendations } from './mocks';
+import {API_BASE_URL } from '../config';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -9,7 +8,6 @@ const api = axios.create({
 
 export const getRecommendations = async (token) => {
     try {
-        if (getUseMocks()) return { data: await mockRecommendations.getRecommendations(), error: null };
         const response = await api.get('/Recommendations', {
             headers: { Authorization: `Bearer ${token}` },
         });
