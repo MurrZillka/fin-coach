@@ -122,7 +122,8 @@ export default function Header() {
                     navigate('/credits');
                 },
                 thirdButtonText: 'Закрыть',
-                onThirdButtonClick: () => {}
+                onThirdButtonClick: () => {
+                }
             }
         );
     };
@@ -143,10 +144,7 @@ export default function Header() {
                     Financial Coach
                 </Text>
 
-                <div className="flex justify-center md:justify-end w-auto ml-4">
-                    {/* --- ЛОГ ДЛЯ ОТЛАДКИ (можно оставить, он не мешает) --- */}
-                    {console.log('Header Render Check: needRemind:', needRemind, 'reminderLoading:', reminderLoading)}
-
+                <div className="flex justify-center md:flex-grow md:justify-end ml-4">
                     {/* Условие рендеринга теперь использует needRemind */}
                     {needRemind && !reminderLoading && (
                         <IconButton
@@ -163,42 +161,42 @@ export default function Header() {
                             tooltip="Есть напоминание!"
                         />
                     )}
-
-                    {/* Навигация и пользователь (для больших экранов) */}
-                    {isAuthenticated && (
-                        <div className="hidden md:flex items-center space-x-4">
-                            <nav className="flex items-center space-x-4">
-                                {links.map((link) => (
-                                    <NavLinkItem
-                                        key={link.path}
-                                        to={link.path}
-                                        label={link.label}
-                                    />
-                                ))}
-                            </nav>
-                            <Text variant="body" className="text-background">
-                                {getUserName()}
-                            </Text>
-                            <IconButton
-                                icon={ArrowRightStartOnRectangleIcon}
-                                onClick={handleLogout}
-                                className="text-background hover:bg-white/10"
-                                tooltip="Выйти"
-                            />
-                        </div>
-                    )}
-
-                    {/* Мобильное меню */}
-                    {isAuthenticated && (
-                        <MobileMenu
-                            links={links}
-                            userName={getUserName()}
-                            onLogout={handleLogout}
-                            hasReminder={needRemind}
-                            onReminderClick={handleReminderClick}
-                        />
-                    )}
                 </div>
+
+                {/* Навигация и пользователь (для больших экранов) */}
+                {isAuthenticated && (
+                    <div className="hidden md:flex items-center space-x-4">
+                        <nav className="flex items-center space-x-4">
+                            {links.map((link) => (
+                                <NavLinkItem
+                                    key={link.path}
+                                    to={link.path}
+                                    label={link.label}
+                                />
+                            ))}
+                        </nav>
+                        <Text variant="body" className="text-background">
+                            {getUserName()}
+                        </Text>
+                        <IconButton
+                            icon={ArrowRightStartOnRectangleIcon}
+                            onClick={handleLogout}
+                            className="text-background hover:bg-white/10"
+                            tooltip="Выйти"
+                        />
+                    </div>
+                )}
+
+                {/* Мобильное меню */}
+                {isAuthenticated && (
+                    <MobileMenu
+                        links={links}
+                        userName={getUserName()}
+                        onLogout={handleLogout}
+                        hasReminder={needRemind}
+                        onReminderClick={handleReminderClick}
+                    />
+                )}
             </div>
         </header>
     );
