@@ -47,12 +47,9 @@ apiClient.interceptors.response.use(
             response: error.response?.data,
         });
         // Для ошибок формируем объект с полями error
-        return Promise.resolve({
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Request failed',
-                status: error.response?.status || 500,
-            },
+        return Promise.reject({
+            message: errorMessage,
+            status: status,
         });
     }
 );
