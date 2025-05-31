@@ -1,15 +1,9 @@
 //src/api/balance/index.js
-import axios from 'axios';
-import {API_BASE_URL} from '../config';
-
-const api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: { 'Content-Type': 'application/json' },
-});
+import apiClient from "../client.js";
 
 export const getBalance = async (token) => {
     try {
-        const response = await api.get('/Balance', {
+        const response = await apiClient.get('/Balance', {
             headers: { Authorization: `Bearer ${token}` },
         });
         return { data: response.data, error: null };
