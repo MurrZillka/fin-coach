@@ -5,6 +5,7 @@ import { API_BASE_URL } from './config';
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: { 'Content-Type': 'application/json' },
+    timeout: 10000, // Таймаут 10 секунд (10000 миллисекунд)
 });
 
 // Перехватчик запросов
@@ -35,8 +36,13 @@ apiClient.interceptors.response.use(
     (error) => {
         const method = error.config?.method?.toUpperCase() || 'UNKNOWN';
         const url = error.config?.url || 'UNKNOWN';
-        const errorMessage = error.response?.data?.error || 'Request failed';
+        let errorMessage = error.response?.data?.error || 'Request failed';
         const status = error.response?.status || 500;
+
+        if (error.code === 'ECONNABORTED') {
+            errorMessage = 'Request timed out';
+        }
+
         console.error(`[API Error] ${method} ${url}`, {
             message: errorMessage,
             status,

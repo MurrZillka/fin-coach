@@ -1,7 +1,7 @@
 // src/stores/authStore.js
-import { create } from 'zustand';
+import {create} from 'zustand';
 // Убедись, что путь к api/auth корректный
-import { login as loginApi, signup as signupApi, logout as logoutApi } from '../api/auth';
+import {login as loginApi, signup as signupApi, logout as logoutApi} from '../api/auth';
 
 // --- ИМПОРТЫ СТОРОВ ---
 // Убедись, что пути к другим сторам корректны
@@ -24,18 +24,18 @@ const useAuthStore = create((set, get) => ({
     // Действия
     login: async (credentials) => {
         console.log('authStore: login started'); // Лог начала
-        set({ status: 'loading', error: null });
+        set({status: 'loading', error: null});
         try {
             const result = await loginApi(credentials);
             console.log('authStore: API login result:', result); // Лог результата API
 
             if (result.error) {
-                set({ status: 'failed', error: result.error });
+                set({status: 'failed', error: result.error});
                 console.error('authStore: API login error:', result.error); // Лог ошибки API
                 throw result.error; // Пробрасываем ошибку API дальше
             }
 
-            const { data } = result;
+            const {data} = result;
 
             if (data && data.access_token) {
                 localStorage.setItem('token', data.access_token);
@@ -62,8 +62,11 @@ const useAuthStore = create((set, get) => ({
 
         } catch (error) {
             console.error('authStore: Unexpected error in login (from authStore):', error); // Лог непредвиденной ошибки
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка авторизации', status: error.status || 500 };
-            set({ status: 'failed', error: unexpectedError });
+            const unexpectedError = {
+                message: error.message || 'Произошла непредвиденная ошибка авторизации',
+                status: error.status || 500
+            };
+            set({status: 'failed', error: unexpectedError});
             // При ошибке входа также важно сбросить состояние, т.к. аутентификация не удалась
             localStorage.removeItem('token'); // Убедимся, что токен удален
             localStorage.removeItem('userName');
@@ -77,27 +80,30 @@ const useAuthStore = create((set, get) => ({
 
     signup: async (userData) => {
         console.log('authStore: signup started'); // Лог начала
-        set({ status: 'loading', error: null });
+        set({status: 'loading', error: null});
         try {
             const result = await signupApi(userData);
             console.log('authStore: API signup result:', result); // Лог результата API
 
 
             if (result.error) {
-                set({ status: 'failed', error: result.error });
+                set({status: 'failed', error: result.error});
                 console.error('authStore: API signup error:', result.error); // Лог ошибки API
                 throw result.error;
             }
 
-            const { data } = result;
+            const {data} = result;
 
-            set({ status: 'succeeded', error: null });
+            set({status: 'succeeded', error: null});
             console.log('authStore: signup successful.'); // Лог успеха
             return data;
         } catch (error) {
             console.error('authStore: Unexpected error in signup (from authStore):', error); // Лог непредвиденной ошибки
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при регистрации', status: error.status || 500 };
-            set({ status: 'failed', error: unexpectedError });
+            const unexpectedError = {
+                message: error.message || 'Произошла непредвиденная ошибка при регистрации',
+                status: error.status || 500
+            };
+            set({status: 'failed', error: unexpectedError});
             throw error;
         } finally {
             console.log('authStore: signup finished.'); // Лог завершения
@@ -106,16 +112,12 @@ const useAuthStore = create((set, get) => ({
 
     logout: async () => {
         console.log('authStore: logout started'); // Лог начала
-        set({ status: 'loading' }); // Опционально, индикатор выхода
-
-        const token = localStorage.getItem('token'); // Берем токен перед очисткой
+        set({status: 'loading'}); // Опционально, индикатор выхода
 
         try {
-            if (token) { // Вызываем API выхода только если токен был
-                console.log('authStore: Calling logoutApi...'); // Лог вызова API
-                await logoutApi(token);
-                console.log('authStore: logoutApi successful.'); // Лог успеха API
-            }
+            console.log('authStore: Calling logoutApi...'); // Лог вызова API
+            await logoutApi();
+            console.log('authStore: logoutApi successful.'); // Лог успеха API
         } catch (error) {
             console.error('authStore: Error during logout API call:', error); // Лог ошибки при вызове API выхода
             // Даже если API выхода с ошибкой, локальные данные и состояние стора нужно почистить
@@ -147,7 +149,7 @@ const useAuthStore = create((set, get) => ({
 
     clearError: () => {
         console.log('authStore: clearError called.'); // Лог
-        set({ error: null });
+        set({error: null});
     },
 
 
@@ -156,7 +158,7 @@ const useAuthStore = create((set, get) => ({
     // Оно должно инициировать загрузку данных для текущего пользователя.
     fetchInitialUserData: async () => {
         console.log('authStore: fetchInitialUserData started'); // Лог начала
-        const { isAuthenticated, user } = get(); // Получаем текущее состояние authStore
+        const {isAuthenticated, user} = get(); // Получаем текущее состояние authStore
 
         if (isAuthenticated && user && user.access_token) {
             const token = user.access_token; // Берем токен из текущего состояния user объекта
@@ -191,7 +193,7 @@ const useAuthStore = create((set, get) => ({
 
             // Убедимся, что состояние authStore корректно сброшено, хотя logout это делает.
             // Этот блок может сработать при initAuth, если токена нет.
-            set({ user: null, loading: false, error: null }); // Убедимся, что user null если нет аутентификации
+            set({user: null, loading: false, error: null}); // Убедимся, что user null если нет аутентификации
         }
         console.log('authStore: fetchInitialUserData finished.'); // Лог завершения
     },
@@ -200,7 +202,7 @@ const useAuthStore = create((set, get) => ({
     // Это первое действие, которое вызывается при монтировании App.
     initAuth: () => {
         console.log('authStore: initAuth started');
-        set({ isInitializing: true });
+        set({isInitializing: true});
         const token = localStorage.getItem('token');
         const userName = localStorage.getItem('userName');
 
