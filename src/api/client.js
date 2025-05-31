@@ -11,7 +11,6 @@ const apiClient = axios.create({
 // Перехватчик запросов
 apiClient.interceptors.request.use(
     (config) => {
-        // Берем токен из localStorage
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -19,7 +18,6 @@ apiClient.interceptors.request.use(
         return config;
     },
     (error) => {
-        // Обрабатываем ошибки конфигурации запроса
         return Promise.reject(error);
     }
 );
