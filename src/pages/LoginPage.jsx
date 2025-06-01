@@ -4,7 +4,6 @@ import {useNavigate, useLocation} from 'react-router-dom';
 import Text from '../components/ui/Text';
 import Input from '../components/ui/Input';
 import useAuthStore from '../stores/authStore';
-// import Modal from "../components/ui/Modal.jsx"; // Закомментировано, если не нужен здесь
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -52,7 +51,6 @@ export default function LoginPage() {
             password: formData.password ? '' : 'Пароль обязателен',
         };
         setErrors(newErrors);
-
         // Если нет ошибок валидации формы, отправляем запрос логина
         if (!newErrors.login && !newErrors.password) {
             await storeLogin(formData);
@@ -60,9 +58,7 @@ export default function LoginPage() {
     }
 };
 
-// --- Отображаем ТОЛЬКО локальную ошибку API/логина ---
 const displayError = error;
-// --- Конец Отображения ошибки ---
 
 return (
     <div className="bg-secondary-50 flex items-center justify-center">
@@ -71,7 +67,6 @@ return (
             <Text variant="h2" className="mb-6 text-center">
                 Вход в аккаунт
             </Text>
-
             {/* Блок для отображения ошибки теперь использует только displayError (локальное состояние) */}
             {displayError && (
                 <div
@@ -125,8 +120,6 @@ return (
                 <div className="text-center mt-4">
                     <Text variant="body" className="text-secondary-600">
                         Нет аккаунта?{' '}
-                        {/* Используем Link из react-router-dom, если он настроен */}
-                        {/* <Link to="/signup" className="text-primary-600 hover:underline"> */}
                         <a href="/signup" className="text-primary-600 hover:underline">
                             Зарегистрироваться
                         </a>
@@ -135,8 +128,6 @@ return (
                 </div>
             </form>
         </div>
-        {/* Если модал Modal нужен на странице логина, его нужно здесь рендерить */}
-        {/* {isModalOpen && <Modal ... />} */}
     </div>
 );
 }
