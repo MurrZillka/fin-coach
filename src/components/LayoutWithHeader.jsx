@@ -13,14 +13,12 @@ import BalanceWidget from './widgets/BalanceWidget.jsx';
 
 export default function LayoutWithHeader() {
     const location = useLocation();
-    console.log('LayoutWithHeader: Accessing useAuthStore');
     const {isAuthenticated} = useAuthStore();
 
     const isAuthPage = ['/login', '/signup', '/demo'].includes(location.pathname);
     const showAuthHeader = isAuthPage;
     const showRegularHeader = isAuthenticated && !isAuthPage;
 
-    // Получаем состояние модальных окон
     const {modalType, modalProps, closeModal, submissionError} = useModalStore();
 
     const validPaths = routes
@@ -28,6 +26,47 @@ export default function LayoutWithHeader() {
         .map(route => route.path);
 
     const isNotFoundPage = !validPaths.includes(location.pathname);
+
+    const renderModal = () => {
+        if (!modalType) return null;
+
+        const formModals = ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'];
+        const confirmModals = ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'];
+
+        if (formModals.includes(modalType)) {
+            return (
+                <Modal
+                    isOpen={true}
+                    onClose={closeModal}
+                    {...modalProps}
+                    submissionError={submissionError}
+                />
+            );
+        }
+
+        if (modalType === 'reminderNotification') {
+            return (
+                <ReminderModal
+                    modalProps={modalProps}
+                />
+            );
+        }
+
+        if (confirmModals.includes(modalType)) {
+            return (
+                <ConfirmModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    onConfirm={modalProps.onConfirm}
+                    title={modalProps.title}
+                    message={modalProps.message}
+                    confirmText={modalProps.confirmText}
+                />
+            );
+        }
+
+        return null;
+    };
 
     return (
         <div className="flex flex-col bg-secondary-50 min-h-screen pb-28">
@@ -61,38 +100,7 @@ export default function LayoutWithHeader() {
                     </div>
                 </div>
             )}
-
-            {/* Модальные окна: КОРРЕКТНЫЙ РЕНДЕРИНГ */}
-            {modalType && (
-                // Если тип модалки для форм (использует универсальный Modal.jsx)
-                ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'].includes(modalType) ? (
-                        <Modal
-                            isOpen={true}
-                            onClose={closeModal}
-                            {...modalProps}
-                            submissionError={submissionError}
-                        />
-                    ) : // Если тип модалки - 'reminderNotification' (использует ReminderModal.jsx)
-                    modalType === 'reminderNotification' ? (
-                            <ReminderModal
-                                modalProps={modalProps}
-                            />
-                        ) : // Если тип модалки для подтверждения (использует ConfirmModal.jsx)
-                        ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'].includes(modalType) ? (
-                            // ConfirmModal требует пропсы напрямую, а не через modalProps={}
-                            // Если modalProps содержит все нужные пропсы, просто разворачиваем их.
-                            <ConfirmModal
-                                isOpen={true} // ConfirmModal использует проп isOpen, который мы передаем явно
-                                onClose={closeModal}
-                                onConfirm={modalProps.onConfirm}
-                                title={modalProps.title}
-                                message={modalProps.message}
-                                confirmText={modalProps.confirmText}
-                                // Если ConfirmModal также принимает cancelText, передай его здесь
-                                // cancelText={modalProps.cancelText}
-                            />
-                        ) : null
-            )}
+            {renderModal()}
         </div>
     );
 }
