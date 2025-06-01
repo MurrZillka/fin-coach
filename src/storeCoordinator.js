@@ -21,6 +21,7 @@ function fetchAll() {
         useCreditStore.getState().fetchCredits();
         useSpendingsStore.getState().fetchSpendings();
         useCategoryStore.getState().fetchCategories();
+        useCategoryStore.getState().getCategoriesMonth();
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal();
         useMainPageStore.getState().fetchRecommendations();
@@ -70,6 +71,7 @@ function updateSpendingsStore() {
     try {
         useBalanceStore.getState().fetchBalance();
         useCategoryStore.getState().fetchCategories();
+        useCategoryStore.getState().getCategoriesMonth();
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal();
         useMainPageStore.getState().fetchRecommendations();

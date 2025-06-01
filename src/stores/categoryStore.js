@@ -6,6 +6,7 @@ import { handleCategoryApiError } from '../utils/handleCategoryApiError';
 
 const initialState = {
     categories: null,
+    categoriesMonth: null,
     loading: false,
     error: null,
 };
@@ -14,6 +15,7 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
     // --- Состояние (State) ---
     ...initialState,
     setCategories: (categories) => set({ categories }),
+    etCategoriesMonth: (categoriesMonth) => set({ categoriesMonth }),
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
     handleError: (error, actionName) => {
@@ -30,7 +32,6 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
             const result = await categoryAPI.getCategories();
             console.log('categoryStore: API getCategories result:', result);
 
-            // API возвращает { categories: [...] }
             const { Categories: categories } = result.data || {};
             set({ categories: categories || [] });
         } catch (error) {
@@ -79,6 +80,22 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
             return result.data;
         } catch (error) {
             get().handleError(error, 'deleteCategory');
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    getCategoriesMonth: async () => {
+        set({ loading: true, error: null });
+        try {
+            const result = await categoryAPI.getCategoriesMonth();
+            console.log('categoryStore: API getCategoriesMonth result:', result);
+
+            // API возвращает { Categories: {Еда2: 34536, Разное: 38008} }
+            const { Categories: categoriesMonth = {} } = result.data || {}; // ← ИСПРАВЬ ЭТУ СТРОКУ
+            set({ categoriesMonth });
+        } catch (error) {
+            get().handleError(error, 'getCategoriesMonth');
         } finally {
             set({ loading: false });
         }
