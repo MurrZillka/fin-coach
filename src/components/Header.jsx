@@ -9,15 +9,13 @@ import IconButton from './ui/IconButton';
 import NavLinkItem from './ui/NavLinkItem';
 import MobileMenu from './ui/MobileMenu';
 import {ArrowRightStartOnRectangleIcon, BellAlertIcon} from '@heroicons/react/24/outline';
-import Tooltip from "./ui/Tooltip.jsx";
 
 export default function Header() {
     const navigate = useNavigate();
-    const {isAuthenticated, user, logout} = useAuthStore();
+    const {isAuthenticated, logout} = useAuthStore();
 
     const needRemind = useRemindersStore(state => state.todayReminder?.TodayRemind?.need_remind);
     const reminderLoading = useRemindersStore(state => state.loading);
-    const fetchTodayReminder = useRemindersStore(state => state.fetchTodayReminder);
     const clearError = useRemindersStore(state => state.clearError);
     const openModal = useModalStore(state => state.openModal);
 
@@ -37,18 +35,15 @@ export default function Header() {
 
     // --- ЛОГИКА ФЕТЧИНГА НАПОМИНАНИЙ ---
     useEffect(() => {
-        if (isAuthenticated && user?.access_token) {
-            console.log('Header: Authenticated, fetching today reminder...');
-            fetchTodayReminder();
-        } else {
-            // При отсутствии аутентификации, убедимся, что моргание остановлено
+        if (!isAuthenticated) {
+            // Только логика остановки моргания при logout
             setIsBlinking(false);
             if (blinkIntervalRef.current) {
                 clearInterval(blinkIntervalRef.current);
                 blinkIntervalRef.current = null;
             }
         }
-    }, [isAuthenticated, user?.access_token, fetchTodayReminder]);
+    }, [isAuthenticated]);
 
     // --- ИСПРАВЛЕННАЯ ЛОГИКА МОРГАНИЯ ЛАМПОЧКИ ---
     useEffect(() => {
@@ -66,7 +61,7 @@ export default function Header() {
 
             // Запускаем интервал
             const toggleBlink = () => setIsBlinking(prev => !prev);
-            let currentIntervalTime = 0; // Определяем здесь, чтобы можно было использовать
+            // let currentIntervalTime = 0; // Определяем здесь, чтобы можно было использовать
 
             // Вместо setTimeout, будем использовать setInterval для постоянного моргания
             // или можно оставить setTimeout, но тогда его нужно постоянно перезапускать

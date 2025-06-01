@@ -25,6 +25,7 @@ function fetchAll() {
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal()
         useMainPageStore.getState().fetchRecommendations();
+        useRemindersStore.getState().fetchTodayReminder();
     } catch (error) {
         console.error('storeCoordinator: Error in fetchAll:', error);
     }
@@ -70,7 +71,6 @@ function updateSpendingsStore() {
     }
     try {
         useBalanceStore.getState().fetchBalance();
-        // useCategoryStore.getState().fetchCategories();
         useCategoryStore.getState().getCategoriesMonth();
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal();
