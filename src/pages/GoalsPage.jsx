@@ -1,22 +1,14 @@
 // src/pages/GoalsPage.jsx
 import React, {useEffect, useState} from 'react';
-// Import necessary components and stores
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-// Import icons
 import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline';
-// --- Import Stores ---
 import useGoalsStore from '../stores/goalsStore';
 import useModalStore from '../stores/modalStore.js';
-// --- ДОБАВЛЕНО: Импорт стора Баланса для расчета процента и цвета иконки ---
 import useBalanceStore from '../stores/balanceStore';
-// --- ДОБАВЛЕНО: Импорт нового компонента для мобильной раскладки ---
 import GoalsCardList from '../components/mobile/GoalsCardList.jsx'; // Убедись, что путь корректен
-// --- Конец ИМПОРТОВ ---
 
-
-// Define fields for the Goal form (Add/Edit)
 const goalFields = [
     {
         name: 'description',
@@ -33,10 +25,10 @@ const goalFields = [
 export default function GoalsPage() {
     const {
         goals, loading, error,
-        currentGoal, currentGoalLoading, currentGoalError,
+        currentGoal,
         fetchGoals, addGoal, updateGoal, deleteGoal,
         setCurrentGoal, getCurrentGoal,
-        clearError, clearCurrentGoalError
+        clearError,
     } = useGoalsStore();
 
     // --- ДОБАВЛЕНО: Получаем баланс и статус его загрузки ---
@@ -63,7 +55,7 @@ export default function GoalsPage() {
         }
 
         // Fetch current goal if not loading, data hasn't been loaded, NO error, AND we haven't attempted fetching it before
-        if (!currentGoalLoading && currentGoal === null && !currentGoalError && !hasFetchedCurrentGoal) {
+        if (!loading && currentGoal === null && !error && !hasFetchedCurrentGoal) {
             // console.log('GoalsPage: Triggering getCurrentGoal...'); // Лог вызова getCurrentGoal
             getCurrentGoal();
             setHasFetchedCurrentGoal(true); // Устанавливаем флаг сразу
@@ -80,12 +72,11 @@ export default function GoalsPage() {
         return () => {
             // console.log('GoalsPage: useEffect cleanup.'); // Лог cleanup
             clearError();
-            clearCurrentGoalError();
         };
     }, [
         fetchGoals, loading, goals, error,
-        getCurrentGoal, currentGoalLoading, currentGoal, currentGoalError,
-        clearError, clearCurrentGoalError,
+        getCurrentGoal, currentGoal,
+        clearError,
         hasFetchedCurrentGoal,
         balance, isBalanceLoading // Зависимости для данных, используемых в рендере
     ]);
@@ -95,7 +86,6 @@ export default function GoalsPage() {
     const handleAddClick = () => {
         // console.log('GoalsPage: Add Goal button clicked');
         clearError();
-        clearCurrentGoalError();
 
         openModal('addGoal', {
             title: 'Добавить цель',
@@ -109,7 +99,6 @@ export default function GoalsPage() {
     const handleEditClick = (goal) => {
         // console.log('GoalsPage: Edit button clicked for goal:', goal);
         clearError();
-        clearCurrentGoalError();
 
         openModal('editGoal', {
             title: 'Редактировать цель',
@@ -129,7 +118,6 @@ export default function GoalsPage() {
     const handleDeleteClick = (goal) => {
         // console.log(`GoalsPage: Delete button clicked for goal ID: ${goal.id}`);
         clearError();
-        clearCurrentGoalError();
 
         const goalDescription = goal.description || `с ID ${goal.id}`;
         const formattedAmount = typeof goal.amount === 'number'
@@ -149,8 +137,6 @@ export default function GoalsPage() {
     const handleSetCurrentClick = (goal) => {
         // console.log(`GoalsPage: Set Current button clicked for goal ID: ${goal.id}`);
         clearError();
-        clearCurrentGoalError();
-
         if (currentGoal && currentGoal.id === goal.id) {
             // console.log('GoalsPage: Selected goal is already the current one.');
             return;
@@ -228,7 +214,7 @@ export default function GoalsPage() {
 
 
     // Determine if a general error message should be displayed
-    const displayError = error || currentGoalError;
+    const displayError = error;
 
 
     // --- Rendering ---
@@ -255,7 +241,7 @@ export default function GoalsPage() {
                 {/* Этот блок виден только на десктопе */}
                 <div className="hidden md:block mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
                     <Text variant="h3" className="mb-2 text-blue-800">Текущая цель:</Text>
-                    {currentGoalLoading || isBalanceLoading ? (
+                    {loading || isBalanceLoading ? (
                         <div className="text-blue-700"><Text variant="body">Загрузка текущей цели и баланса...</Text>
                         </div>
                     ) : currentGoal ? (
@@ -289,7 +275,7 @@ export default function GoalsPage() {
 
                 {/* Container for Goals List (Table for Desktop, Cards for Mobile) */}
                 <div>
-                    {loading && goals === null && !currentGoalLoading && !isBalanceLoading ? (
+                    {loading && goals === null && !loading && !isBalanceLoading ? (
                         <div className="text-center p-4">
                             <Text variant="body">Загрузка списка целей...</Text>
                         </div>
@@ -419,7 +405,7 @@ export default function GoalsPage() {
                                     currentGoal={currentGoal}
                                     balance={balance}
                                     loading={loading}
-                                    currentGoalLoading={currentGoalLoading}
+                                    currentGoalLoading={loading}
                                     isBalanceLoading={isBalanceLoading}
                                     handleEditClick={handleEditClick}
                                     handleDeleteClick={handleDeleteClick}

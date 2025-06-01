@@ -1,131 +1,30 @@
-//src/api/goals/index.js
+// src/api/goals/index.js
+import apiClient from '../client.js';
 
-import axios from 'axios';
-import {API_BASE_URL } from '../config';
-
-const api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: { 'Content-Type': 'application/json' },
-});
-
-export const addGoal = async (data, token) => {
-    try {
-        const response = await api.post('/AddGoal', data, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to add goal',
-                status: error.response?.status || 500,
-            },
-        };
-    }
+export const getGoals = async () => {
+    return apiClient.get('/Goals');
 };
 
-export const getGoals = async (token) => {
-    try {
-        const response = await api.get('/Goals', {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to fetch goals',
-                status: error.response?.status || 500,
-            },
-        };
-    }
+export const addGoal = async (goalData) => {
+    return apiClient.post('/AddGoal', goalData);
 };
 
-export const getGoalById = async (id, token) => {
-    try {
-        const response = await api.get(`/Goal/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to fetch goal',
-                status: error.response?.status || 500,
-            },
-        };
-    }
+export const getGoalById = async (id) => {
+    return apiClient.get(`/Goal/${id}`);
 };
 
-export const updateGoalById = async (id, data, token) => {
-    try {
-        const response = await api.put(`/Goal/${id}`, data, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to update goal',
-                status: error.response?.status || 500,
-            },
-        };
-    }
+export const updateGoalById = async (id, goalData) => {
+    return apiClient.put(`/Goal/${id}`, goalData);
 };
 
-// --- Путь запроса для setCurrentGoal исправлен согласно описанию API: /CurrentGoal/{id} ---
-export const setCurrentGoal = async (id, token) => {
-    try {
-        const response = await api.put(`/CurrentGoal/${id}`, null, { // Используем null в теле, так как API не показывает явного тела
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to set current goal',
-                status: error.response?.status || 500,
-            },
-        };
-    }
-};
-// --- Конец исправления ---
-
-
-export const getCurrentGoal = async (token) => {
-    try {
-        const response = await api.get('/CurrentGoal', {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to fetch current goal',
-                status: error.response?.status || 500,
-            },
-        };
-    }
+export const deleteGoalById = async (id) => {
+    return apiClient.delete(`/Goal/${id}`);
 };
 
-export const deleteGoalById = async (id, token) => {
-    try {
-        const response = await api.delete(`/Goal/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return { data: response.data, error: null };
-    } catch (error) {
-        return {
-            data: null,
-            error: {
-                message: error.response?.data?.error || 'Failed to delete goal',
-                status: error.response?.status || 500,
-            },
-        };
-    }
+export const getCurrentGoal = async () => {
+    return apiClient.get('/CurrentGoal');
+};
+
+export const setCurrentGoal = async (id) => {
+    return apiClient.put(`/CurrentGoal/${id}`, null);
 };
