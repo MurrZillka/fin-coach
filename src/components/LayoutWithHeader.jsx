@@ -1,5 +1,5 @@
 // src/components/LayoutWithHeader.jsx
-import {useLocation, Routes, Route} from 'react-router-dom';
+import {Route, Routes, useLocation} from 'react-router-dom';
 import Header from './Header.jsx';
 import HeaderAuth from './HeaderAuth.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
@@ -10,7 +10,6 @@ import Modal from './ui/Modal.jsx';
 import ConfirmModal from './ui/ConfirmModal.jsx';
 import ReminderModal from './ui/ReminderModal.jsx'; // Убедимся, что ReminderModal импортирован
 import BalanceWidget from './widgets/BalanceWidget.jsx';
-import {useEffect} from "react";
 
 export default function LayoutWithHeader() {
     const location = useLocation();
@@ -29,10 +28,6 @@ export default function LayoutWithHeader() {
         .map(route => route.path);
 
     const isNotFoundPage = !validPaths.includes(location.pathname);
-
-    useEffect(() => {
-
-    }, []);
 
     return (
         <div className="flex flex-col bg-secondary-50 min-h-screen pb-28">
