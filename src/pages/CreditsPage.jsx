@@ -8,7 +8,8 @@ import useCreditStore from '../stores/creditStore';
 import useModalStore from '../stores/modalStore.js';
 import Loader from "../components/ui/Loader.jsx";
 import {isDateTodayOrEarlier} from "../utils/dateUtils.js";
-import CreditCardList from '../components/mobile/CreditCardList.jsx'; // Новый импорт
+import CreditCardList from '../components/mobile/CreditCardList.jsx';
+import {dataCoordinator} from '../dataCoordinator.js';
 
 // Динамическое формирование полей (без изменений)
 function getCreditFields(formData) {
@@ -142,7 +143,7 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
     </table>
 );
 export default function CreditsPage() {
-    const { credits, loading, error, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
+    const { credits, loading, error, clearError } = useCreditStore();
     const { openModal, closeModal, setModalSubmissionError, modalType } = useModalStore();
 
     const handleAddClick = () => {
@@ -239,7 +240,7 @@ export default function CreditsPage() {
             dataToSend.end_date = '0001-01-01';
         }
         try {
-            await addCredit(dataToSend);
+            await dataCoordinator.addCredit(formData);
             closeModal();
         } catch (err) {
             console.error('Error during add credit:', err);
@@ -261,7 +262,7 @@ export default function CreditsPage() {
             dataToUpdate.end_date = '0001-01-01';
         }
         try {
-            await updateCredit(id, dataToUpdate);
+            await dataCoordinator.updateCredit(id, dataToUpdate);
             closeModal();
         } catch (err) {
             console.error('Error during edit credit:', err);
@@ -275,7 +276,7 @@ export default function CreditsPage() {
 
     const handleDeleteConfirm = async (id) => {
         try {
-            await deleteCredit(id);
+            await dataCoordinator.deleteCredit(id);
             closeModal();
         } catch (err) {
             console.error('Error during delete credit:', err);

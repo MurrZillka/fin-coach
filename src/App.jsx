@@ -4,14 +4,29 @@ import useAuthStore from './stores/authStore';
 import LayoutWithHeader from './components/LayoutWithHeader';
 import Loader from './components/ui/Loader.jsx';
 import Text from './components/ui/Text.jsx';
-import {initializeStoreCoordinator} from "./storeCoordinator.js";
+import {dataCoordinator} from "./dataCoordinator.js";
 
 function App() {
     const {isAuthenticated, status} = useAuthStore();
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
     useEffect(() => {
-        return initializeStoreCoordinator();
+        // Только подписка на auth, остальное явно
+        const unsubscribe = useAuthStore.subscribe(
+            (state) => state.isAuthenticated,
+            (isAuthenticated, previousIsAuthenticated) => {
+                if (isAuthenticated && !previousIsAuthenticated) {
+                    dataCoordinator.loadAllData();
+                }
+            }
+        );
+
+        // Проверка начального состояния
+        if (useAuthStore.getState().isAuthenticated) {
+            dataCoordinator.loadAllData();
+        }
+
+        return unsubscribe;
     }, []);
 
     useEffect(() => {
