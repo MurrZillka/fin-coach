@@ -123,10 +123,99 @@ async function deleteCredit(id) {
     }
 }
 
-// Экспортируем новые методы
+// Методы для работы с расходами
+async function addSpending(spendingData) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Adding spending...');
+
+        // 1. Добавляем расход
+        const result = await useSpendingsStore.getState().addSpending(spendingData);
+
+        // 2. Обновляем зависимые данные
+        await Promise.all([
+            useBalanceStore.getState().fetchBalance(),
+            useCategoryStore.getState().getCategoriesMonth(), // Месячные категории зависят от расходов
+            useGoalsStore.getState().fetchGoals(),
+            useGoalsStore.getState().getCurrentGoal(),
+            useMainPageStore.getState().fetchRecommendations(),
+            useRemindersStore.getState().fetchTodayReminder(),
+        ]);
+
+        console.log('dataCoordinator: Spending added and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error adding spending:', error);
+        throw error;
+    }
+}
+
+async function updateSpending(id, spendingData) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Updating spending...');
+
+        const result = await useSpendingsStore.getState().updateSpending(id, spendingData);
+
+        // Те же зависимости, что и при добавлении
+        await Promise.all([
+            useBalanceStore.getState().fetchBalance(),
+            useCategoryStore.getState().getCategoriesMonth(),
+            useGoalsStore.getState().fetchGoals(),
+            useGoalsStore.getState().getCurrentGoal(),
+            useMainPageStore.getState().fetchRecommendations(),
+            useRemindersStore.getState().fetchTodayReminder(),
+        ]);
+
+        console.log('dataCoordinator: Spending updated and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error updating spending:', error);
+        throw error;
+    }
+}
+
+async function deleteSpending(id) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Deleting spending...');
+
+        const result = await useSpendingsStore.getState().deleteSpending(id);
+
+        // Те же зависимости
+        await Promise.all([
+            useBalanceStore.getState().fetchBalance(),
+            useCategoryStore.getState().getCategoriesMonth(),
+            useGoalsStore.getState().fetchGoals(),
+            useGoalsStore.getState().getCurrentGoal(),
+            useMainPageStore.getState().fetchRecommendations(),
+            useRemindersStore.getState().fetchTodayReminder(),
+        ]);
+
+        console.log('dataCoordinator: Spending deleted and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error deleting spending:', error);
+        throw error;
+    }
+}
+
+// Обновить экспорт
 export const dataCoordinator = {
     loadAllData,
     addCredit,
     updateCredit,
     deleteCredit,
+    addSpending,
+    updateSpending,
+    deleteSpending,
 };

@@ -8,7 +8,8 @@ import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
 import {isDateTodayOrEarlier} from '../utils/dateUtils.js';
-import SpendingCardList from '../components/mobile/SpendingCardList.jsx'; // Новый импорт
+import SpendingCardList from '../components/mobile/SpendingCardList.jsx';
+import {dataCoordinator} from '../dataCoordinator.js';
 
 // Формируем динамические поля для модалки расходов
 function getSpendingFields(formData, categories) {
@@ -205,8 +206,7 @@ const SpendingTable = ({spendings, categories, handleEditClick, handleDeleteClic
 
 export default function SpendingsPage() {
     const {
-        spendings, loading, error,
-        addSpending, updateSpending, deleteSpending, clearError
+        spendings, loading, error, clearError
     } = useSpendingsStore();
     const {
         categories, loading: categoriesLoading, error: categoriesError,
@@ -314,7 +314,7 @@ export default function SpendingsPage() {
         }
 
         try {
-            await addSpending(dataToSend);
+            await dataCoordinator.addSpending(dataToSend);
             closeModal();
         } catch (err) {
             console.error('Error during add spending:', err);
@@ -333,7 +333,7 @@ export default function SpendingsPage() {
         }
 
         try {
-            await updateSpending(id, dataToUpdate);
+            await dataCoordinator.updateSpending(id, dataToUpdate);
             closeModal();
         } catch (err) {
             console.error('Error during edit spending:', err);
@@ -343,7 +343,7 @@ export default function SpendingsPage() {
 
     const handleDeleteConfirm = async (id) => {
         try {
-            await deleteSpending(id);
+            await dataCoordinator.deleteSpending(id);
             closeModal();
         } catch (err) {
             console.error('Error during delete spending:', err);
