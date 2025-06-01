@@ -8,6 +8,7 @@ import useModalStore from '../stores/modalStore.js';
 import CategoriesCardList from '../components/mobile/CategoriesCardList.jsx';
 import Tooltip from "../components/ui/Tooltip.jsx";
 import {DEFAULT_CATEGORY_NAME} from "../constants/categories.js";
+import {dataCoordinator} from '../dataCoordinator.js';
 
 const categoryFields = [
     {name: 'name', label: 'Название', required: true, type: 'text', placeholder: 'Например: Еда'},
@@ -25,9 +26,6 @@ export default function CategoriesPage() {
         categories,
         loading,
         error,
-        deleteCategory,
-        addCategory,
-        updateCategory,
         clearError
     } = useCategoryStore();
 
@@ -83,7 +81,7 @@ export default function CategoriesPage() {
     const handleAddSubmit = async (formData) => {
         // console.log('CategoriesPage Logic: handleAddSubmit called with data:', formData);
         try {
-            await addCategory(formData);
+            await dataCoordinator.addCategory(formData);
             closeModal();
             // console.log('CategoriesPage Logic: addCategory successful, modal closed.');
         } catch (err) {
@@ -101,7 +99,7 @@ export default function CategoriesPage() {
     const handleEditSubmit = async (id, formData) => {
         // console.log(`CategoriesPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData);
         try {
-            await updateCategory(id, formData);
+            await dataCoordinator.updateCategory(id, formData);
             closeModal();
             // console.log(`CategoriesPage Logic: updateCategory ID ${id} successful, modal closed.`);
         } catch (err) {
@@ -118,7 +116,7 @@ export default function CategoriesPage() {
     const handleDeleteConfirm = async (id) => {
         // console.log(`CategoriesPage Logic: handleDeleteConfirm called for ID: ${id}`);
         try {
-            await deleteCategory(id);
+            await dataCoordinator.deleteCategory(id);
             // console.log(`CategoriesPage Logic: Категория ${id} успешно удалена.`);
             closeModal();
         } catch (err) {

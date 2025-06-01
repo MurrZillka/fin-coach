@@ -306,6 +306,81 @@ async function setCurrentGoal(id) {
     }
 }
 
+// Методы для работы с категориями
+async function addCategory(categoryData) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Adding category...');
+
+        // 1. Добавляем категорию
+        const result = await useCategoryStore.getState().addCategory(categoryData);
+
+        // 2. Обновляем зависимые данные
+        await Promise.all([
+            useSpendingsStore.getState().fetchSpendings(), // Расходы зависят от категорий
+            useCategoryStore.getState().getCategoriesMonth(), // Месячная статистика категорий
+        ]);
+
+        console.log('dataCoordinator: Category added and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error adding category:', error);
+        throw error;
+    }
+}
+
+async function updateCategory(id, categoryData) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Updating category...');
+
+        const result = await useCategoryStore.getState().updateCategory(id, categoryData);
+
+        // Те же зависимости
+        await Promise.all([
+            useSpendingsStore.getState().fetchSpendings(),
+            useCategoryStore.getState().getCategoriesMonth(),
+        ]);
+
+        console.log('dataCoordinator: Category updated and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error updating category:', error);
+        throw error;
+    }
+}
+
+async function deleteCategory(id) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Deleting category...');
+
+        const result = await useCategoryStore.getState().deleteCategory(id);
+
+        // Те же зависимости
+        await Promise.all([
+            useSpendingsStore.getState().fetchSpendings(),
+            useCategoryStore.getState().getCategoriesMonth(),
+        ]);
+
+        console.log('dataCoordinator: Category deleted and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error deleting category:', error);
+        throw error;
+    }
+}
+
+
 // Обновить экспорт
 export const dataCoordinator = {
     loadAllData,
@@ -319,4 +394,7 @@ export const dataCoordinator = {
     updateGoal,
     deleteGoal,
     setCurrentGoal,
+    addCategory,
+    updateCategory,
+    deleteCategory,
 };
