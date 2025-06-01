@@ -7,7 +7,7 @@ import Text from './components/ui/Text.jsx';
 import {initializeStoreCoordinator} from "./storeCoordinator.js";
 
 function App() {
-    const {initAuth, isAuthenticated, status} = useAuthStore();
+    const {isAuthenticated, status} = useAuthStore();
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -23,11 +23,6 @@ function App() {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
-
-    useEffect(() => {
-        console.log("App.jsx: Running initial auth check (initAuth)...");
-        initAuth();
-    }, [initAuth]);
 
     console.log('App.jsx: Rendering, status:', status, 'isAuthenticated:', isAuthenticated);
 
