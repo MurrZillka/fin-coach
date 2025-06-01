@@ -92,3 +92,4 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
 })));
 
 export default useSpendingsStore;
+//todo - разобраться с появлением в модалке подписей к ошибкам в датах.
