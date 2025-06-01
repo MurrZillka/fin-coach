@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { getBalance as fetchBalanceApi } from '../api/balance';
-import { handleBalanceApiError } from '../utils/handleBalanceApiError'; // Нужно создать
+import { handleBalanceApiError } from '../utils/handleBalanceApiError';
 
 const initialState = {
     balance: null,
@@ -30,6 +30,7 @@ const useBalanceStore = create()(subscribeWithSelector((set, get) => ({
             const result = await fetchBalanceApi();
             console.log('balanceStore: API getBalance result:', result);
 
+            // API возвращает { balance: 792502 }
             const { balance } = result.data || {};
             set({ balance: balance || null });
         } catch (error) {
