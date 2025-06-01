@@ -16,44 +16,46 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
     setCredits: (credits) => set({credits}),
     setLoading: (loading) => set({loading}),
     setError: (error) => set({error}),
+    handleError: (error, actionName) => {
+        const processedError = handleCreditApiError(error);
+        set({ error: processedError, loading: false });
+        console.error(`Ошибка ${actionName}:`, error);
+        throw processedError;
+    },
 
     // --- Действия (Actions) ---
     // Действие для загрузки списка доходов
     fetchCredits: async () => {
+        set({loading: true, error: null});
         try {
             const result = await creditAPI.getCredits();
             console.log('creditStore: API getCredits result:', result);
-            set({credits: result.data.Credits || [], loading: false});
+            set({credits: result.data.Credits || []});
         } catch (error) {
-            const processedError = handleCreditApiError(error)
-            set({
-                error: processedError,
-                loading: false
-            });
-            throw processedError;
+            get().handleError(error, 'fetchCredits');
+        } finally {
+            set({loading: false}); // Гарантированно сбросится
         }
     },
 
     // Действие для добавления нового дохода
     addCredit: async (creditData) => {
+        set({loading: true, error: null});
         console.log('creditStore: addCredit started');
         try {
             const result = await creditAPI.addCredit(creditData);
             await get().fetchCredits();
             return result.data;
         } catch (error) {
-            const processedError = handleCreditApiError(error)
-            set({
-                error: processedError,
-                loading: false
-            });
-            console.error('Непредвиденная ошибка addCredit:', error);
-            throw processedError;
+            get().handleError(error, 'addCredit')
+        } finally {
+            set({loading: false}); // Гарантированно сбросится
         }
     },
 
     // Действие для обновления дохода по ID
     updateCredit: async (id, creditData) => {
+        set({loading: true, error: null});
         console.log('creditStore: updateCredit started');
         try {
             const result = await creditAPI.updateCreditById(id, creditData);
@@ -61,17 +63,15 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
             await get().fetchCredits();
             return result.data;
         } catch (error) {
-            const processedError = handleCreditApiError(error)
-            set({
-                error: processedError,
-                loading: false
-            });
-            throw processedError;
+            get().handleError(error, 'updateCredit')
+        } finally {
+            set({loading: false}); // Гарантированно сбросится
         }
     },
 
     // Действие для удаления дохода по ID
     deleteCredit: async (id) => {
+        set({loading: true, error: null});
         console.log('creditStore: deleteCredit started');
         try {
             const result = await creditAPI.deleteCreditById(id);
@@ -79,13 +79,9 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
             await get().fetchCredits();
             return result.data;
         } catch (error) {
-            console.error('Непредвиденная ошибка deleteCredit:', error);
-            const processedError = handleCreditApiError(error)
-            set({
-                error: processedError,
-                loading: false
-            });
-            throw processedError;
+            get().handleError(error, 'deleteCredit')
+        } finally {
+            set({loading: false}); // Гарантированно сбросится
         }
     },
     // Действие для сброса состояния стора доходов (используется при выходе пользователя)
