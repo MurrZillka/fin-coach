@@ -7,7 +7,8 @@ import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline';
 import useGoalsStore from '../stores/goalsStore';
 import useModalStore from '../stores/modalStore.js';
 import useBalanceStore from '../stores/balanceStore';
-import GoalsCardList from '../components/mobile/GoalsCardList.jsx'; // Убедись, что путь корректен
+import GoalsCardList from '../components/mobile/GoalsCardList.jsx';
+import {dataCoordinator} from '../dataCoordinator.js';
 
 const goalFields = [
     {
@@ -26,8 +27,6 @@ export default function GoalsPage() {
     const {
         goals, loading, error,
         currentGoal,
-        addGoal, updateGoal, deleteGoal,
-        setCurrentGoalById,
         clearError,
     } = useGoalsStore();
 
@@ -113,7 +112,7 @@ export default function GoalsPage() {
     const handleAddSubmit = async (formData) => {
         // console.log('GoalsPage Logic: handleAddSubmit called with data:', formData);
         try {
-            await addGoal(formData);
+            await dataCoordinator.addGoal(formData);
             closeModal();
             // console.log('GoalsPage Logic: addGoal store action finished successfully.');
         } catch (err) {
@@ -126,7 +125,7 @@ export default function GoalsPage() {
     const handleEditSubmit = async (id, formData) => {
         // console.log(`GoalsPage Logic: handleEditSubmit called for ID: ${id} with data:`, formData);
         try {
-            await updateGoal(id, formData);
+            await dataCoordinator.updateGoal(id, formData);
             closeModal();
             // console.log(`GoalsPage Logic: updateGoal store action finished successfully for ID: ${id}.`);
             // eslint-disable-next-line no-unused-vars
@@ -140,7 +139,7 @@ export default function GoalsPage() {
     const handleDeleteConfirm = async (id) => {
         // console.log(`GoalsPage Logic: handleDeleteConfirm called for ID: ${id}`);
         try {
-            await deleteGoal(id);
+            await dataCoordinator.deleteGoal(id);
             // console.log(`GoalsPage Logic: deleteGoal store action finished for ID: ${id}.`);
             closeModal();
             // console.log(`GoalsPage Logic: handleDeleteConfirm finished.`);
@@ -154,7 +153,7 @@ export default function GoalsPage() {
     const handleSetCurrentConfirm = async (id) => {
         // console.log(`GoalsPage Logic: handleSetCurrentConfirm called for ID: ${id}`);
         try {
-            await setCurrentGoalById(id);
+            await dataCoordinator.setCurrentGoalById(id);
             // console.log(`GoalsPage Logic: setCurrentGoal store action finished for ID: ${id}.`);
             closeModal();
             // console.log(`GoalsPage Logic: handleSetCurrentConfirm finished.`);

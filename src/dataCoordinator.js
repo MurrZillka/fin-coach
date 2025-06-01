@@ -209,6 +209,103 @@ async function deleteSpending(id) {
     }
 }
 
+// После методов для расходов добавить:
+
+// Методы для работы с целями
+async function addGoal(goalData) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Adding goal...');
+
+        // 1. Добавляем цель
+        const result = await useGoalsStore.getState().addGoal(goalData);
+
+        // 2. Обновляем зависимые данные
+        // Цели довольно независимы, но могут влиять на рекомендации
+        await Promise.all([
+            useMainPageStore.getState().fetchRecommendations(),
+        ]);
+
+        console.log('dataCoordinator: Goal added and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error adding goal:', error);
+        throw error;
+    }
+}
+
+async function updateGoal(id, goalData) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Updating goal...');
+
+        const result = await useGoalsStore.getState().updateGoal(id, goalData);
+
+        // Те же зависимости, что и при добавлении
+        await Promise.all([
+            useMainPageStore.getState().fetchRecommendations(),
+        ]);
+
+        console.log('dataCoordinator: Goal updated and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error updating goal:', error);
+        throw error;
+    }
+}
+
+async function deleteGoal(id) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Deleting goal...');
+
+        const result = await useGoalsStore.getState().deleteGoal(id);
+
+        // Те же зависимости
+        await Promise.all([
+            useMainPageStore.getState().fetchRecommendations(),
+        ]);
+
+        console.log('dataCoordinator: Goal deleted and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error deleting goal:', error);
+        throw error;
+    }
+}
+
+async function setCurrentGoal(id) {
+    if (!isUserAuthenticated()) {
+        throw new Error('User not authenticated');
+    }
+
+    try {
+        console.log('dataCoordinator: Setting current goal...');
+
+        const result = await useGoalsStore.getState().setCurrentGoalById(id);
+
+        // При установке текущей цели могут измениться рекомендации
+        await Promise.all([
+            useMainPageStore.getState().fetchRecommendations(),
+        ]);
+
+        console.log('dataCoordinator: Current goal set and dependencies updated');
+        return result;
+    } catch (error) {
+        console.error('dataCoordinator: Error setting current goal:', error);
+        throw error;
+    }
+}
+
 // Обновить экспорт
 export const dataCoordinator = {
     loadAllData,
@@ -218,4 +315,8 @@ export const dataCoordinator = {
     addSpending,
     updateSpending,
     deleteSpending,
+    addGoal,
+    updateGoal,
+    deleteGoal,
+    setCurrentGoal,
 };
