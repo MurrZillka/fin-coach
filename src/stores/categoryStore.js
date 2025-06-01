@@ -3,10 +3,13 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as categoryAPI from '../api/categories/index';
 import { handleCategoryApiError } from '../utils/handleCategoryApiError';
+import { CHART_COLORS } from '../constants/colors';
 
 const initialState = {
     categories: null,
     categoriesMonth: null,
+    categoryColorMap: {},
+    nextColorIndex: 0,
     loading: false,
     error: null,
 };
@@ -16,6 +19,8 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
     ...initialState,
     setCategories: (categories) => set({ categories }),
     etCategoriesMonth: (categoriesMonth) => set({ categoriesMonth }),
+    setCategoryColorMap: (categoryColorMap) => set({ categoryColorMap }),
+    setNextColorIndex: (nextColorIndex) => set({ nextColorIndex }),
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
     handleError: (error, actionName) => {
@@ -34,6 +39,7 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
 
             const { Categories: categories } = result.data || {};
             set({ categories: categories || [] });
+            get()._updateCategoryColorMap(categories);
         } catch (error) {
             get().handleError(error, 'fetchCategories');
         } finally {
@@ -99,6 +105,22 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
         } finally {
             set({ loading: false });
         }
+    },
+
+    _updateCategoryColorMap: (allCategories) => {
+        const currentMap = get().categoryColorMap;
+        let currentIndex = get().nextColorIndex;
+        const updatedMap = { ...currentMap };
+
+        allCategories.forEach(category => {
+            if (!updatedMap[category.name]) {
+                updatedMap[category.name] = CHART_COLORS[currentIndex % CHART_COLORS.length];
+                currentIndex++;
+            }
+        });
+
+        set({ categoryColorMap: updatedMap, nextColorIndex: currentIndex });
+        console.log('categoryStore: categoryColorMap updated', updatedMap);
     },
 
     resetCategories: () => {
