@@ -39,7 +39,7 @@ function resetAll() {
         useCategoryStore.getState().resetCategories();
         useGoalsStore.getState().resetGoals();
         useCategoryStore.getState().getCategoriesMonth();
-        // useMainPageStore.getState().resetRecommendations();
+        useMainPageStore.getState().resetRecommendations();
     } catch (error) {
         console.error('storeCoordinator: Error in resetAll:', error);
     }

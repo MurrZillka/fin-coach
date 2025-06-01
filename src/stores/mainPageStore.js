@@ -1,74 +1,54 @@
+// src/stores/mainPageStore.js
 import { create } from 'zustand';
-import * as mainPageAPI from '../api/recommendations/index'; // Путь к API-слою
-import useAuthStore from './authStore';
+import { subscribeWithSelector } from 'zustand/middleware';
+import * as mainPageAPI from '../api/recommendations/index';
+import { handleMainPageApiError } from '../utils/handleMainPageApiError';
 
-const useMainPageStore = create((set, get) => ({
-    // Состояние
+const initialState = {
     recommendations: null,
     loading: false,
     error: null,
+};
 
-    // Вспомогательная функция: Получение токена
-    getToken: () => {
-        const token = useAuthStore.getState().user?.access_token;
-        if (!token) {
-            const authError = { message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.' };
-            set({ error: authError, loading: false });
-            console.error('Ошибка аутентификации в mainPageStore:', authError);
-            return null;
-        }
-        return token;
+const useMainPageStore = create()(subscribeWithSelector((set, get) => ({
+    // --- Состояние (State) ---
+    ...initialState,
+    setRecommendations: (recommendations) => set({ recommendations }),
+    setLoading: (loading) => set({ loading }),
+    setError: (error) => set({ error }),
+    handleError: (error, actionName) => {
+        const processedError = handleMainPageApiError(error);
+        set({ error: processedError, loading: false });
+        console.error(`Ошибка ${actionName}:`, error);
+        throw processedError;
     },
 
-    // Действие: Загрузка рекомендаций
+    // --- Действия (Actions) ---
     fetchRecommendations: async () => {
-        console.log('mainPageStore: fetchRecommendations started');
-        if (!get().loading) {
-            set({ loading: true, error: null });
-        } else {
-            set({ error: null });
-        }
-
-        const token = get().getToken();
-        if (!token) {
-            console.log('mainPageStore: fetchRecommendations - No token, stopping fetch.');
-            if (!get().loading) set({ loading: false });
-            return;
-        }
-        console.log('mainPageStore: fetchRecommendations - Token found, proceeding with API call.');
-
+        set({ loading: true, error: null });
         try {
-            const result = await mainPageAPI.getRecommendations(token);
+            const result = await mainPageAPI.getRecommendations();
             console.log('mainPageStore: API getRecommendations result:', result);
 
-            if (result.error) {
-                set({ error: result.error, loading: false });
-                console.error('Ошибка загрузки рекомендаций от API:', result.error);
-            } else {
-                set({ recommendations: result.data.Recommendations || [], loading: false });
-            }
+            // API возвращает { Recommendations: [...] }
+            const { Recommendations: recommendations = [] } = result.data || {};
+            set({ recommendations });
         } catch (error) {
-            const unexpectedError = { message: error.message || 'Произошла непредвиденная ошибка при загрузке рекомендаций.' };
-            set({ error: unexpectedError, loading: false });
-            console.error('Непредвиденная ошибка fetchRecommendations:', error);
+            get().handleError(error, 'fetchRecommendations');
         } finally {
-            console.log('mainPageStore: fetchRecommendations finished.');
+            set({ loading: false });
         }
     },
 
-    // Действие: Загрузка финансового обзора
-
-    // Действие: Сброс состояния стора
     resetMainPage: () => {
         console.log('mainPageStore: resetMainPage called.');
-        set({ recommendations: null, loading: false, error: null });
+        set(initialState);
     },
 
-    // Действие: Сброс ошибки
     clearError: () => {
         console.log('mainPageStore: clearError called.');
         set({ error: null });
     },
-}));
+})));
 
 export default useMainPageStore;
