@@ -62,12 +62,12 @@ const useAuthStore = create()(
             set({status: 'loading'});
             try {
                 await logoutApi();
-                set({status: 'succeeded'});
+                // Ничего не делаем в try
             } catch (error) {
                 set({status: 'failed', error: error});
                 get().handleError(error);
             } finally {
-                get().resetAuthState();
+                get().resetAuthState(); // Только один set() в конце
             }
         },
 
