@@ -1,17 +1,13 @@
 // src/pages/CategoriesPage.jsx
-import {useEffect} from 'react';
-import {PencilIcon, TrashIcon, InformationCircleIcon} from '@heroicons/react/24/outline';
+import {InformationCircleIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
 import Text from '../components/ui/Text';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
-// --- НОВЫЙ ИМПОРТ: Мобильный компонент для карточек категорий ---
 import CategoriesCardList from '../components/mobile/CategoriesCardList.jsx';
 import Tooltip from "../components/ui/Tooltip.jsx";
-// --- Конец НОВОГО ИМПОРТА ---
-
-const DEFAULT_CATEGORY_NAME = 'Разное';
+import {DEFAULT_CATEGORY_NAME} from "../constants/categories.js";
 
 const categoryFields = [
     {name: 'name', label: 'Название', required: true, type: 'text', placeholder: 'Например: Еда'},
@@ -29,7 +25,6 @@ export default function CategoriesPage() {
         categories,
         loading,
         error,
-        fetchCategories,
         deleteCategory,
         addCategory,
         updateCategory,
@@ -37,16 +32,6 @@ export default function CategoriesPage() {
     } = useCategoryStore();
 
     const {openModal, closeModal, setModalSubmissionError, modalType} = useModalStore(); // <-- ДОБАВЛЕНО setModalSubmissionError, modalType
-
-
-    useEffect(() => {
-        if (categories === null && !loading) {
-            // console.log('CategoriesPage: useEffect triggered, fetching categories.');
-            fetchCategories();
-        } else {
-            // console.log('CategoriesPage: useEffect triggered, fetch skipped. Categories:', categories === null ? 'null' : 'loaded', 'Loading:', loading);
-        }
-    }, [fetchCategories, categories, loading]);
 
 
     const handleAddClick = () => {
@@ -79,7 +64,6 @@ export default function CategoriesPage() {
                 useCategoryStore.getState().clearError(); // Очищаем ошибку в categoryStore
             }
         });
-        // console.log('CategoriesPage: Edit button clicked for category ID:', category.id, ', openModal called.');
     };
 
     const handleDeleteClick = (id) => {
@@ -93,7 +77,6 @@ export default function CategoriesPage() {
             onConfirm: () => handleDeleteConfirm(id),
             confirmText: 'Удалить',
         });
-        // console.log('CategoriesPage: Delete button clicked for category ID:', id, ', openModal called.');
     };
 
 
@@ -145,13 +128,6 @@ export default function CategoriesPage() {
         }
         // console.log(`CategoriesPage Logic: handleDeleteConfirm finished for ID: ${id}.`);
     };
-
-    useEffect(() => {
-        return () => {
-            // console.log('CategoriesPage: useEffect cleanup, clearing error.');
-            clearError();
-        }
-    }, [clearError]);
 
     const displayError = error;
 
@@ -215,7 +191,8 @@ export default function CategoriesPage() {
                                             className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
                                             <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
                                             <td className="p-4"><Text variant="tdPrimary">{category.name}</Text></td>
-                                            <td className="p-4"><Text variant="tdSecondary">{category.description}</Text></td>
+                                            <td className="p-4"><Text
+                                                variant="tdSecondary">{category.description}</Text></td>
                                             <td className="px-2 py-4 flex gap-1">
                                                 {/* ДОБАВЛЕНО: Условный рендеринг для кнопок редактирования и удаления */}
                                                 {category.name !== DEFAULT_CATEGORY_NAME ? (
@@ -237,7 +214,8 @@ export default function CategoriesPage() {
                                                 ) : (
                                                     // Если это категория по умолчанию, показываем иконку информации с тултипом
                                                     <Tooltip text="Эту категорию нельзя удалить.">
-                                                        <InformationCircleIcon className="h-6 w-6 text-gray-500 cursor-help" />
+                                                        <InformationCircleIcon
+                                                            className="h-6 w-6 text-gray-500 cursor-help"/>
                                                     </Tooltip>
                                                 )}
                                             </td>
