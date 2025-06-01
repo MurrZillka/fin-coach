@@ -170,7 +170,7 @@ export default function Header() {
                                 />
                             ))}
                         </nav>
-                        <Text variant="body" className="text-background">
+                        <Text variant="navLink">
                             {getUserName()}
                         </Text>
                         <IconButton
