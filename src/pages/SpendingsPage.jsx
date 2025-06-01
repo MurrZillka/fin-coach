@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {CheckCircleIcon, XCircleIcon} from '@heroicons/react/24/solid';
 import useSpendingsStore from '../stores/spendingsStore';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
-import { isDateTodayOrEarlier } from '../utils/dateUtils.js';
+import {isDateTodayOrEarlier} from '../utils/dateUtils.js';
 import SpendingCardList from '../components/mobile/SpendingCardList.jsx'; // Новый импорт
 
 // Формируем динамические поля для модалки расходов
@@ -21,11 +21,17 @@ function getSpendingFields(formData, categories) {
     }));
 
     const fields = [
-        { name: 'amount', label: 'Сумма', required: true, type: 'number', placeholder: 'Например: 1500' },
-        { name: 'description', label: 'Описание', required: false, type: 'text', placeholder: 'Например: Продукты из магазина' },
-        { name: 'category_id', label: 'Категория', required: true, type: 'select', options: categoryOptions },
-        { name: 'is_permanent', label: 'Регулярный расход?', required: false, type: 'checkbox' },
-        { name: 'date', label: isPermanent ? 'Дата начала расхода' : 'Дата расхода', required: true, type: 'date' },
+        {name: 'amount', label: 'Сумма', required: true, type: 'number', placeholder: 'Например: 1500'},
+        {
+            name: 'description',
+            label: 'Описание',
+            required: false,
+            type: 'text',
+            placeholder: 'Например: Продукты из магазина'
+        },
+        {name: 'category_id', label: 'Категория', required: true, type: 'select', options: categoryOptions},
+        {name: 'is_permanent', label: 'Регулярный расход?', required: false, type: 'checkbox'},
+        {name: 'date', label: isPermanent ? 'Дата начала расхода' : 'Дата расхода', required: true, type: 'date'},
     ];
 
     if (isPermanent) {
@@ -47,7 +53,7 @@ function getSpendingFields(formData, categories) {
 }
 
 // Компонент таблицы для десктопов
-const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteClick }) => {
+const SpendingTable = ({spendings, categories, handleEditClick, handleDeleteClick}) => {
     return (
         <table className="min-w-full hidden md:table">
             <thead className="bg-secondary-200">
@@ -79,24 +85,34 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                 Container div с flex-wrap для автоматического переноса.
                                 Использован items-baseline для выравнивания по нижней линии текста.
                             */}
-                                    <div className="flex flex-wrap items-baseline mb-1"> {/* Изменено items-start на items-baseline */}
+                                    <div
+                                        className="flex flex-wrap items-baseline mb-1"> {/* Изменено items-start на items-baseline */}
                                         {/* Метка "Разовый платеж:" */}
-                                        <Text variant="tdSecondary" className="text-xs text-gray-600 mr-1 mb-1 whitespace-nowrap">Разовый платеж:</Text>
+                                        <Text variant="tdSecondary"
+                                              className="text-xs text-gray-600 mr-1 mb-1 whitespace-nowrap">Разовый
+                                            платеж:</Text>
                                         {/* Сумма с неразрывным пробелом перед знаком рубля */}
                                         <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                             {typeof spending.amount === 'number'
-                                                ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                ? spending.amount.toLocaleString('ru-RU', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })
                                                 : spending.amount}
                                             {'\u00A0'}₽ {/* Используем \u00A0 для неразрывного пробела */}
                                         </Text>
                                     </div>
                                     {/* Часть "Всего:" (уже использует items-center, которое часто приводит к выравниванию по базовой линии для текста) */}
                                     <div className="flex items-center">
-                                        <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
+                                        <Text variant="tdSecondary"
+                                              className="font-normal text-gray-600 mr-1">Всего:</Text>
                                         {/* Общая сумма с неразрывным пробелом перед знаком рубля */}
                                         <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                             {typeof spending.full_amount === 'number'
-                                                ? spending.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                                ? spending.full_amount.toLocaleString('ru-RU', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })
                                                 : spending.full_amount}
                                             {'\u00A0'}₽ {/* Используем \u00A0 для неразрывного пробела */}
                                         </Text>
@@ -109,7 +125,10 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                     {/* Сумма нерегулярного расхода с неразрывным пробелом */}
                                     <Text variant="tdPrimary" className="text-accent-error font-semibold">
                                         {typeof spending.amount === 'number'
-                                            ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                            ? spending.amount.toLocaleString('ru-RU', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2
+                                            })
                                             : spending.amount}
                                         {'\u00A0'}₽ {/* Используем \u00A0 для неразрывного пробела */}
                                     </Text>
@@ -134,7 +153,8 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                 <div className="flex items-center gap-1">
                                     {isEndedDisplay ? (
                                         <>
-                                            <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-gray-400" />
+                                            <CheckCircleIcon
+                                                className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-gray-400"/>
                                             <Text variant="tdSecondary" className="text-gray-600">
                                                 до {spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01'
                                                 ? new Date(spending.end_date).toLocaleDateString('ru-RU')
@@ -143,7 +163,8 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                         </>
                                     ) : (
                                         <>
-                                            <CheckCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-blue-500" />
+                                            <CheckCircleIcon
+                                                className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-blue-500"/>
                                             <Text variant="tdSecondary" className="text-blue-700">
                                                 расходы продолжаются
                                             </Text>
@@ -152,7 +173,7 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1">
-                                    <XCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-red-300" />
+                                    <XCircleIcon className="h-5 w-5 min-h-[1.25rem] min-w-[1.25rem] text-red-300"/>
                                     <Text variant="tdSecondary">Разовый</Text>
                                 </div>
                             )}
@@ -185,20 +206,18 @@ const SpendingTable = ({ spendings, categories, handleEditClick, handleDeleteCli
 export default function SpendingsPage() {
     const {
         spendings, loading, error,
-        fetchSpendings, addSpending, updateSpending, deleteSpending, clearError
+        addSpending, updateSpending, deleteSpending, clearError
     } = useSpendingsStore();
     const {
         categories, loading: categoriesLoading, error: categoriesError,
-        fetchCategories, clearError: clearCategoriesError
+        clearError: clearCategoriesError
     } = useCategoryStore();
-    const { openModal, closeModal, submissionError, setModalSubmissionError, modalType } = useModalStore();
-
-    // n
+    const {openModal, closeModal, submissionError, setModalSubmissionError, modalType} = useModalStore();
 
     const handleAddClick = () => {
         clearError();
         clearCategoriesError();
-        const initialData = { is_permanent: false, is_finished: false, date: '', end_date: '' };
+        const initialData = {is_permanent: false, is_finished: false, date: '', end_date: ''};
         openModal('addSpending', {
             title: 'Добавить расход',
             fields: getSpendingFields(initialData, categories),
@@ -206,7 +225,7 @@ export default function SpendingsPage() {
             onSubmit: handleAddSubmit,
             submitText: 'Добавить',
             onFieldChange: (name, value, prevFormData) => {
-                const newFormData = { ...prevFormData, [name]: value };
+                const newFormData = {...prevFormData, [name]: value};
                 if (name === 'is_permanent') {
                     if (!value) {
                         newFormData.is_finished = false;
@@ -245,7 +264,7 @@ export default function SpendingsPage() {
             onSubmit: (formData) => handleEditSubmit(spending.id, formData),
             submitText: 'Сохранить изменения',
             onFieldChange: (name, value, prevFormData) => {
-                const newFormData = { ...prevFormData, [name]: value };
+                const newFormData = {...prevFormData, [name]: value};
                 if (name === 'is_permanent') {
                     if (!value) {
                         newFormData.is_finished = false;
@@ -269,7 +288,7 @@ export default function SpendingsPage() {
         clearCategoriesError();
         const spendingDescription = spending.description || `с ID ${spending.id}`;
         const formattedAmount = typeof spending.amount === 'number'
-            ? spending.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            ? spending.amount.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2})
             : spending.amount;
         const message = `Вы уверены, что хотите удалить расход "${spendingDescription}" на сумму ${formattedAmount} ₽?`;
 
@@ -285,7 +304,7 @@ export default function SpendingsPage() {
     };
 
     const handleAddSubmit = async (formData) => {
-        const dataToSend = { ...formData };
+        const dataToSend = {...formData};
         if (dataToSend.is_permanent) {
             if (!dataToSend.is_finished) {
                 dataToSend.end_date = '0001-01-01';
@@ -304,7 +323,7 @@ export default function SpendingsPage() {
     };
 
     const handleEditSubmit = async (id, formData) => {
-        const dataToUpdate = { ...formData };
+        const dataToUpdate = {...formData};
         if (dataToUpdate.is_permanent) {
             if (!dataToUpdate.is_finished) {
                 dataToUpdate.end_date = '0001-01-01';
@@ -328,7 +347,7 @@ export default function SpendingsPage() {
             closeModal();
         } catch (err) {
             console.error('Error during delete spending:', err);
-            useSpendingsStore.getState().setError({ message: err.message || 'Ошибка при удалении расхода.' });
+            useSpendingsStore.getState().setError({message: err.message || 'Ошибка при удалении расхода.'});
             closeModal();
         }
     };

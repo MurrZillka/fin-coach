@@ -7,17 +7,8 @@ export default function PageNotFound() {
     const navigate = useNavigate();
     const { isAuthenticated, isInitializing } = useAuthStore(); // Получаем состояние аутентификации
 
-    // Используем useEffect для автоматического перенаправления,
-    // если хотим, чтобы кнопка была "Назад на главную" или типа того.
-    // Если нужна именно кнопка, то просто onClick на ней.
-    // Для дипломной работы можно сделать просто кнопку, которая при клике будет решать, куда навигировать.
-    // Давай сделаем кнопку, так будет проще и понятнее для диплома.
-
     const handleGoHomeClick = () => {
         if (isInitializing) {
-            // Если инициализация еще идет, не делаем ничего или показываем лоадер.
-            // В реальном приложении можно было бы подождать.
-            // Для простоты дипломной работы, если сюда дошли, скорее всего, isInitializing уже false.
             console.log('PageNotFound: Authentication initialization in progress, cannot redirect yet.');
             return;
         }
