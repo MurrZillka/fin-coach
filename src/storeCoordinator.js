@@ -40,6 +40,7 @@ function resetAll() {
         useGoalsStore.getState().resetGoals();
         useCategoryStore.getState().getCategoriesMonth();
         useMainPageStore.getState().resetRecommendations();
+        useRemindersStore.getState().resetReminders()
     } catch (error) {
         console.error('storeCoordinator: Error in resetAll:', error);
     }

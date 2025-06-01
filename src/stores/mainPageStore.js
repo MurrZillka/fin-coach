@@ -40,7 +40,7 @@ const useMainPageStore = create()(subscribeWithSelector((set, get) => ({
         }
     },
 
-    resetMainPage: () => {
+    resetRecommendations: () => {
         console.log('mainPageStore: resetMainPage called.');
         set(initialState);
     },
