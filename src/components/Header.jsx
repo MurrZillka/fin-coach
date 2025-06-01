@@ -1,5 +1,5 @@
 // src/components/Header.jsx
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import useRemindersStore from '../stores/remindersStore';
 import useModalStore from '../stores/modalStore';
@@ -7,14 +7,17 @@ import Text from './ui/Text';
 import IconButton from './ui/IconButton';
 import NavLinkItem from './ui/NavLinkItem';
 import MobileMenu from './ui/MobileMenu';
-import {ArrowRightStartOnRectangleIcon} from '@heroicons/react/24/outline';
-import ReminderButton from "./ui/ReminderButton.jsx";
+import ReminderButton from './ui/ReminderButton.jsx';
+import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
+import { APP_NAME, NAVIGATION_LINKS } from '../constants/navigation';
+import { createReminderModalProps } from '../utils/reminderModal';
 
 export default function Header() {
     const navigate = useNavigate();
-    const {isAuthenticated, logout} = useAuthStore();
+    const { isAuthenticated, logout } = useAuthStore();
 
-    const { needRemind, loading } = useRemindersStore();
+    const needRemind = useRemindersStore(state => state.todayReminder?.TodayRemind?.need_remind);
+    const reminderLoading = useRemindersStore(state => state.loading);
     const clearError = useRemindersStore(state => state.clearError);
     const openModal = useModalStore(state => state.openModal);
 
@@ -26,53 +29,27 @@ export default function Header() {
     const handleLogout = () => {
         logout();
         console.log('Header: Logout triggered.');
-        navigate('/login', {replace: true});
+        navigate('/login', { replace: true });
     };
 
     const handleReminderClick = () => {
         console.log('Header: Reminder icon clicked. Opening reminder modal.');
         clearError();
-
-        openModal(
-            'reminderNotification',
-            {
-                title: 'Важное напоминание!',
-                message: 'Пора обновить доходы и расходы, иначе может нарушиться точность учета финансов.',
-                confirmText: 'Внести расходы',
-                cancelText: 'Внести доходы',
-                onConfirm: () => {
-                    navigate('/spendings');
-                },
-                onCancel: () => {
-                    navigate('/credits');
-                },
-                thirdButtonText: 'Закрыть',
-                onThirdButtonClick: () => {
-                }
-            }
-        );
+        openModal('reminderNotification', createReminderModalProps(navigate));
     };
-
-    const links = [
-        {path: '/main', label: 'Главная'},
-        {path: '/categories', label: 'Категории'},
-        {path: '/spendings', label: 'Расходы'},
-        {path: '/credits', label: 'Доходы'},
-        {path: '/goals', label: 'Цели'},
-    ];
 
     return (
         <header className="bg-secondary-800 text-background p-4 shadow-md h-[64px]">
             <div className="max-w-7xl mx-auto flex justify-between items-center h-full">
                 {/* Логотип */}
                 <Text variant="h1" className="md:text-xl">
-                    Financial Coach
+                    {APP_NAME}
                 </Text>
 
                 <div className="flex justify-center md:flex-grow md:justify-end ml-4">
                     <ReminderButton
                         needRemind={needRemind}
-                        isLoading={loading}
+                        isLoading={reminderLoading}
                         onClick={handleReminderClick}
                     />
                 </div>
@@ -81,7 +58,7 @@ export default function Header() {
                 {isAuthenticated && (
                     <div className="hidden md:flex items-center space-x-4">
                         <nav className="flex items-center space-x-4">
-                            {links.map((link) => (
+                            {NAVIGATION_LINKS.map((link) => (
                                 <NavLinkItem
                                     key={link.path}
                                     to={link.path}
@@ -104,7 +81,7 @@ export default function Header() {
                 {/* Мобильное меню */}
                 {isAuthenticated && (
                     <MobileMenu
-                        links={links}
+                        links={NAVIGATION_LINKS}
                         userName={getUserName()}
                         onLogout={handleLogout}
                         hasReminder={needRemind}

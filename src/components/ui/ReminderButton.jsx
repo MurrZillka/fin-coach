@@ -44,7 +44,7 @@ export default function ReminderButton({
                 ? 'text-red-400 animate-pulse border-red-500 border-2'
                 : 'text-yellow-300 border-red-500 border-2 border-opacity-0'
             }
-                rounded-full p-1 hover:text-red-500 hover:border-red-500 
+                rounded-sm p-1 hover:text-red-500 hover:border-red-500 
                 transition-all duration-100 cursor-pointer
                 ${className}
             `}
