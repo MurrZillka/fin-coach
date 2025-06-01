@@ -35,7 +35,7 @@ function resetAll() {
     useBalanceStore.getState().resetBalance();
     useCreditStore.getState().resetCredits();
     useSpendingsStore.getState().resetSpendings();
-    // useCategoryStore.getState().resetCategories();
+    useCategoryStore.getState().resetCategories();
     // useGoalsStore.getState().resetGoals();
     // useMainPageStore.getState().resetRecommendations();
     } catch (error) {
