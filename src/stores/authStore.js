@@ -1,6 +1,7 @@
 import {create} from 'zustand';
 import {subscribeWithSelector} from 'zustand/middleware';
 import {login as loginApi, signup as signupApi, logout as logoutApi} from '../api/auth';
+import {handleAuthApiError} from "../utils/handleAuthApiError.js";
 
 const useAuthStore = create()(
     subscribeWithSelector((set, get) => ({
@@ -26,8 +27,9 @@ const useAuthStore = create()(
         },
 
         handleError: (error) => {
-            console.error('authStore: Error occurred:', error);
-            set({status: 'failed', error: error});
+            const processedError = handleAuthApiError(error); // Преобразование
+            set({status: 'failed', error: processedError}); // Управление состоянием
+            console.error('authStore: Error occurred:', error); // Логирование
         },
 
         login: async (credentials) => {
@@ -40,7 +42,6 @@ const useAuthStore = create()(
                 set({user: data, isAuthenticated: true, status: 'succeeded', error: null});
                 return data;
             } catch (error) {
-                set({status: 'failed', error: error});
                 get().resetAuthState();
                 get().handleError(error);
                 throw error;
@@ -53,7 +54,6 @@ const useAuthStore = create()(
                 set({status: 'succeeded', error: null});
                 return result.data;
             } catch (error) {
-                set({status: 'failed', error: error});
                 get().handleError(error);
                 throw error;
             }
@@ -64,7 +64,6 @@ const useAuthStore = create()(
                 await logoutApi();
                 // Ничего не делаем в try
             } catch (error) {
-                set({status: 'failed', error: error});
                 get().handleError(error);
             } finally {
                 get().resetAuthState(); // Только один set() в конце
