@@ -25,7 +25,7 @@ function fetchAll() {
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal();
         useMainPageStore.getState().fetchRecommendations();
-    }catch(error) {
+    } catch (error) {
         console.error('storeCoordinator: Error in fetchAll:', error);
     }
 
@@ -33,12 +33,13 @@ function fetchAll() {
 
 function resetAll() {
     try {
-    useBalanceStore.getState().resetBalance();
-    useCreditStore.getState().resetCredits();
-    useSpendingsStore.getState().resetSpendings();
-    useCategoryStore.getState().resetCategories();
-    // useGoalsStore.getState().resetGoals();
-    // useMainPageStore.getState().resetRecommendations();
+        useBalanceStore.getState().resetBalance();
+        useCreditStore.getState().resetCredits();
+        useSpendingsStore.getState().resetSpendings();
+        useCategoryStore.getState().resetCategories();
+        useGoalsStore.getState().resetGoals();
+        useCategoryStore.getState().getCategoriesMonth();
+        // useMainPageStore.getState().resetRecommendations();
     } catch (error) {
         console.error('storeCoordinator: Error in resetAll:', error);
     }
@@ -52,12 +53,11 @@ function updateCreditStore() {
     }
     try {
         useBalanceStore.getState().fetchBalance();
-        useCategoryStore.getState().fetchCategories();
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal();
         useMainPageStore.getState().fetchRecommendations();
         useRemindersStore.getState().fetchTodayReminder();
-    }catch(error) {
+    } catch (error) {
         console.log('storeCoordinator: Error in updateCreditStore:', error);
     }
 }
@@ -70,14 +70,42 @@ function updateSpendingsStore() {
     }
     try {
         useBalanceStore.getState().fetchBalance();
-        useCategoryStore.getState().fetchCategories();
+        // useCategoryStore.getState().fetchCategories();
         useCategoryStore.getState().getCategoriesMonth();
         useGoalsStore.getState().fetchGoals();
         useGoalsStore.getState().getCurrentGoal();
         useMainPageStore.getState().fetchRecommendations();
         useRemindersStore.getState().fetchTodayReminder();
-    }catch(error) {
+    } catch (error) {
         console.log('storeCoordinator: Error in updateSpendingsStore:', error);
+    }
+}
+
+// При изменении категорий - только расходы и месячные категории
+function updateCategoryStore() {
+    if (!isUserAuthenticated()) {
+        console.log('storeCoordinator: User not authenticated, skipping updateCategoryStore');
+        return;
+    }
+    try {
+        useSpendingsStore.getState().fetchSpendings(); // Расходы зависят от категорий
+    } catch (error) {
+        console.log('storeCoordinator: Error in updateCategoryStore:', error);
+    }
+}
+
+// При изменении целей - возможно вообще ничего не обновлять
+function updateGoalsStore() {
+    if (!isUserAuthenticated()) {
+        console.log('storeCoordinator: User not authenticated, skipping updateGoalsStore');
+        return;
+    }
+    try {
+        // Пока оставляем пустым - цели довольно независимы
+        // Возможно только рекомендации зависят от целей?
+        // useMainPageStore.getState().fetchRecommendations();
+    } catch (error) {
+        console.log('storeCoordinator: Error in updateGoalsStore:', error);
     }
 }
 
@@ -116,6 +144,24 @@ export function initializeStoreCoordinator() {
         }
     );
 
+    // Подписка на категории
+    const unsubscribeCategories = useCategoryStore.subscribe(
+        (state) => state.categories,
+        () => {
+            console.log('storeCoordinator: Categories changed, updating dependent stores...');
+            updateCategoryStore();
+        }
+    );
+
+    // Подписка на цели (пока с пустой функцией)
+    const unsubscribeGoals = useGoalsStore.subscribe(
+        (state) => state.goals,
+        () => {
+            console.log('storeCoordinator: Goals changed, updating dependent stores...');
+            updateGoalsStore();
+        }
+    );
+
     // Проверка начального состояния
     const initialIsAuthenticated = useAuthStore.getState().isAuthenticated;
     if (initialIsAuthenticated) {
@@ -130,6 +176,8 @@ export function initializeStoreCoordinator() {
         unsubscribeAuth();
         unsubscribeCredits();
         unsubscribeSpendings();
+        unsubscribeGoals();
+        unsubscribeCategories();
         console.log('storeCoordinator: All subscriptions cleaned up.');
     };
 }
