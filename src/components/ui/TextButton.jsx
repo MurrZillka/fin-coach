@@ -1,20 +1,30 @@
 import { forwardRef } from 'react';
-import Text from './Text';
 
-// Определяем стили для разных вариантов кнопки
-const baseStyles = 'rounded-md px-2 py-1 md:px-3 md:py-2 transition focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed' // Общие стили
+const baseStyles = 'rounded-md transition focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed';
 
-// Определяем стили для фона и текста для каждого варианта
 const variantStyles = {
-    primary: 'bg-primary-600 text-background hover:bg-primary-500 focus:ring-primary-600', // Основной вариант (синий)
-    secondary: 'bg-secondary-500 text-white hover:bg-secondary-800 focus:ring-secondary-500', // Вторичный вариант (серый)
-    error: 'bg-accent-error text-white hover:bg-accent-error/80 focus:ring-accent-error', // Вариант ошибки/опасности (красный)
+    primary: 'bg-primary-600 text-background hover:bg-primary-500 focus:ring-primary-600',
+    secondary: 'bg-secondary-500 text-white hover:bg-secondary-800 focus:ring-secondary-500',
+    error: 'bg-accent-error text-white hover:bg-accent-error/80 focus:ring-accent-error',
 };
 
-const TextButton = forwardRef(({ children, onClick, className = '', disabled = false, type = 'button', variant = 'primary' }, ref) => { // ДОБАВЛЕН проп variant = 'primary'
+const sizeStyles = {
+    sm: 'px-2 py-1 text-sm',
+    md: 'px-2 py-1 md:px-3 md:py-2 text-sm md:text-base',
+    lg: 'px-4 py-2 text-base md:text-lg',
+};
 
-    // Выбираем стили в зависимости от варианта
-    const stylesForVariant = variantStyles[variant] || variantStyles.primary; // Используем variantStyles объект
+const TextButton = forwardRef(({
+                                   children,
+                                   onClick,
+                                   className = '',
+                                   disabled = false,
+                                   type = 'button',
+                                   variant = 'primary',
+                                   size = 'md'
+                               }, ref) => {
+    const variantClass = variantStyles[variant] || variantStyles.primary;
+    const sizeClass = sizeStyles[size] || sizeStyles.md;
 
     return (
         <button
@@ -22,20 +32,13 @@ const TextButton = forwardRef(({ children, onClick, className = '', disabled = f
             onClick={onClick}
             disabled={disabled}
             type={type}
-            // Объединяем базовые стили, стили варианта и дополнительные стили из пропса className
-            className={`${baseStyles} ${stylesForVariant} ${className}`}
+            className={`${baseStyles} ${variantClass} ${sizeClass} ${className}`}
         >
-            {/* Текст внутри компонента Text. Его цвет может быть переопределен классом text-white/text-background на button */}
-            <Text variant="button" className="text-sm md:text-base ">{children}</Text>
+            {children}
         </button>
     );
 });
 
 TextButton.displayName = 'TextButton';
-
-TextButton.defaultProps = {
-    type: 'button',
-    variant: 'primary', // Устанавливаем primary как вариант по умолчанию
-};
 
 export default TextButton;
