@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {CheckCircleIcon, XCircleIcon} from '@heroicons/react/24/solid';
 import useCreditStore from '../stores/creditStore';
 import useModalStore from '../stores/modalStore.js';
 import Loader from "../components/ui/Loader.jsx";
-import { isDateTodayOrEarlier } from "../utils/dateUtils.js";
+import {isDateTodayOrEarlier} from "../utils/dateUtils.js";
 import CreditCardList from '../components/mobile/CreditCardList.jsx'; // Новый импорт
 
 // Динамическое формирование полей (без изменений)
@@ -142,14 +142,8 @@ const CreditTable = ({ credits, handleEditClick, handleDeleteClick, className })
     </table>
 );
 export default function CreditsPage() {
-    const { credits, loading, error, fetchCredits, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
+    const { credits, loading, error, addCredit, updateCredit, deleteCredit, clearError } = useCreditStore();
     const { openModal, closeModal, setModalSubmissionError, modalType } = useModalStore();
-
-    useEffect(() => {
-        if (!loading && credits === null && !error) {
-            fetchCredits();
-        }
-    }, [fetchCredits, loading, credits, error, clearError]);
 
     const handleAddClick = () => {
         clearError();

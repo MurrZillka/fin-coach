@@ -62,7 +62,8 @@ const useAuthStore = create()(
             set({status: 'loading'});
             try {
                 await logoutApi();
-                // Ничего не делаем в try
+                localStorage.setItem('logout_event', Date.now());
+                localStorage.removeItem('logout_event');
             } catch (error) {
                 get().handleError(error);
             } finally {

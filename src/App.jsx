@@ -15,6 +15,23 @@ function App() {
     }, []);
 
     useEffect(() => {
+        const handleStorageChange = (event) => {
+            // Слушаем только событие logout
+            if (event.key === 'logout_event') {
+                console.log('App.jsx: Logout detected in another tab');
+                // Вызываем logout в текущем окне
+                useAuthStore.getState().logout();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+    useEffect(() => {
         const handleResize = () => {
             setScreenWidth(window.innerWidth);
         };
