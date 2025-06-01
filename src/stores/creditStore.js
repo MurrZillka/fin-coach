@@ -1,7 +1,6 @@
 // src/stores/creditStore.js
 import {create} from 'zustand';
 import * as creditAPI from '../api/credit/index';
-import useAuthStore from './authStore';
 import {subscribeWithSelector} from "zustand/middleware";
 
 export const handleCreditApiError = (error) => {
@@ -11,6 +10,11 @@ export const handleCreditApiError = (error) => {
         'spending end_date must be less than current date': 'Дата окончания дохода должна быть не больше текущей даты.',
     };
     const userMessage = translations[error.message] || (error.status >= 400 && error.status < 500 ? 'Ошибка в данных формы. Проверьте введенные значения.' : 'Ошибка связи или сервера. Попробуйте позже.');
+    console.error('handleCreditApiError: Processed error -', {
+        original: error.message,
+        translated: userMessage,
+        status: error.status || 500
+    });
     return {message: userMessage, status: error.status || 500};
 };
 
@@ -23,99 +27,63 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
         setLoading: (loading) => set({loading}),
         setError: (error) => set({error}),
 
-        // --- Вспомогательная функция: Получение токена ---
-        getToken: () => {
-            const token = useAuthStore.getState().user?.access_token;
-            if (!token) {
-                const authError = {message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.'};
-                set({error: authError, loading: false});
-                console.error('Ошибка аутентификации в creditStore:', authError);
-                return null;
-            }
-            return token;
-        },
-
-        checkToken: () => {
-            console.log('creditStore: action started');
-            if (!get().loading) {
-                set({loading: true, error: null});
-            } else {
-                set({error: null});
-            }
-            const token = get().getToken();
-            if (!token) {
-                console.log('creditStore: action - No token, stopping fetch.');
-                set({loading: false});
-                throw new Error('Пользователь не аутентифицирован');
-            }
-            console.log('creditStore: actions - Token found, proceeding with API call.');
-        },
-
-
         // --- Действия (Actions) ---
 
         // Действие для загрузки списка доходов
         fetchCredits: async () => {
-            get().checkToken()
-
             try {
                 const result = await creditAPI.getCredits();
                 console.log('creditStore: API getCredits result:', result);
                 set({credits: result.data.Credits || [], loading: false});
             } catch (error) {
-                handleCreditApiError()
+                const processedError = handleCreditApiError(error)
                 set({
-                    error: error,
+                    error: processedError,
                     loading: false
                 });
+                throw processedError;
             }
         },
 
         // Действие для добавления нового дохода
         addCredit: async (creditData) => {
             console.log('creditStore: addCredit started');
-            get().checkToken()
-
             try {
                 const result = await creditAPI.addCredit(creditData);
                 await get().fetchCredits();
                 return result.data;
             } catch (error) {
-                handleCreditApiError(error)
+                const processedError = handleCreditApiError(error)
                 set({
-                    error: error,
+                    error: processedError,
                     loading: false
                 });
                 console.error('Непредвиденная ошибка addCredit:', error);
-                throw error;
+                throw processedError;
             }
         },
 
         // Действие для обновления дохода по ID
         updateCredit: async (id, creditData) => {
             console.log('creditStore: updateCredit started');
-            get().checkToken()
-
             try {
                 const result = await creditAPI.updateCreditById(id, creditData);
                 console.log('creditStore: API updateCredit result:', result);
                 await get().fetchCredits();
                 return result.data;
             } catch (error) {
-                handleCreditApiError(error)
+                const processedError = handleCreditApiError(error)
                 set({
-                    error: error,
+                    error: processedError,
                     loading: false
                 });
-                throw error;
+                throw processedError;
             }
         },
 
         // Действие для удаления дохода по ID
         deleteCredit: async (id) => {
             console.log('creditStore: deleteCredit started');
-           get().checkToken()
-
             try {
                 const result = await creditAPI.deleteCreditById(id);
                 console.log('creditStore: API deleteCredit result:', result);
@@ -123,8 +91,12 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
                 return result.data;
             } catch (error) {
                 console.error('Непредвиденная ошибка deleteCredit:', error);
-                handleCreditApiError()
-                throw error;
+                const processedError = handleCreditApiError(error)
+                set({
+                    error: processedError,
+                    loading: false
+                });
+                throw processedError;
             }
         },
         // Действие для сброса состояния стора доходов (используется при выходе пользователя)
@@ -144,3 +116,5 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
 ;
 
 export default useCreditStore;
+
+//todo - разобраться с появлением в модалке подписей к ошибкам в датах.

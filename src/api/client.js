@@ -1,31 +1,34 @@
-// src/api/client.js
 import axios from 'axios';
 import { API_BASE_URL } from './config';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     headers: { 'Content-Type': 'application/json' },
-    timeout: 10000, // Таймаут 10 секунд (10000 миллисекунд)
+    timeout: 10000,
 });
 
-// Перехватчик запросов
+const publicEndpoints = ['/signup', '/login']; // Список не защищённых эндпоинтов
+
 apiClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
+        const isPublicEndpoint = publicEndpoints.some(endpoint => config.url.startsWith(endpoint));
+        if (!isPublicEndpoint) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                return Promise.reject({
+                    message: 'Пользователь не аутентифицирован. Пожалуйста, войдите.',
+                    status: 401,
+                });
+            }
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
-// Перехватчик ответов
 apiClient.interceptors.response.use(
     (response) => {
-        // Для успешных ответов возвращаем объект в формате { data, error }
         console.log(`[API Success] ${response.config.method.toUpperCase()} ${response.config.url}`, {
             data: response.data,
         });
@@ -46,7 +49,6 @@ apiClient.interceptors.response.use(
             status,
             response: error.response?.data,
         });
-        // Для ошибок формируем объект с полями error
         return Promise.reject({
             message: errorMessage,
             status: status,
