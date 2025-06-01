@@ -10,50 +10,50 @@ function App() {
     const {initAuth, isAuthenticated, status} = useAuthStore();
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
-            useEffect(() => {
-                return initializeStoreCoordinator();
-        }, []);
+    useEffect(() => {
+        return initializeStoreCoordinator();
+    }, []);
 
-        useEffect(() => {
-            const handleResize = () => {
-                setScreenWidth(window.innerWidth);
-            };
-            window.addEventListener('resize', handleResize);
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenWidth(window.innerWidth);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
-        useEffect(() => {
-            console.log("App.jsx: Running initial auth check (initAuth)...");
-            initAuth();
-        }, [initAuth]);
+    useEffect(() => {
+        console.log("App.jsx: Running initial auth check (initAuth)...");
+        initAuth();
+    }, [initAuth]);
 
-        console.log('App.jsx: Rendering, status:', status, 'isAuthenticated:', isAuthenticated);
+    console.log('App.jsx: Rendering, status:', status, 'isAuthenticated:', isAuthenticated);
 
-        if (screenWidth < 350) {
-            return (
-                <div className="flex items-center justify-center min-h-screen bg-secondary-50 text-center px-4">
-                    <Text variant="h3" className="text-red-600">
-                        Извините, но наше приложение рассчитано на работу с минимальным горизонтальным разрешением
-                        350px.
-                        Войдите, пожалуйста, с другого устройства.
-                    </Text>
-                </div>
-            );
-        }
-
+    if (screenWidth < 350) {
         return (
-            <>
-                {status === 'initializing' ? (
-                    <Loader/>
-                ) : (
-                    <Router>
-                        <LayoutWithHeader/>
-                    </Router>
-                )}
-            </>
+            <div className="flex items-center justify-center min-h-screen bg-secondary-50 text-center px-4">
+                <Text variant="h3" className="text-red-600">
+                    Извините, но наше приложение рассчитано на работу с минимальным горизонтальным разрешением
+                    350px.
+                    Войдите, пожалуйста, с другого устройства.
+                </Text>
+            </div>
         );
     }
 
-    export default App;
+    return (
+        <>
+            {status === 'initializing' ? (
+                <Loader/>
+            ) : (
+                <Router>
+                    <LayoutWithHeader/>
+                </Router>
+            )}
+        </>
+    );
+}
+
+export default App;

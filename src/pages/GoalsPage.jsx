@@ -27,7 +27,7 @@ export default function GoalsPage() {
         goals, loading, error,
         currentGoal,
         fetchGoals, addGoal, updateGoal, deleteGoal,
-        setCurrentGoal, getCurrentGoal,
+        setCurrentGoalById, getCurrentGoal,
         clearError,
     } = useGoalsStore();
 
@@ -200,7 +200,7 @@ export default function GoalsPage() {
     const handleSetCurrentConfirm = async (id) => {
         // console.log(`GoalsPage Logic: handleSetCurrentConfirm called for ID: ${id}`);
         try {
-            await setCurrentGoal(id);
+            await setCurrentGoalById(id);
             // console.log(`GoalsPage Logic: setCurrentGoal store action finished for ID: ${id}.`);
             closeModal();
             // console.log(`GoalsPage Logic: handleSetCurrentConfirm finished.`);
