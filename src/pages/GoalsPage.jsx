@@ -1,5 +1,5 @@
 // src/pages/GoalsPage.jsx
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
 import IconButton from '../components/ui/IconButton';
@@ -26,8 +26,8 @@ export default function GoalsPage() {
     const {
         goals, loading, error,
         currentGoal,
-        fetchGoals, addGoal, updateGoal, deleteGoal,
-        setCurrentGoalById, getCurrentGoal,
+        addGoal, updateGoal, deleteGoal,
+        setCurrentGoalById,
         clearError,
     } = useGoalsStore();
 
@@ -36,52 +36,6 @@ export default function GoalsPage() {
     // --- Конец ДОБАВЛЕННОГО ---
 
     const {openModal, closeModal} = useModalStore();
-
-    // --- ДОБАВЛЕНО: Локальное состояние для отслеживания попытки загрузки текущей цели ---
-    const [hasFetchedCurrentGoal, setHasFetchedCurrentGoal] = useState(false);
-    // --- Конец ДОБАВЛЕННОГО ---
-
-
-    // --- useEffect for initial data fetching ---
-    useEffect(() => {
-        // console.log('GoalsPage: useEffect triggered.'); // Лог триггера useEffect
-
-        // Fetch goals list if not loading and data hasn't been loaded yet and no error
-        if (!loading && goals === null && !error) {
-            // console.log('GoalsPage: Triggering fetchGoals...'); // Лог вызова fetchGoals
-            fetchGoals();
-        } else {
-            // console.log('GoalsPage: fetchGoals skipped. Loading:', loading, 'goals:', goals ? 'loaded' : null, 'error:', !!error); // Лог пропуска
-        }
-
-        // Fetch current goal if not loading, data hasn't been loaded, NO error, AND we haven't attempted fetching it before
-        if (!loading && currentGoal === null && !error && !hasFetchedCurrentGoal) {
-            // console.log('GoalsPage: Triggering getCurrentGoal...'); // Лог вызова getCurrentGoal
-            getCurrentGoal();
-            setHasFetchedCurrentGoal(true); // Устанавливаем флаг сразу
-        } else {
-            // console.log('GoalsPage: getCurrentGoal skipped.',
-            //     'currentGoalLoading:', currentGoalLoading,
-            //     'currentGoal:', currentGoal ? 'loaded' : null,
-            //     'currentGoalError:', !!currentGoalError,
-            //     'hasFetchedCurrentGoal:', hasFetchedCurrentGoal
-            // );
-        }
-
-        // Cleanup effect: clear error states in stores when unmounts
-        return () => {
-            // console.log('GoalsPage: useEffect cleanup.'); // Лог cleanup
-            clearError();
-        };
-    }, [
-        fetchGoals, loading, goals, error,
-        getCurrentGoal, currentGoal,
-        clearError,
-        hasFetchedCurrentGoal,
-        balance, isBalanceLoading // Зависимости для данных, используемых в рендере
-    ]);
-
-
     // --- Handlers for UI actions (opening modals/confirmations) ---
     const handleAddClick = () => {
         // console.log('GoalsPage: Add Goal button clicked');
@@ -412,18 +366,12 @@ export default function GoalsPage() {
                                     handleSetCurrentClick={handleSetCurrentClick}
                                 />
                             ) : (
-                                // Состояние "Нет целей" (для обоих видов, но будет видно только там, где нет таблицы/карточек)
-                                // Поскольку таблица и карточки скрываются при goals === null && !loading,
-                                // этот блок будет виден только в этом случае.
                                 !loading && goals !== null && goals.length === 0 && (
                                     <div className="p-4 text-center">
                                         <Text variant="body">У вас пока нет добавленных целей.</Text>
                                     </div>
                                 )
                             )}
-
-                            {/* Show a general loading/updating indicator only if loading and we already have data (for table/cards) */}
-                            {/* Этот индикатор будет отображаться ПОСЛЕ таблицы ИЛИ карточек, если они уже были загружены ранее */}
                             {loading && goals !== null && goals.length > 0 ? (
                                 <div className="text-center p-4">
                                     <Text variant="body">Обновление списка целей...</Text>
@@ -433,9 +381,6 @@ export default function GoalsPage() {
                         </>
                     )}
                 </div>
-
-                {/* Modal and ConfirmModal components are rendered by LayoutWithHeader */}
-
             </main>
         </div>
     );

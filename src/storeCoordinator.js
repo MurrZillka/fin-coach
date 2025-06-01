@@ -23,6 +23,7 @@ function fetchAll() {
         useCategoryStore.getState().fetchCategories();
         useCategoryStore.getState().getCategoriesMonth();
         useGoalsStore.getState().fetchGoals();
+        useGoalsStore.getState().getCurrentGoal()
         useMainPageStore.getState().fetchRecommendations();
     } catch (error) {
         console.error('storeCoordinator: Error in fetchAll:', error);
