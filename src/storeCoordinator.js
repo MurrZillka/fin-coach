@@ -16,36 +16,67 @@ function fetchAll() {
         console.log('storeCoordinator: User not authenticated, skipping fetchAll');
         return;
     }
-    useBalanceStore.getState().fetchBalance();
-    useCreditStore.getState().fetchCredits();
-    useSpendingsStore.getState().fetchSpendings();
-    useCategoryStore.getState().fetchCategories();
-    useGoalsStore.getState().fetchGoals();
-    useGoalsStore.getState().getCurrentGoal();
-    useMainPageStore.getState().fetchRecommendations();
+    try {
+        useBalanceStore.getState().fetchBalance();
+        useCreditStore.getState().fetchCredits();
+        useSpendingsStore.getState().fetchSpendings();
+        useCategoryStore.getState().fetchCategories();
+        useGoalsStore.getState().fetchGoals();
+        useGoalsStore.getState().getCurrentGoal();
+        useMainPageStore.getState().fetchRecommendations();
+    }catch(error) {
+        console.error('storeCoordinator: Error in fetchAll:', error);
+    }
+
 }
 
 function resetAll() {
+    try {
     useBalanceStore.getState().resetBalance();
     useCreditStore.getState().resetCredits();
-    // useSpendingsStore.getState().resetSpendings();
+    useSpendingsStore.getState().resetSpendings();
     // useCategoryStore.getState().resetCategories();
     // useGoalsStore.getState().resetGoals();
     // useMainPageStore.getState().resetRecommendations();
+    } catch (error) {
+        console.error('storeCoordinator: Error in resetAll:', error);
+    }
 }
 
+// Обновления при изменении кредитов
 function updateCreditStore() {
     if (!isUserAuthenticated()) {
-        console.log('storeCoordinator: User not authenticated, skipping fetchAll');
+        console.log('storeCoordinator: User not authenticated, skipping updateCreditStore');
         return;
     }
-    useBalanceStore.getState().fetchBalance();
-    useSpendingsStore.getState().fetchSpendings();
-    useCategoryStore.getState().fetchCategories();
-    useGoalsStore.getState().fetchGoals();
-    useGoalsStore.getState().getCurrentGoal();
-    useMainPageStore.getState().fetchRecommendations();
-    useRemindersStore.getState().fetchTodayReminder();
+    try {
+        useBalanceStore.getState().fetchBalance();
+        useCategoryStore.getState().fetchCategories();
+        useGoalsStore.getState().fetchGoals();
+        useGoalsStore.getState().getCurrentGoal();
+        useMainPageStore.getState().fetchRecommendations();
+        useRemindersStore.getState().fetchTodayReminder();
+    }catch(error) {
+        console.log('storeCoordinator: Error in updateCreditStore:', error);
+    }
+}
+
+// Обновления при изменении расходов
+function updateSpendingsStore() {
+    if (!isUserAuthenticated()) {
+        console.log('storeCoordinator: User not authenticated, skipping updateSpendingsStore');
+        return;
+    }
+    try {
+        useBalanceStore.getState().fetchBalance();
+        useCategoryStore.getState().fetchCategories();
+        useGoalsStore.getState().fetchGoals();
+        useGoalsStore.getState().getCurrentGoal();
+        useMainPageStore.getState().fetchRecommendations();
+        useRemindersStore.getState().fetchTodayReminder();
+    }catch(error) {
+        console.log('storeCoordinator: Error in updateSpendingsStore:', error);
+    }
 }
 
 export function initializeStoreCoordinator() {
@@ -65,13 +96,21 @@ export function initializeStoreCoordinator() {
         }
     );
 
-    // Подписка на кредиты - убираем лишнюю проверку и исключаем fetchCredits из updateCreditStore
+    // Подписка на кредиты
     const unsubscribeCredits = useCreditStore.subscribe(
         (state) => state.credits,
         () => {
             console.log('storeCoordinator: Credits changed, updating dependent stores...');
-            // Обновляем только зависимые сторы, НЕ сам кредитный стор
             updateCreditStore();
+        }
+    );
+
+    // Подписка на расходы
+    const unsubscribeSpendings = useSpendingsStore.subscribe(
+        (state) => state.spendings,
+        () => {
+            console.log('storeCoordinator: Spendings changed, updating dependent stores...');
+            updateSpendingsStore();
         }
     );
 
@@ -88,6 +127,7 @@ export function initializeStoreCoordinator() {
     return () => {
         unsubscribeAuth();
         unsubscribeCredits();
+        unsubscribeSpendings();
         console.log('storeCoordinator: All subscriptions cleaned up.');
     };
 }

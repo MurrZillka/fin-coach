@@ -1,36 +1,53 @@
+// src/stores/balanceStore.js
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import { getBalance as fetchBalanceApi } from '../api/balance';
+import { handleBalanceApiError } from '../utils/handleBalanceApiError'; // Нужно создать
 
-// Начальное состояние
 const initialState = {
     balance: null,
-    isLoading: false,
+    loading: false,
     error: null,
 };
 
-const useBalanceStore = create((set, get) => ({
+const useBalanceStore = create()(subscribeWithSelector((set, get) => ({
+    // --- Состояние (State) ---
     ...initialState,
+    setBalance: (balance) => set({ balance }),
+    setLoading: (loading) => set({ loading }),
+    setError: (error) => set({ error }),
+    handleError: (error, actionName) => {
+        const processedError = handleBalanceApiError(error);
+        set({ error: processedError, loading: false });
+        console.error(`Ошибка ${actionName}:`, error);
+        throw processedError;
+    },
 
-    // Загрузка баланса
+    // --- Действия (Actions) ---
     fetchBalance: async () => {
-        if (get().isLoading) return; // Пропускаем, если загрузка уже идёт
-
-        set({ isLoading: true, error: null });
+        set({ loading: true, error: null });
         try {
             const result = await fetchBalanceApi();
-            const { data } = result; // Перехватчик вернёт { data, error: null }
-            set({ balance: data.balance, isLoading: false }); // Предполагаем, что data содержит { balance: number }
+            console.log('balanceStore: API getBalance result:', result);
+
+            const { balance } = result.data || {};
+            set({ balance: balance || null });
         } catch (error) {
-            set({ balance: null, isLoading: false, error });
-            console.error('balanceStore: Failed to fetch balance:', error); // Добавляем логирование
-            throw error;
+            get().handleError(error, 'fetchBalance');
+        } finally {
+            set({ loading: false });
         }
     },
 
-    // Сброс состояния
     resetBalance: () => {
+        console.log('balanceStore: resetBalance called.');
         set(initialState);
     },
-}));
+
+    clearError: () => {
+        console.log('balanceStore: clearError called.');
+        set({ error: null });
+    },
+})));
 
 export default useBalanceStore;

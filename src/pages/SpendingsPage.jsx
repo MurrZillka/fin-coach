@@ -43,7 +43,6 @@ function getSpendingFields(formData, categories) {
             disabled: !isFinished,
         });
     }
-
     return fields;
 }
 
@@ -194,20 +193,7 @@ export default function SpendingsPage() {
     } = useCategoryStore();
     const { openModal, closeModal, submissionError, setModalSubmissionError, modalType } = useModalStore();
 
-    useEffect(() => {
-        if (!loading && spendings === null) fetchSpendings();
-        if (!categoriesLoading && categories === null) fetchCategories();
-        return () => {
-            clearError();
-            clearCategoriesError();
-            setModalSubmissionError(null);
-        };
-    }, [
-        fetchSpendings, loading, spendings,
-        fetchCategories, categoriesLoading, categories,
-        clearError, clearCategoriesError,
-        setModalSubmissionError
-    ]);
+    // n
 
     const handleAddClick = () => {
         clearError();

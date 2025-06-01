@@ -82,54 +82,54 @@ export default function MainPage() {
 
 
     // useEffect для запуска загрузки данных при монтировании компонента
-    useEffect(() => {
-        if (!spendingsLoading && spendings === null) {
-            console.log('MainPage useEffect: Fetching spendings...');
-            fetchSpendings();
-        }
-        if (!creditsLoading && credits === null) {
-            console.log('MainPage useEffect: Fetching credits (will also fetch balance)...');
-            fetchCredits();
-        }
-        if (!goalsLoading && goals === null) {
-            console.log('MainPage useEffect: Fetching goals...');
-            fetchGoals();
-        }
-        if (!mainPageLoading && recommendations === null && !mainPageError) {
-            console.log('MainPage useEffect: Fetching recommendations...');
-            fetchRecommendations();
-        }
-        if (!mainPageLoading && financialEntries === null && !mainPageError) {
-            console.log('MainPage useEffect: Fetching financial overview...');
-            fetchFinancialOverview();
-        }
-
-        // Запускаем загрузку categoriesMonthSummary, она нужна для модалки, даже если виджет не отображается
-        if (!categoriesMonthLoading && categoriesMonthSummary === null) {
-            console.log('MainPage useEffect: Fetching categories month summary...');
-            fetchCategoriesMonthSummary();
-        }
-
-        // --- ДОБАВЛЕНО: Загрузка всех категорий ---
-        if (!categoriesLoading && categories === null) {
-            console.log('MainPage useEffect: Fetching all categories...');
-            fetchCategories();
-        }
-        // --- Конец ДОБАВЛЕНО ---
-
-        console.log('MainPage useEffect finished checks.');
-
-    }, [
-        fetchSpendings, spendings, spendingsLoading,
-        fetchCredits, credits, creditsLoading,
-        fetchGoals, goals, goalsLoading,
-        fetchBalance, balance, isBalanceLoading,
-        fetchRecommendations, recommendations,
-        fetchFinancialOverview, financialEntries,
-        mainPageLoading, mainPageError,
-        fetchCategoriesMonthSummary, categoriesMonthSummary, categoriesMonthLoading,
-        fetchCategories, categories, categoriesLoading // ДОБАВЛЕНО: Зависимости для категорий
-    ]);
+    // useEffect(() => {
+    //     if (!spendingsLoading && spendings === null) {
+    //         console.log('MainPage useEffect: Fetching spendings...');
+    //         fetchSpendings();
+    //     }
+    //     if (!creditsLoading && credits === null) {
+    //         console.log('MainPage useEffect: Fetching credits (will also fetch balance)...');
+    //         fetchCredits();
+    //     }
+    //     if (!goalsLoading && goals === null) {
+    //         console.log('MainPage useEffect: Fetching goals...');
+    //         fetchGoals();
+    //     }
+    //     if (!mainPageLoading && recommendations === null && !mainPageError) {
+    //         console.log('MainPage useEffect: Fetching recommendations...');
+    //         fetchRecommendations();
+    //     }
+    //     if (!mainPageLoading && financialEntries === null && !mainPageError) {
+    //         console.log('MainPage useEffect: Fetching financial overview...');
+    //         fetchFinancialOverview();
+    //     }
+    //
+    //     // Запускаем загрузку categoriesMonthSummary, она нужна для модалки, даже если виджет не отображается
+    //     if (!categoriesMonthLoading && categoriesMonthSummary === null) {
+    //         console.log('MainPage useEffect: Fetching categories month summary...');
+    //         fetchCategoriesMonthSummary();
+    //     }
+    //
+    //     // --- ДОБАВЛЕНО: Загрузка всех категорий ---
+    //     if (!categoriesLoading && categories === null) {
+    //         console.log('MainPage useEffect: Fetching all categories...');
+    //         fetchCategories();
+    //     }
+    //     // --- Конец ДОБАВЛЕНО ---
+    //
+    //     console.log('MainPage useEffect finished checks.');
+    //
+    // }, [
+    //     fetchSpendings, spendings, spendingsLoading,
+    //     fetchCredits, credits, creditsLoading,
+    //     fetchGoals, goals, goalsLoading,
+    //     fetchBalance, balance, isBalanceLoading,
+    //     fetchRecommendations, recommendations,
+    //     fetchFinancialOverview, financialEntries,
+    //     mainPageLoading, mainPageError,
+    //     fetchCategoriesMonthSummary, categoriesMonthSummary, categoriesMonthLoading,
+    //     fetchCategories, categories, categoriesLoading // ДОБАВЛЕНО: Зависимости для категорий
+    // ]);
 
     // Определяем, полностью ли данные пустые для приветственного сообщения
     // Теперь hasAnyData будет проверять наличие данных в allTimeCategoriesSummary
