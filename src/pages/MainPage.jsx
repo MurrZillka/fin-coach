@@ -1,54 +1,45 @@
-import React, {useEffect, useState, useMemo} from 'react';
-// Импортируем компоненты UI
+import React, {useMemo, useState} from 'react';
 import Text from '../components/ui/Text';
-// Импортируем компонент Loader для плавной загрузки
 import Loader from '../components/ui/Loader';
-
 import RecommendationsModal from '../components/ui/RecommendationsModal.jsx';
 
-// --- НОВЫЕ ИМПОРТЫ: Виджет и Модалка для распределения категорий ---
 import CategoryDistributionWidget from '../components/widgets/CategoryDistributionWidget.jsx';
 import CategoryDistributionChartModal from '../components/charts/CategoryDistributionChartModal.jsx';
-// --- Конец НОВЫХ ИМПОРТОВ ---
-
-// Импортируем сторы для получения данных
 import useSpendingsStore from '../stores/spendingsStore';
 import useCreditStore from '../stores/creditStore';
 import useGoalsStore from '../stores/goalsStore';
 import useBalanceStore from '../stores/balanceStore';
-// Импортируем стор для главной страницы (рекомендации, обзор)
 import useMainPageStore from '../stores/mainPageStore';
-// Импортируем useModalStore для проверки modalType при отображении ошибок
 import useModalStore from '../stores/modalStore';
 import useCategoryStore from '../stores/categoryStore'; // Импортируем useCategoryStore
-
 import TextButton from '../components/ui/TextButton';
 
-// Импортируем разработанные компоненты виджетов
 import RecentIncomeWidget from '../components/widgets/RecentIncomeWidget.jsx';
 import RecentExpenseWidget from '../components/widgets/RecentExpenseWidget.jsx';
 import GoalsSummaryWidget from '../components/widgets/GoalsSummaryWidget.jsx';
-// Импортируем компонент графика
 import IncomeExpenseChart from '../components/charts/IncomeExpenseChart.jsx';
 import {useNavigate} from "react-router-dom";
 import {aggregateSpendingsByCategory} from "../utils/spendingAggregator.js";
 
 
 export default function MainPage() {
-    // Получаем данные и статусы загрузки из сторов
-    const {spendings, loading: spendingsLoading, fetchSpendings, error: spendingsError} = useSpendingsStore();
-    const {credits, loading: creditsLoading, fetchCredits, error: creditsError} = useCreditStore();
-    const {goals, currentGoal, loading: goalsLoading, fetchGoals, error: goalsError} = useGoalsStore();
-    const {balance, isLoading: isBalanceLoading, fetchBalance, error: balanceError} = useBalanceStore();
+    const {spendings, loading: spendingsLoading, error: spendingsError} = useSpendingsStore();
+    const {credits, loading: creditsLoading, error: creditsError} = useCreditStore();
+    const {goals, currentGoal, loading: goalsLoading, error: goalsError} = useGoalsStore();
+    const {balance, isLoading: isBalanceLoading, error: balanceError} = useBalanceStore();
     // Получаем из стора Main Page (рекомендации, обзор)
     const {
         recommendations, financialEntries,
         loading: mainPageLoading, error: mainPageError,
-        fetchRecommendations, fetchFinancialOverview
     } = useMainPageStore();
 
     // Получаем данные из categoryStore, включая все категории
-    const { categoriesMonthSummary, loading: categoriesMonthLoading, fetchCategoriesMonthSummary, categories, loading: categoriesLoading, fetchCategories } = useCategoryStore();
+    const {
+        categoriesMonthSummary,
+        loading: categoriesMonthLoading,
+        categories,
+        loading: categoriesLoading,
+    } = useCategoryStore();
 
     // Получаем modalType из useModalStore для правильного отображения ошибок
     const {modalType} = useModalStore();
@@ -73,66 +64,10 @@ export default function MainPage() {
         console.log('allTimeCategoriesSummary useMemo: Number of unique categories:', Object.keys(summary).length);
         return summary;
     }, [spendings, categories]); // Пересчитываем только когда spendings ИЛИ categories меняются
-// --- Конец ИЗМЕНЕНИЙ ---
-    // --- Конец ДОБАВЛЕНО/ИЗМЕНЕНИЙ ---
 
 
     // Определяем, идет ли какая-либо загрузка основных данных для страницы
     const isLoadingData = spendingsLoading || creditsLoading || goalsLoading || isBalanceLoading || mainPageLoading || categoriesMonthLoading || categoriesLoading;
-
-
-    // useEffect для запуска загрузки данных при монтировании компонента
-    // useEffect(() => {
-    //     if (!spendingsLoading && spendings === null) {
-    //         console.log('MainPage useEffect: Fetching spendings...');
-    //         fetchSpendings();
-    //     }
-    //     if (!creditsLoading && credits === null) {
-    //         console.log('MainPage useEffect: Fetching credits (will also fetch balance)...');
-    //         fetchCredits();
-    //     }
-    //     if (!goalsLoading && goals === null) {
-    //         console.log('MainPage useEffect: Fetching goals...');
-    //         fetchGoals();
-    //     }
-    //     if (!mainPageLoading && recommendations === null && !mainPageError) {
-    //         console.log('MainPage useEffect: Fetching recommendations...');
-    //         fetchRecommendations();
-    //     }
-    //     if (!mainPageLoading && financialEntries === null && !mainPageError) {
-    //         console.log('MainPage useEffect: Fetching financial overview...');
-    //         fetchFinancialOverview();
-    //     }
-    //
-    //     // Запускаем загрузку categoriesMonthSummary, она нужна для модалки, даже если виджет не отображается
-    //     if (!categoriesMonthLoading && categoriesMonthSummary === null) {
-    //         console.log('MainPage useEffect: Fetching categories month summary...');
-    //         fetchCategoriesMonthSummary();
-    //     }
-    //
-    //     // --- ДОБАВЛЕНО: Загрузка всех категорий ---
-    //     if (!categoriesLoading && categories === null) {
-    //         console.log('MainPage useEffect: Fetching all categories...');
-    //         fetchCategories();
-    //     }
-    //     // --- Конец ДОБАВЛЕНО ---
-    //
-    //     console.log('MainPage useEffect finished checks.');
-    //
-    // }, [
-    //     fetchSpendings, spendings, spendingsLoading,
-    //     fetchCredits, credits, creditsLoading,
-    //     fetchGoals, goals, goalsLoading,
-    //     fetchBalance, balance, isBalanceLoading,
-    //     fetchRecommendations, recommendations,
-    //     fetchFinancialOverview, financialEntries,
-    //     mainPageLoading, mainPageError,
-    //     fetchCategoriesMonthSummary, categoriesMonthSummary, categoriesMonthLoading,
-    //     fetchCategories, categories, categoriesLoading // ДОБАВЛЕНО: Зависимости для категорий
-    // ]);
-
-    // Определяем, полностью ли данные пустые для приветственного сообщения
-    // Теперь hasAnyData будет проверять наличие данных в allTimeCategoriesSummary
     const hasAnyData =
         (spendings !== null && spendings.length > 0) ||
         (credits !== null && credits.length > 0) ||
@@ -198,11 +133,6 @@ export default function MainPage() {
         categories: categories?.length // ДОБАВЛЕНО: Добавили категории в лог
     });
 
-    // --- ИЗМЕНЕНО: Логика для отображения виджета аналитики по категориям ---
-    // Условие:
-    // 1. spendings НЕ null (данные о расходах загружены).
-    // 2. categories НЕ null (данные о категориях загружены).
-    // 3. И количество уникальных категорий с расходами "за все время" БОЛЬШЕ или РАВНО двум.
     const showCategoryDistributionWidget =
         spendings !== null &&
         categories !== null && // ДОБАВЛЕНО: Проверяем, что категории загружены
