@@ -58,6 +58,16 @@ const useAuthStore = create()(
                 throw error;
             }
         },
+        logoutLocal: () => {
+            // Только сброс состояния, без API-запроса
+            set({
+                user: null,
+                isAuthenticated: false,
+                status: 'idle',
+                error: null
+            });
+            localStorage.removeItem('token');
+        },
         logout: async () => {
             set({status: 'loading'});
             try {

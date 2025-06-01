@@ -35,7 +35,7 @@ function App() {
             if (event.key === 'logout_event') {
                 console.log('App.jsx: Logout detected in another tab');
                 // Вызываем logout в текущем окне
-                useAuthStore.getState().logout();
+                useAuthStore.getState().logoutLocal();
             }
         };
 
