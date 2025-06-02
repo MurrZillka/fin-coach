@@ -1,21 +1,13 @@
 // src/components/ui/Modal.jsx
-import {useState, useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import Text from './Text';
 import Input from './Input';
 import TextButton from './TextButton';
 import Tooltip from './Tooltip';
-import PropTypes from 'prop-types';
 import {XMarkIcon} from '@heroicons/react/24/outline';
 import IconButton from './IconButton';
-// --- Корректный путь импорта и перенос в начало файла ---
 import useModalStore from '../../stores/modalStore';
-// --- Конец ИСПРАВЛЕНИЯ ---
-
-// --- Определяем propTypes для опций выпадающего списка (такое же определение, как в Input.jsx) ---
-const optionShape = PropTypes.shape({
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    label: PropTypes.string.isRequired,
-});
+import {clearServerFieldErrors, mapServerErrorToFieldError} from "../../utils/fieldErrorMapping.js";
 
 const Modal = ({
                    isOpen,
@@ -90,79 +82,19 @@ const Modal = ({
 
     // --- ЭФФЕКТ ДЛЯ ОБРАБОТКИ submissionError И УСТАНОВКИ ЛОКАЛЬНЫХ ОШИБОК ПОЛЕЙ ---
     useEffect(() => {
-        // Точные сообщения об ошибке валидации дат, которые мы ожидаем от сторов (уже на русском)
-        const dateValidationErrorRussianSpending = 'Дата окончания расхода должна быть больше или равна дате начала расхода.'; // Для расходов
-        const dateValidationErrorCreditRussian = 'Дата окончания кредита должна быть больше или равна дате начала.'; // Для доходов
-        const dateValidationErrorCreditStartDateRussian = 'Дата дохода должна быть не больше текущей'; // Для доходов (дата начала > текущей)
-        const startDateValidationErrorRussianSpending = 'Дата расхода должна быть не больше текущей'; // Для расходов (дата начала > текущей)
-        // НОВОЕ: Русский перевод ошибки для end_date дохода
-        const endDateGreaterThanCurrentDateRussianCredit = 'Дата окончания дохода должна быть не больше текущей даты.';
-        const categoryNameUniqueError = 'Категория с таким именем уже существует. Выберите другое, пожалуйста.';
-
-
-        if (submissionError) {
-            // Проверяем, является ли submissionError одним из ожидаемых сообщений об ошибке дат
-            // Теперь включаем все специфические ошибки дат (для расходов и доходов)
-            if (submissionError === dateValidationErrorRussianSpending ||
-                submissionError === dateValidationErrorCreditRussian ||
-                submissionError === dateValidationErrorCreditStartDateRussian ||
-                submissionError === startDateValidationErrorRussianSpending ||
-                submissionError === 'Дата окончания расхода должна быть не больше текущей даты.' || // Это ошибка для расходов, которую мы уже добавили ранее
-                submissionError === endDateGreaterThanCurrentDateRussianCredit ||
-                submissionError === categoryNameUniqueError
-            ) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
-
-                setErrors(prevErrors => {
-                    const newErrors = {...prevErrors};
-
-                    // Очищаем предыдущие ошибки дат, установленные этим эффектом, чтобы избежать дублирования
-                    if (newErrors.date === 'Проверьте дату') delete newErrors.date;
-                    if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
-                    if (newErrors.name === 'Измените имя категории') delete newErrors.name;
-
-                    // Устанавливаем ошибку для поля 'date', если submissionError соответствует ошибкам начальной даты
-                    if (submissionError === dateValidationErrorCreditStartDateRussian ||
-                        submissionError === startDateValidationErrorRussianSpending) {
-                        newErrors.date = 'Проверьте дату';
-                    }
-
-                    // Устанавливаем ошибку для поля 'end_date', если submissionError соответствует ошибкам конечной даты
-                    if (submissionError === dateValidationErrorRussianSpending ||
-                        submissionError === dateValidationErrorCreditRussian ||
-                        submissionError === 'Дата окончания расхода должна быть не больше текущей даты.' ||
-                        submissionError === endDateGreaterThanCurrentDateRussianCredit) { // <-- ДОБАВЛЕНО: Новая ошибка для доходов
-                        newErrors.end_date = 'Проверьте дату';
-                    }
-                    if (submissionError === categoryNameUniqueError) {
-                        newErrors.name = 'Измените имя категории'; // Устанавливаем специфичное сообщение как ошибку для поля 'name'
-                    }
-
-                    return newErrors;
-                });
-            } else {
-                // Если это какая-то другая submissionError, убедимся, что предыдущие ошибки дат сброшены
-                setErrors(prevErrors => {
-                    const newErrors = {...prevErrors};
-                    if (newErrors.date === 'Проверьте дату') delete newErrors.date;
-                    if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
-                    if (newErrors.name === categoryNameUniqueError) delete newErrors.name; // <-- ДОБАВЛЕНО
-                    return newErrors;
-                });
+        if (submissionError?.field) {
+            const fieldError = mapServerErrorToFieldError(submissionError);
+            if (fieldError) {
+                setErrors(prev => ({
+                    ...prev,
+                    [fieldError.field]: fieldError.message
+                }));
             }
-        } else {
-            // Если submissionError стал null (успешный сабмит, закрытие модалки),
-            // очищаем ошибки для полей даты, если они были установлены этим эффектом.
-            setErrors(prevErrors => {
-                const newErrors = {...prevErrors};
-                if (newErrors.date === 'Проверьте дату') delete newErrors.date;
-                if (newErrors.end_date === 'Проверьте дату') delete newErrors.end_date;
-                if (newErrors.name === categoryNameUniqueError) delete newErrors.name; // <-- ДОБАВЛЕНО
-                return newErrors;
-            });
+        } else if (submissionError === null) {
+            // Очищаем только серверные ошибки полей
+            setErrors(prev => clearServerFieldErrors(prev));
         }
-    }, [submissionError]); // Запускать эффект при изменении submissionError
-    // --- КОНЕЦ ЭФФЕКТА ---
-    // --- КОНЕЦ ЭФФЕКТА ---
+    }, [submissionError]);
 
     useEffect(() => {
         const handleEscapeKey = (event) => {
@@ -382,9 +314,8 @@ const Modal = ({
                 </div>
                 {/* Блок общей ошибки с сервера */} {/* <--- Исправлено здесь */}
                 {submissionError && (
-                    <div
-                        className="mb-4 py-2 px-3 bg-red-100 text-sm border rounded-md text-[var(--color-form-error)] border-[var(--color-form-error)]">
-                        {submissionError}
+                    <div className="mb-4 py-2 px-3 bg-red-100 text-sm border rounded-md text-[var(--color-form-error)] border-[var(--color-form-error)]">
+                        {submissionError.message || submissionError}  {/* ✅ Рендерим только строку */}
                     </div>
                 )}
                 {/* Форма */}
@@ -435,48 +366,4 @@ const Modal = ({
         </div>
     );
 };
-
-Modal.propTypes = {
-    isOpen: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
-    title: PropTypes.string.isRequired,
-    fields: PropTypes.arrayOf(PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired,
-        required: PropTypes.bool,
-        type: PropTypes.string,
-        placeholder: PropTypes.string,
-        tooltip: PropTypes.string,
-        disabled: PropTypes.bool,
-        options: (props, propName, componentName, location, propFullName) => {
-            if (props.type === 'select') {
-                if (!props[propName] || !Array.isArray(props[propName])) {
-                    return new Error(
-                        `Invalid prop \`${propFullName}\` supplied to \`${componentName}\`. ` +
-                        `\`options\` is required and must be an array of objects when \`type\` is 'select'.`
-                    );
-                }
-                for (let i = 0; i < props[propName].length; i++) {
-                    // Use optionShape directly
-                    const error = optionShape(props[propName], i, componentName, location, `${propFullName}[${i}]`);
-                    if (error) return error;
-                }
-            }
-            return null;
-        },
-    })).isRequired,
-    initialData: PropTypes.object,
-    onSubmit: PropTypes.func.isRequired,
-    submitText: PropTypes.string,
-    onFieldChange: PropTypes.func,
-    submissionError: PropTypes.string, // --- PropType для ошибки отправки ---
-};
-
-Modal.defaultProps = {
-    initialData: {},
-    submitText: 'Сохранить',
-    submissionError: null, // --- Значение по умолчанию ---
-};
-
-
 export default Modal;

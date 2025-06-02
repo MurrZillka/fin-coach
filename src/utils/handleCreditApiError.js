@@ -1,14 +1,52 @@
+// src/utils/handleCreditApiError.js
 export const handleCreditApiError = (error) => {
-    const translations = {
-        'credit end_date must be greater than credit date': 'Дата окончания дохода должна быть больше или равна дате начала.',
-        'credit date must be less than current date': 'Дата дохода должна быть не больше текущей',
-        'spending end_date must be less than current date': 'Дата окончания дохода должна быть не больше текущей даты.',
+    const errorMappings = {
+        'credit end_date must be greater than credit date': {
+            message: 'Дата окончания дохода должна быть больше или равна дате начала.',
+            field: 'end_date'
+        },
+        'credit date must be less than current date': {
+            message: 'Дата дохода должна быть не больше текущей',
+            field: 'date'
+        },
+        'spending end_date must be less than current date': {
+            message: 'Дата окончания дохода должна быть не больше текущей даты.',
+            field: 'end_date'
+        }
     };
-    const userMessage = translations[error.message] || (error.status >= 400 && error.status < 500 ? 'Ошибка в данных формы. Проверьте введенные значения.' : 'Ошибка связи или сервера. Попробуйте позже.');
+
+    const mapping = errorMappings[error.message];
+
+    if (mapping) {
+        console.error('handleCreditApiError: Processed error -', {
+            original: error.message,
+            translated: mapping.message,
+            field: mapping.field,
+            status: error.status || 400
+        });
+
+        return {
+            message: mapping.message,
+            field: mapping.field,
+            status: error.status || 400
+        };
+    }
+
+    // Общие ошибки без привязки к полю
+    const userMessage = error.status >= 400 && error.status < 500
+        ? 'Ошибка в данных формы. Проверьте введенные значения.'
+        : 'Ошибка связи или сервера. Попробуйте позже.';
+
     console.error('handleCreditApiError: Processed error -', {
         original: error.message,
         translated: userMessage,
+        field: null,
         status: error.status || 500
     });
-    return {message: userMessage, status: error.status || 500};
+
+    return {
+        message: userMessage,
+        field: null,
+        status: error.status || 500
+    };
 };

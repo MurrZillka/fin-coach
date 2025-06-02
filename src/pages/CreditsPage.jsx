@@ -231,6 +231,7 @@ export default function CreditsPage() {
     };
 
     const handleAddSubmit = async (formData) => {
+        // ✅ Логика обработки дат остается
         const dataToSend = { ...formData };
         if (dataToSend.is_permanent) {
             if (!dataToSend.is_exhausted) {
@@ -239,20 +240,26 @@ export default function CreditsPage() {
         } else {
             dataToSend.end_date = '0001-01-01';
         }
+
         try {
-            await dataCoordinator.addCredit(formData);
+            await dataCoordinator.addCredit(dataToSend); // ← Используем dataToSend, не formData
             closeModal();
         } catch (err) {
             console.error('Error during add credit:', err);
-            const errorMessage = err.message === 'Failed to add credit'
-                ? 'Ошибка связи или сервера. Попробуйте позже.'
-                : err.message || 'Ошибка при добавлении дохода.';
-            setModalSubmissionError(errorMessage);
+
+            // ✅ Новая логика обработки ошибок
+            if (err.field) {
+                setModalSubmissionError(err);
+            } else {
+                setModalSubmissionError({ message: err.message, field: null });
+            }
+
             useCreditStore.getState().clearError();
         }
     };
 
     const handleEditSubmit = async (id, formData) => {
+        // ✅ Логика обработки дат остается
         const dataToUpdate = { ...formData };
         if (dataToUpdate.is_permanent) {
             if (!dataToUpdate.is_exhausted) {
@@ -261,15 +268,20 @@ export default function CreditsPage() {
         } else {
             dataToUpdate.end_date = '0001-01-01';
         }
+
         try {
-            await dataCoordinator.updateCredit(id, dataToUpdate);
+            await dataCoordinator.updateCredit(id, dataToUpdate); // ← Используем dataToUpdate
             closeModal();
         } catch (err) {
             console.error('Error during edit credit:', err);
-            const errorMessage = err.message === 'Failed to update credit'
-                ? 'Ошибка связи или сервера. Попробуйте позже.'
-                : err.message || 'Ошибка при сохранении изменений.';
-            setModalSubmissionError(errorMessage);
+
+            // ✅ Новая логика обработки ошибок
+            if (err.field) {
+                setModalSubmissionError(err);
+            } else {
+                setModalSubmissionError({ message: err.message, field: null });
+            }
+
             useCreditStore.getState().clearError();
         }
     };

@@ -67,6 +67,7 @@ const useAuthStore = create()(
                 error: null
             });
             localStorage.removeItem('token');
+            localStorage.removeItem('name');
         },
         logout: async () => {
             set({status: 'loading'});
