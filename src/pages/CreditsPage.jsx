@@ -11,6 +11,8 @@ import ActionsCell from "../components/ui/cells/ActionsCell.jsx";
 import Table from "../components/ui/Table.jsx";
 import CreditStatusCell from "../components/ui/cells/CreditStatusCell.jsx";
 import TextButton from "../components/ui/TextButton.jsx";
+import {useDateFormatting} from "../hooks/useDateFormatting.js";
+import {useFinancialData} from "../hooks/useFinancialData.js";
 
 // Динамическое формирование полей (без изменений)
 function getCreditFields(formData) {
@@ -57,6 +59,8 @@ function getCreditFields(formData) {
 export default function CreditsPage() {
     const {credits, loading, error, clearError} = useCreditStore();
     const {openModal, closeModal, setModalSubmissionError, modalType} = useModalStore();
+    const { prepareInitialData } = useDateFormatting();
+    const { prepareDataForSubmit } = useFinancialData();
 
     const handleAddClick = () => {
         clearError();
@@ -88,16 +92,8 @@ export default function CreditsPage() {
 
     const handleEditClick = (credit) => {
         clearError();
-        const initialData = {
-            ...credit,
-            date: (credit.date && credit.date !== '0001-01-01T00:00:00Z' && credit.date !== '0001-01-01')
-                ? new Date(credit.date).toISOString().split('T')[0]
-                : '',
-            end_date: (credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01')
-                ? new Date(credit.end_date).toISOString().split('T')[0]
-                : '',
-            is_exhausted: !!credit.end_date && credit.end_date !== '0001-01-01T00:00:00Z' && credit.end_date !== '0001-01-01',
-        };
+        const initialData = prepareInitialData(credit, 'is_exhausted');
+
         openModal('editCredit', {
             title: 'Редактировать доход',
             fields: getCreditFields(initialData),
@@ -144,14 +140,7 @@ export default function CreditsPage() {
 
     const handleAddSubmit = async (formData) => {
         // ✅ Логика обработки дат остается
-        const dataToSend = {...formData};
-        if (dataToSend.is_permanent) {
-            if (!dataToSend.is_exhausted) {
-                dataToSend.end_date = '0001-01-01';
-            }
-        } else {
-            dataToSend.end_date = '0001-01-01';
-        }
+        const dataToSend = prepareDataForSubmit(formData, 'is_exhausted');
 
         try {
             await dataCoordinator.addCredit(dataToSend); // ← Используем dataToSend, не formData
@@ -172,14 +161,7 @@ export default function CreditsPage() {
 
     const handleEditSubmit = async (id, formData) => {
         // ✅ Логика обработки дат остается
-        const dataToUpdate = {...formData};
-        if (dataToUpdate.is_permanent) {
-            if (!dataToUpdate.is_exhausted) {
-                dataToUpdate.end_date = '0001-01-01';
-            }
-        } else {
-            dataToUpdate.end_date = '0001-01-01';
-        }
+        const dataToUpdate = prepareDataForSubmit(formData, 'is_exhausted');
 
         try {
             await dataCoordinator.updateCredit(id, dataToUpdate); // ← Используем dataToUpdate

@@ -13,6 +13,8 @@ import DateCell from "../components/ui/cells/DateCell.jsx";
 import SpendingStatusCell from "../components/ui/cells/SpendingStatusCell.jsx";
 import ActionsCell from "../components/ui/cells/ActionsCell.jsx";
 import Table from "../components/ui/Table.jsx";
+import {useDateFormatting} from "../hooks/useDateFormatting.js";
+import {useFinancialData} from "../hooks/useFinancialData.js";
 
 // Формируем динамические поля для модалки расходов
 function getSpendingFields(formData, categories) {
@@ -65,6 +67,8 @@ export default function SpendingsPage() {
         clearError: clearCategoriesError
     } = useCategoryStore();
     const {openModal, closeModal, submissionError, setModalSubmissionError, modalType} = useModalStore();
+    const { prepareInitialData } = useDateFormatting();
+    const { prepareDataForSubmit } = useFinancialData();
 
     const handleAddClick = () => {
         clearError();
@@ -99,16 +103,8 @@ export default function SpendingsPage() {
     const handleEditClick = (spending) => {
         clearError();
         clearCategoriesError();
-        const initialData = {
-            ...spending,
-            date: (spending.date && spending.date !== '0001-01-01' && spending.date !== '0001-01-01T00:00:00Z')
-                ? new Date(spending.date).toISOString().split('T')[0]
-                : '',
-            end_date: (spending.end_date && spending.end_date !== '0001-01-01' && spending.end_date !== '0001-01-01T00:00:00Z')
-                ? new Date(spending.end_date).toISOString().split('T')[0]
-                : '',
-            is_finished: !!spending.end_date && spending.end_date !== '0001-01-01T00:00:00Z' && spending.end_date !== '0001-01-01',
-        };
+        const initialData = prepareInitialData(spending, 'is_finished');
+
         openModal('editSpending', {
             title: 'Редактировать расход',
             fields: getSpendingFields(initialData, categories),
@@ -156,15 +152,7 @@ export default function SpendingsPage() {
     };
 
     const handleAddSubmit = async (formData) => {
-        const dataToSend = {...formData};
-        if (dataToSend.is_permanent) {
-            if (!dataToSend.is_finished) {
-                dataToSend.end_date = '0001-01-01';
-            }
-        } else {
-            dataToSend.end_date = '0001-01-01';
-        }
-
+        const dataToSend = prepareDataForSubmit(formData, 'is_finished');
         try {
             await dataCoordinator.addSpending(dataToSend);
             closeModal();
@@ -183,14 +171,7 @@ export default function SpendingsPage() {
     };
 
     const handleEditSubmit = async (id, formData) => {
-        const dataToUpdate = {...formData};
-        if (dataToUpdate.is_permanent) {
-            if (!dataToUpdate.is_finished) {
-                dataToUpdate.end_date = '0001-01-01';
-            }
-        } else {
-            dataToUpdate.end_date = '0001-01-01';
-        }
+        const dataToUpdate = prepareDataForSubmit(formData, 'is_finished');
 
         try {
             await dataCoordinator.updateSpending(id, dataToUpdate);
