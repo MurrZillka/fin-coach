@@ -283,7 +283,7 @@ async function deleteGoal(id) {
     }
 }
 
-async function setCurrentGoal(id) {
+async function setCurrentGoalById(id) {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -393,7 +393,7 @@ export const dataCoordinator = {
     addGoal,
     updateGoal,
     deleteGoal,
-    setCurrentGoal,
+    setCurrentGoalById,
     addCategory,
     updateCategory,
     deleteCategory,

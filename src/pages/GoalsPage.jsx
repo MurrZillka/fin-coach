@@ -2,13 +2,16 @@
 import React from 'react';
 import Text from '../components/ui/Text';
 import TextButton from '../components/ui/TextButton';
-import IconButton from '../components/ui/IconButton';
-import {PencilIcon, StarIcon, TrashIcon} from '@heroicons/react/24/outline';
 import useGoalsStore from '../stores/goalsStore';
 import useModalStore from '../stores/modalStore.js';
 import useBalanceStore from '../stores/balanceStore';
 import GoalsCardList from '../components/mobile/GoalsCardList.jsx';
 import {dataCoordinator} from '../dataCoordinator.js';
+import GoalDescriptionCell from "../components/ui/cells/GoalDescriptionCell.jsx";
+import CurrencyCell from "../components/ui/cells/CurrencyCell.jsx";
+import DateCell from "../components/ui/cells/DateCell.jsx";
+import GoalActionsCell from "../components/ui/cells/GoalActionsCell.jsx";
+import Table from "../components/ui/Table.jsx";
 
 const goalFields = [
     {
@@ -169,13 +172,150 @@ export default function GoalsPage() {
     // Determine if a general error message should be displayed
     const displayError = error;
 
+    const goalColumns = [
+        {
+            key: 'description',
+            header: 'Описание',
+            component: GoalDescriptionCell,
+            props: {currentGoal, balance},
+            cellClassName: 'p-4'
+        },
+        {
+            key: 'amount',
+            header: 'Сумма',
+            component: CurrencyCell,
+            props: {field: 'amount', variant: 'tdSecondary'},
+            cellClassName: 'p-4'
+        },
+        {
+            key: 'wish_date',
+            header: 'Желаемая дата',
+            component: DateCell,
+            props: {field: 'wish_date', variant: 'tdSecondary'},
+            cellClassName: 'px-2 py-4'
+        },
+        {
+            key: 'actions',
+            header: 'Действия',
+            component: GoalActionsCell,
+            props: {
+                currentGoal,
+                onEdit: handleEditClick,
+                onDelete: handleDeleteClick,
+                onSetCurrent: handleSetCurrentClick
+            },
+            cellClassName: 'px-2 py-4'
+        }
+    ];
 
     // --- Rendering ---
+    const renderCurrentGoalSection = () => {
+        if (loading || isBalanceLoading) {
+            return (
+                <div className="text-blue-700">
+                    <Text variant="body">Загрузка текущей цели и баланса...</Text>
+                </div>
+            );
+        }
+
+        if (currentGoal) {
+            return (
+                <div className="flex items-center flex-wrap gap-x-4">
+                    <Text variant="body" className="font-semibold">{currentGoal.description}</Text>
+                    <Text variant="body">
+                        Сумма: {typeof currentGoal.amount === 'number'
+                        ? currentGoal.amount.toLocaleString('ru-RU', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        })
+                        : currentGoal.amount} ₽
+                    </Text>
+                    {currentGoal.wish_date && currentGoal.wish_date !== "0001-01-01T00:00:00Z" && (
+                        <Text variant="body">
+                            Желаемая дата: {new Date(currentGoal.wish_date).toLocaleDateString('ru-RU')}
+                        </Text>
+                    )}
+                    {currentGoal.is_achieved && currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z" && (
+                        <Text variant="body" className="text-green-700">
+                            Достигнута: {new Date(currentGoal.achievement_date).toLocaleDateString('ru-RU')}
+                        </Text>
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <Text variant="body" className="text-blue-700 ml-2">
+                Текущая цель не установлена.
+            </Text>
+        );
+    };
+
+    const renderGoalsContent = () => {
+        // Early return для первичной загрузки
+        if (loading && goals === null && !isBalanceLoading) {
+            return (
+                <div className="text-center p-4">
+                    <Text variant="body">Загрузка списка целей...</Text>
+                </div>
+            );
+        }
+
+        // Early return для пустого списка
+        if (!loading && goals !== null && goals.length === 0) {
+            return (
+                <div className="p-4 text-center">
+                    <Text variant="body">У вас пока нет добавленных целей.</Text>
+                </div>
+            );
+        }
+
+        // Рендер списка целей
+        const shouldShowTable = (goals !== null && goals.length > 0) || (loading && goals === null);
+
+        if (shouldShowTable) {
+            return (
+                <>
+                    {/* Десктопная таблица */}
+                    <Table
+                        data={goals || []}
+                        columns={goalColumns}
+                        loading={loading}
+                        emptyMessage="У вас пока нет добавленных целей."
+                        className="min-w-full hidden md:table"
+                    />
+
+                    {/* Мобильный список карточек */}
+                    <GoalsCardList
+                        className="block md:hidden"
+                        goals={goals}
+                        currentGoal={currentGoal}
+                        balance={balance}
+                        loading={loading}
+                        currentGoalLoading={loading}
+                        isBalanceLoading={isBalanceLoading}
+                        handleEditClick={handleEditClick}
+                        handleDeleteClick={handleDeleteClick}
+                        handleSetCurrentClick={handleSetCurrentClick}
+                    />
+
+                    {/* Индикатор фоновой загрузки */}
+                    {loading && goals !== null && goals.length > 0 && (
+                        <div className="text-center p-4">
+                            <Text variant="body">Обновление списка целей...</Text>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        return null;
+    };
+
     return (
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
-
-                {/* Header section: Title and Add Button */}
+                {/* Заголовок страницы и кнопка "Добавить цель" */}
                 <div className="flex justify-between items-center mb-4">
                     <Text variant="h2">Мои цели</Text>
                     <TextButton onClick={handleAddClick}>
@@ -183,202 +323,22 @@ export default function GoalsPage() {
                     </TextButton>
                 </div>
 
-                {/* Display general error message from the store */}
+                {/* Отображаем общую ошибку из стора */}
                 {displayError && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
                         {displayError.message}
                     </div>
                 )}
 
-                {/* Section for Current Goal (Desktop only) */}
-                {/* Этот блок виден только на десктопе */}
+                {/* Секция текущей цели (только для десктопа) */}
                 <div className="hidden md:block mb-6 p-4 bg-blue-100 border border-blue-300 rounded-md shadow-sm">
                     <Text variant="h3" className="mb-2 text-blue-800">Текущая цель:</Text>
-                    {loading || isBalanceLoading ? (
-                        <div className="text-blue-700"><Text variant="body">Загрузка текущей цели и баланса...</Text>
-                        </div>
-                    ) : currentGoal ? (
-                        <div className="flex items-center flex-wrap gap-x-4">
-                            {/* Описание цели с иконкой звезды (на десктопе иконка отрисовывается в таблице) */}
-                            <Text variant="body" className="font-semibold">{currentGoal.description}</Text>
-                            {/* Сумма цели */}
-                            <Text variant="body">Сумма: {typeof currentGoal.amount === 'number'
-                                ? currentGoal.amount.toLocaleString('ru-RU', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                })
-                                : currentGoal.amount} ₽
-                            </Text>
-                            {/* Желаемая дата */}
-                            {currentGoal.wish_date && currentGoal.wish_date !== "0001-01-01T00:00:00Z" && (
-                                <Text variant="body">Желаемая
-                                    дата: {new Date(currentGoal.wish_date).toLocaleDateString('ru-RU')}</Text>
-                                )}
-                            {/* Достигнута / Дата достижения */}
-                            {currentGoal.is_achieved && currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z" && (
-                                <Text variant="body"
-                                      className="text-green-700">Достигнута: {new Date(currentGoal.achievement_date).toLocaleDateString('ru-RU')}</Text> // Формат даты
-                            )}
-                        </div>
-                    ) : (
-                        <Text variant="body" className="text-blue-700 ml-2">Текущая цель не установлена.</Text>
-                    )}
+                    {renderCurrentGoalSection()}
                 </div>
 
-
-                {/* Container for Goals List (Table for Desktop, Cards for Mobile) */}
+                {/* Основная область контента */}
                 <div>
-                    {loading && goals === null && !loading && !isBalanceLoading ? (
-                        <div className="text-center p-4">
-                            <Text variant="body">Загрузка списка целей...</Text>
-                        </div>
-                    ) : (
-                        // Content container
-                        <>
-                            {/* Desktop Table (hidden on mobile) */}
-                            {/* Отображаем таблицу только если есть цели ИЛИ если загрузка еще идет, но данных пока нет (чтобы показать "Обновление") */}
-                            {/* Проверяем, что есть данные goals ИЛИ loading, но goals == null (т.е. идет первая загрузка) */}
-                            {(goals !== null && goals.length > 0) || (loading && goals === null) ? (
-                                <table className="min-w-full hidden md:table">
-                                    <thead className="bg-secondary-200">
-                                    <tr>
-                                        {/* Заголовки таблицы - Отступы как в финальной SpendingTable */}
-                                        <th className="text-left pl-2 pr-0 py-4"><Text variant="th">№</Text></th>
-                                        {/* № */}
-                                        <th className="text-left p-4"><Text variant="th">Описание</Text></th>
-                                        {/* Описание */}
-                                        <th className="text-left p-4"><Text variant="th">Сумма</Text></th>
-                                        {/* Сумма */}
-                                        <th className="text-left px-2 py-4"><Text variant="th">Желаемая дата</Text></th>
-                                        {/* Желаемая дата */}
-                                        <th className="text-left px-2 py-4"><Text variant="th">Действия</Text></th>
-                                        {/* Действия */}
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {/* Проходим по массиву goals и рендерим строку для каждой цели */}
-                                    {goals !== null && goals.length > 0 && goals.map((goal, index) => {
-                                        {/* Проверяем goals перед map */
-                                        }
-                                        const isCurrent = currentGoal && currentGoal.id === goal.id;
-
-                                        // --- Расчет процента и определение класса цвета для иконки (для звезды в таблице) ---
-                                        let percentage = 0;
-                                        let starColorClass = 'text-gray-500'; // Цвет по умолчанию (если не текущая или баланс не загружен)
-
-                                        if (isCurrent && typeof balance === 'number' && typeof goal.amount === 'number' && goal.amount > 0) {
-                                            const achieved = balance >= 0 ? balance : 0; // Достигнутая часть
-                                            percentage = Math.min((achieved / goal.amount) * 100, 100); // Процент (не более 100)
-
-                                            if (percentage < 25) starColorClass = 'text-red-500';
-                                            else if (percentage < 50) starColorClass = 'text-orange-500';
-                                            else if (percentage < 75) starColorClass = 'text-yellow-500';
-                                            else starColorClass = 'text-green-500';
-                                            if (percentage >= 100) starColorClass = 'text-green-600';
-                                        } else if (!isCurrent) {
-                                            starColorClass = 'text-transparent'; // Делаем иконку невидимой, если не текущая цель
-                                        }
-                                        // --- Конец расчета ---
-
-                                        return (
-                                            <tr key={goal.id}
-                                                className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                                {/* № */}
-                                                <td className="pl-2 pr-0 py-4"><Text
-                                                    variant="tdPrimary">{index + 1}</Text></td>
-                                                {/* Отступы как в SpendingTable */}
-                                                {/* Описание с иконкой звезды (в таблице) */}
-                                                <td className="p-4"> {/* Отступы как в SpendingTable */}
-                                                    <div className="flex items-center">
-                                                        {/* Рендерим StarIcon только если это текущая цель */}
-                                                        {isCurrent && (
-                                                            <StarIcon
-                                                                className={`w-5 h-5 mr-1 ${starColorClass}`}/>
-                                                            )}
-                                                        <Text variant="tdPrimary">{goal.description}</Text>
-                                                    </div>
-                                                </td>
-                                                {/* Сумма */}
-                                                <td className="p-4"><Text
-                                                    variant="tdSecondary"> {/* Отступы как в SpendingTable */}
-                                                    {typeof goal.amount === 'number'
-                                                        ? goal.amount.toLocaleString('ru-RU', {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2
-                                                        })
-                                                        : goal.amount}
-                                                    {'\u00A0'}₽ {/* Неразрывный пробел */}
-                                                </Text></td>
-                                                {/* Желаемая дата */}
-                                                <td className="px-2 py-4"><Text
-                                                    variant="tdSecondary"> {/* Отступы как в SpendingTable */}
-                                                    {goal.wish_date && goal.wish_date !== "0001-01-01T00:00:00Z" ? new Date(goal.wish_date).toLocaleDateString('ru-RU') : '-'} {/* Формат даты */}
-                                                </Text></td>
-                                                {/* Действия */}
-                                                <td className="px-2 py-4 flex gap-1"> {/* Отступы и зазор как в финальной SpendingTable */}
-                                                    {/* Кнопка "Редактировать" */}
-                                                    <IconButton
-                                                        icon={PencilIcon}
-                                                        tooltip="Редактировать цель"
-                                                        className="text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                        onClick={() => handleEditClick(goal)}
-                                                    />
-                                                    {/* Кнопка "Установить текущей" (не отображается для текущей) */}
-                                                    {!(isCurrent) && (
-                                                        <IconButton
-                                                            icon={StarIcon}
-                                                            tooltip="Установить как текущую"
-                                                            className="text-yellow-500 hover:bg-yellow-500/10 hover:text-yellow-400"
-                                                            onClick={() => handleSetCurrentClick(goal)}
-                                                        />
-                                                    )}
-                                                    {/* Кнопка "Удалить" */}
-                                                    <IconButton
-                                                        icon={TrashIcon}
-                                                        tooltip="Удалить цель"
-                                                        className="text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                        onClick={() => handleDeleteClick(goal)}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                    </tbody>
-                                </table>
-                            ) : null /* Не рендерим таблицу, если целей нет и не идет загрузка */
-                            }
-
-                            {/* Mobile Card List (hidden on desktop) */}
-                            {/* Отображаем карточки только если есть цели ИЛИ если загрузка еще идет, но данных пока нет */}
-                            {/* goals === null && loading - условие для показа "Загрузка списка целей..." внутри карточек, если goals пуст при первой загрузке */}
-                            {(goals !== null && goals.length > 0) || (loading && goals === null) ? (
-                                <GoalsCardList
-                                    className="block md:hidden"
-                                    goals={goals}
-                                    currentGoal={currentGoal}
-                                    balance={balance}
-                                    loading={loading}
-                                    currentGoalLoading={loading}
-                                    isBalanceLoading={isBalanceLoading}
-                                    handleEditClick={handleEditClick}
-                                    handleDeleteClick={handleDeleteClick}
-                                    handleSetCurrentClick={handleSetCurrentClick}
-                                />
-                            ) : (
-                                !loading && goals !== null && goals.length === 0 && (
-                                    <div className="p-4 text-center">
-                                        <Text variant="body">У вас пока нет добавленных целей.</Text>
-                                    </div>
-                                )
-                            )}
-                            {loading && goals !== null && goals.length > 0 ? (
-                                <div className="text-center p-4">
-                                    <Text variant="body">Обновление списка целей...</Text>
-                                </div>
-                            ) : null}
-
-                        </>
-                    )}
+                    {renderGoalsContent()}
                 </div>
             </main>
         </div>
