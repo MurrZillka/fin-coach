@@ -1,4 +1,4 @@
-// CategoriesPage/hooks/useCategoriesPageHandlers.js
+// CategoriesPage/hooks/useGoalsPageHandlers.js
 import { dataCoordinator } from '../../../dataCoordinator';
 import useCategoryStore from '../../../stores/categoryStore';
 import { categoryFields } from '../config/modalFields';

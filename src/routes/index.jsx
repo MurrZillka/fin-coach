@@ -8,7 +8,7 @@ import SpendingsPage from '../pages/SpendingsPage/ui/SpendingsPage.jsx';
 import DemoPage from '../pages/DemoPage';
 import MainPage from '../pages/MainPage';
 // --- ДОБАВЛЕНО: Импортируем страницу Целей ---
-import GoalsPage from '../pages/GoalsPage.jsx';
+import GoalsPage from '../pages/GoalsPage/ui/GoalsPage.jsx';
 import PageNotFound from "../pages/PageNotFound.jsx";
 // --- Конец ДОБАВЛЕННОГО ---
 
