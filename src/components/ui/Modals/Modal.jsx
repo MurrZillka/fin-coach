@@ -1,13 +1,13 @@
-// src/components/ui/Modal.jsx
+// src/components/ui/Modals.jsx
 import {useEffect, useRef, useState} from 'react';
-import Text from './Text';
-import Input from './Input';
-import TextButton from './TextButton';
-import Tooltip from './Tooltip';
+import Text from '../Text.jsx';
+import Input from '../Input.jsx';
+import TextButton from '../TextButton.jsx';
+import Tooltip from '../Tooltip.jsx';
 import {XMarkIcon} from '@heroicons/react/24/outline';
-import IconButton from './IconButton';
-import useModalStore from '../../stores/modalStore';
-import {clearServerFieldErrors, mapServerErrorToFieldError} from "../../utils/fieldErrorMapping.js";
+import IconButton from '../IconButton.jsx';
+import useModalStore from '../../../stores/modalStore.js';
+import {clearServerFieldErrors, mapServerErrorToFieldError} from "./utils/fieldErrorMapping.js";
 
 const Modal = ({
                    isOpen,
@@ -118,7 +118,7 @@ const Modal = ({
     // Универсальный обработчик для всех Input (ожидает name, value)
     // --- Убеждаемся, что здесь нет параметра 'e' ---
     const handleChange = (name, value) => { // --- ИСПРАВЛЕННАЯ СИГНАТУРА ---
-        // console.log(`Modal: handleChange - Field "${name}" changed to value:`, value); // Можно оставить для отладки
+        // console.log(`Modals: handleChange - Field "${name}" changed to value:`, value); // Можно оставить для отладки
 
         // --- Обработка для полей даты - установка сегодняшней даты при очистке ---
         let fieldValue = value; // Начинаем с полученного значения
@@ -190,7 +190,7 @@ const Modal = ({
                 } else { // text, number, date, select
                     if (String(fieldValue).trim() === '') isMissing = true;
                     // Для обязательного поля даты, '0001-01-01' также считается отсутствующим значением локально
-                    // (Хотя Modal.jsx старается подставить сегодня для обязательной даты, это перестраховка)
+                    // (Хотя Modals.jsx старается подставить сегодня для обязательной даты, это перестраховка)
                     if (fieldType === 'date' && String(fieldValue) === '0001-01-01') {
                         isMissing = true;
                     }
@@ -277,7 +277,7 @@ const Modal = ({
 
         // Если нет локальных ошибок валидации, вызываем onSubmit с подготовленными данными
         if (Object.keys(newErrors).length === 0) {
-            // onSubmit теперь должен самостоятельно обрабатывать ошибки API и передавать их обратно в Modal через submissionError
+            // onSubmit теперь должен самостоятельно обрабатывать ошибки API и передавать их обратно в Modals через submissionError
             onSubmit(dataToSend);
         }
         // Если есть локальные ошибки, onSubmit не вызывается, а ошибки отображаются Input компонентами.
@@ -308,7 +308,7 @@ const Modal = ({
                     {/* Убрали абсолютное позиционирование и z-index */}
                     <IconButton
                         icon={XMarkIcon}
-                        onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
+                        onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modals.jsx (который закрывает модалку и сбрасывает submissionError)
                         className="text-gray-500 hover:text-gray-700" // Оставляем только стили цвета
                     />
                 </div>
@@ -333,7 +333,7 @@ const Modal = ({
                                 value={field.type === 'checkbox' ? !!formData[field.name] : formData[field.name] || ''} // Передаем булево для чекбокса
                                 // checked проп в Input.jsx больше не нужен или используется внутренне
                                 onChange={handleChange} // <-- Input вызовет ее с (name, value)
-                                error={errors[field.name]} // Здесь показываем локальные ошибки Modal И ошибки для дат, установленные useEffect
+                                error={errors[field.name]} // Здесь показываем локальные ошибки Modals И ошибки для дат, установленные useEffect
                                 placeholder={field.placeholder}
                                 disabled={field.disabled}
                                 required={field.required}
@@ -348,7 +348,7 @@ const Modal = ({
                     ))}
                     <div className="flex justify-end gap-2">
                         <TextButton
-                            onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modal.jsx (который закрывает модалку и сбрасывает submissionError)
+                            onClick={onClose} // <-- Этот onClick вызывает onClose проп из Modals.jsx (который закрывает модалку и сбрасывает submissionError)
                             type="button"
                             variant="secondary"
                         >

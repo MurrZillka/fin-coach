@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {subscribeWithSelector} from 'zustand/middleware';
 import {login as loginApi, signup as signupApi, logout as logoutApi} from '../api/auth';
-import {handleAuthApiError} from "../utils/handleAuthApiError.js";
+import {handleAuthApiError} from "../api/auth/utils/handleAuthApiError.js";
 
 const useAuthStore = create()(
     subscribeWithSelector((set, get) => ({

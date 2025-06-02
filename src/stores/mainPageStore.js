@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as mainPageAPI from '../api/recommendations/index';
-import { handleMainPageApiError } from '../utils/handleMainPageApiError';
+import { handleMainPageApiError } from '../api/recommendations/utils/handleMainPageApiError.js';
 
 const initialState = {
     recommendations: null,

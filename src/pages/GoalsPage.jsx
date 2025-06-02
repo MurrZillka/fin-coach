@@ -108,7 +108,7 @@ export default function GoalsPage() {
     };
 
 
-    // --- Logic functions called by Modal/ConfirmModal components ---
+    // --- Logic functions called by Modals/ConfirmModal components ---
     const handleAddSubmit = async (formData) => {
         // console.log('GoalsPage Logic: handleAddSubmit called with data:', formData);
         try {

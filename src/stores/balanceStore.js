@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { getBalance as fetchBalanceApi } from '../api/balance';
-import { handleBalanceApiError } from '../utils/handleBalanceApiError';
+import { handleBalanceApiError } from '../api/balance/utils/handleBalanceApiError.js';
 
 const initialState = {
     balance: null,

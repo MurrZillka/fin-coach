@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as categoryAPI from '../api/categories/index';
-import { handleCategoryApiError } from '../utils/handleCategoryApiError';
+import { handleCategoryApiError } from '../api/categories/utils/handleCategoryApiError.js';
 import { CHART_COLORS } from '../constants/colors';
 
 const initialState = {

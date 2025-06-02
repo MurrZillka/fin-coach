@@ -318,7 +318,15 @@ export default function SpendingsPage() {
             closeModal();
         } catch (err) {
             console.error('Error during add spending:', err);
-            setModalSubmissionError(err.message || 'Ошибка при добавлении расхода.');
+
+            // Используем новую структуру ошибок
+            if (err.field) {
+                setModalSubmissionError(err);
+            } else {
+                setModalSubmissionError({ message: err.message, field: null });
+            }
+
+            useSpendingsStore.getState().clearError();
         }
     };
 
@@ -337,7 +345,14 @@ export default function SpendingsPage() {
             closeModal();
         } catch (err) {
             console.error('Error during edit spending:', err);
-            setModalSubmissionError(err.message || 'Ошибка при сохранении изменений.');
+
+            if (err.field) {
+                setModalSubmissionError(err);
+            } else {
+                setModalSubmissionError({ message: err.message, field: null });
+            }
+
+            useSpendingsStore.getState().clearError();
         }
     };
 

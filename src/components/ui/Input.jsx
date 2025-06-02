@@ -38,7 +38,7 @@ const Input = forwardRef(({
         if (type === 'checkbox') {
             fieldValue = e.target.checked; // Для чекбокса значение - это булево checked
         } else if (type === 'number') {
-            // Для числового поля берем value как строку. Парсинг в число происходит в Modal.jsx (в handleSubmit).
+            // Для числового поля берем value как строку. Парсинг в число происходит в Modals.jsx (в handleSubmit).
             fieldValue = e.target.value;
         } else if (type === 'select') {
             fieldValue = e.target.value; // Для select берем value как строку
@@ -155,7 +155,7 @@ const Input = forwardRef(({
                 </Text>
             </div>
 
-            {/* Тултип рендерится в Modal.jsx */}
+            {/* Тултип рендерится в Modals.jsx */}
         </div>
     );
 });

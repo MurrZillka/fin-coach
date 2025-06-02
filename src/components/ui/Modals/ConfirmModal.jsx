@@ -1,8 +1,8 @@
 // src/components/ui/ConfirmModal.jsx
-import Text from './Text';
-import TextButton from './TextButton';
+import Text from '../Text.jsx';
+import TextButton from '../TextButton.jsx';
 import {useEffect, useRef} from "react";
-import IconButton from "./IconButton.jsx";
+import IconButton from "../IconButton.jsx";
 import { XMarkIcon } from '@heroicons/react/24/outline'; // Добавлен импорт XMarkIcon
 
 // Компонент модального окна подтверждения

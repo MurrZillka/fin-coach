@@ -2,7 +2,7 @@
 import {create} from 'zustand';
 import * as creditAPI from '../api/credit/index';
 import {subscribeWithSelector} from "zustand/middleware";
-import {handleCreditApiError} from "../utils/handleCreditApiError.js";
+import {handleCreditApiError} from "../api/credit/utils/handleCreditApiError.js";
 
 const initialState = {
     credits: null,

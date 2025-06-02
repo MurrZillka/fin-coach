@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as remindersAPI from '../api/reminders/index';
-import { handleRemindersApiError } from '../utils/handleRemindersApiError';
+import { handleRemindersApiError } from '../api/reminders/utils/handleRemindersApiError.js';
 
 const initialState = {
     todayReminder: null,

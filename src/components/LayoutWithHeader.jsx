@@ -6,9 +6,9 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import routes from '../routes';
 import useAuthStore from '../stores/authStore.js';
 import useModalStore from '../stores/modalStore.js';
-import Modal from './ui/Modal.jsx';
-import ConfirmModal from './ui/ConfirmModal.jsx';
-import ReminderModal from './ui/ReminderModal.jsx'; // Убедимся, что ReminderModal импортирован
+import Modal from './ui/Modals/Modal.jsx';
+import ConfirmModal from './ui/Modals/ConfirmModal.jsx';
+import ReminderModal from './ui/Modals/ReminderModal.jsx'; // Убедимся, что ReminderModal импортирован
 import BalanceWidget from './widgets/BalanceWidget.jsx';
 
 export default function LayoutWithHeader() {
