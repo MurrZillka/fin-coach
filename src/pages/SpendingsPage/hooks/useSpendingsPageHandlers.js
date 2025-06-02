@@ -1,4 +1,4 @@
-// SpendingsPage/hooks/useSpendingsPageHandlers.js
+// SpendingsPage/hooks/useCreditsPageHandlers.js
 import {useDateFormatting} from '../../../hooks/useDateFormatting';
 import {useFinancialData} from '../../../hooks/useFinancialData';
 import {dataCoordinator} from '../../../dataCoordinator';
@@ -135,15 +135,11 @@ export const useSpendingsPageHandlers = ({
     const handleDeleteClick = (spending) => {
         clearError();
         clearCategoriesError();
-        openModal('deleteSpending', {
-            title: 'Удалить расход',
+        openModal('confirmDelete', {
+            title: 'Подтверждение удаления',
             message: `Вы уверены, что хотите удалить расход "${spending.description}"?`,
-            onSubmit: () => handleDeleteSubmit(spending.id),
-            submitText: 'Удалить',
-            onClose: () => {
-                closeModal();
-                clearError();
-            }
+            onConfirm: () => handleDeleteSubmit(spending.id),
+            confirmText: 'Удалить',
         });
     };
 

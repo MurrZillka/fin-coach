@@ -1,79 +1,74 @@
-// SpendingsPage/ui/SpendingsPage.jsx
+// CreditsPage/ui/CreditsPage.jsx
 import React from 'react';
-import useSpendingsStore from '../../../stores/spendingsStore';
-import useCategoryStore from '../../../stores/categoryStore';
+import useCreditStore from '../../../stores/creditStore';
 import useModalStore from '../../../stores/modalStore';
 import Text from '../../../components/ui/Text';
 import TextButton from '../../../components/ui/TextButton';
 import Table from '../../../components/ui/Table';
-import SpendingCardList from '../../../components/mobile/SpendingCardList';
+import CreditCardList from '../../../components/mobile/CreditCardList';
 import Modal from '../../../components/ui/Modals/Modal';
-import {useSpendingsPageHandlers} from '../hooks/useSpendingsPageHandlers';
-import {getSpendingColumns} from '../config/tableColumns';
+import { useCreditsPageHandlers } from '../hooks/useCreditsPageHandlers';
+import { getCreditColumns } from '../config/tableColumns';
 import ConfirmModal from "../../../components/ui/Modals/ConfirmModal.jsx";
 
-export default function SpendingsPage() {
+export default function CreditsPage() {
     // Хуки сторов
-    const { spendings, loading, error, clearError } = useSpendingsStore();
-    const { categories, loading: categoriesLoading, error: categoriesError, clearError: clearCategoriesError } = useCategoryStore();
+    const { credits, loading, error, clearError } = useCreditStore();
     const { modalType, modalProps, openModal, closeModal, setModalSubmissionError } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
-    const { handleAddClick, handleEditClick, handleDeleteClick } = useSpendingsPageHandlers({
-        categories,
+    const { handleAddClick, handleEditClick, handleDeleteClick } = useCreditsPageHandlers({
         clearError,
-        clearCategoriesError,
         openModal,
         closeModal,
         setModalSubmissionError
     });
 
     // Конфигурация колонок таблицы
-    const spendingColumns = getSpendingColumns(categories, handleEditClick, handleDeleteClick);
+    const creditColumns = getCreditColumns(handleEditClick, handleDeleteClick);
 
     // Вычисляемые значения
-    const displayError = error || categoriesError;
+    const displayError = error;
 
     // Функция рендеринга контента
     const renderContent = () => {
-        if ((loading && spendings === null) || (categoriesLoading && categories === null)) {
+        if (loading && credits === null) {
             return (
                 <div className="text-center p-4">
-                    <Text variant="body">Загрузка данных...</Text>
+                    <Text variant="body">Загрузка доходов...</Text>
                 </div>
             );
         }
 
-        if (spendings !== null && spendings.length === 0 && categories !== null) {
+        if (credits !== null && credits.length === 0) {
             return (
                 <div className="p-4 text-center">
-                    <Text variant="body">У вас пока нет добавленных расходов.</Text>
+                    <Text variant="body">У вас пока нет добавленных доходов.</Text>
                 </div>
             );
         }
 
-        if (spendings !== null && spendings.length > 0 && categories !== null) {
+        if (credits !== null && credits.length > 0) {
             return (
                 <>
                     <Table
-                        data={spendings}
-                        columns={spendingColumns}
+                        data={credits}
+                        columns={creditColumns}
                         loading={loading}
-                        emptyMessage="У вас пока нет добавленных расходов."
+                        emptyMessage="У вас пока нет добавленных доходов."
                         className="hidden md:table"
                     />
-                    <SpendingCardList
+                    <CreditCardList
                         className="block md:hidden"
-                        spendings={spendings}
+                        credits={credits}
                         handleEditClick={handleEditClick}
                         handleDeleteClick={handleDeleteClick}
-                        categories={categories}
                     />
-                    {(loading && spendings !== null) || (categoriesLoading && categories !== null) ? (
+                    {loading && credits !== null && (
                         <div className="text-center mt-4">
-                            <Text variant="body">Обновление данных...</Text>
+                            <Text variant="body">Обновление списка доходов...</Text>
                         </div>
-                    ) : null}
+                    )}
                 </>
             );
         }
@@ -85,9 +80,9 @@ export default function SpendingsPage() {
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
                 <div className="flex justify-between items-center">
-                    <Text variant="h2">Мои расходы</Text>
+                    <Text variant="h2">Мои доходы</Text>
                     <TextButton onClick={handleAddClick}>
-                        Добавить расход
+                        Добавить доход
                     </TextButton>
                 </div>
 
