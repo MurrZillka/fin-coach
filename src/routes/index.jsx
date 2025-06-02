@@ -1,10 +1,10 @@
 // routes/index.jsx
-import { Navigate } from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 import SignupPage from '../pages/SignupPage';
 import CategoriesPage from '../pages/CategoriesPage';
 import CreditsPage from '../pages/CreditsPage';
-import SpendingsPage from '../pages/SpendingsPage';
+import SpendingsPage from '../pages/SpendingsPage/ui/SpendingsPage.jsx';
 import DemoPage from '../pages/DemoPage';
 import MainPage from '../pages/MainPage';
 // --- ДОБАВЛЕНО: Импортируем страницу Целей ---

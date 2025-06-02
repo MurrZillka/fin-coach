@@ -121,10 +121,10 @@ export default function MainPage() {
 
     // Условный рендеринг компонента
     if (showFullPageLoader) {
-        console.log('Showing full page loader...');
+        console.log('Showing full ui loader...');
         return <Loader/>;
     }
-    console.log('Not showing full page loader. State:', {
+    console.log('Not showing full ui loader. State:', {
         isLoadingData, hasAnyData,
         spendings: spendings?.length, credits: credits?.length, goals: goals?.length, balance,
         recommendations: recommendations?.length, financialEntries: financialEntries?.length,
