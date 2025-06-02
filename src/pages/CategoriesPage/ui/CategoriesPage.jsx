@@ -1,0 +1,121 @@
+// CategoriesPage/ui/CategoriesPage.jsx
+import React from 'react';
+import TextButton from '../../../components/ui/TextButton';
+import Text from '../../../components/ui/Text';
+import useCategoryStore from '../../../stores/categoryStore';
+import useModalStore from '../../../stores/modalStore';
+import CategoriesCardList from '../../../components/mobile/CategoriesCardList';
+import { DEFAULT_CATEGORY_NAME } from "../../../constants/categories";
+import Table from "../../../components/ui/Table";
+import Modal from '../../../components/ui/Modals/Modal';
+import ConfirmModal from '../../../components/ui/Modals/ConfirmModal';
+import { useCategoriesPageHandlers } from '../hooks/useCategoriesPageHandlers';
+import { getCategoryColumns } from '../config/tableColumns';
+
+export default function CategoriesPage() {
+    // Хуки сторов
+    const { categories, loading, error, clearError } = useCategoryStore();
+    const { openModal, closeModal, setModalSubmissionError, modalType, modalProps } = useModalStore();
+
+    // Получаем хендлеры из кастомного хука
+    const { handleAddClick, handleEditClick, handleDeleteClick } = useCategoriesPageHandlers({
+        categories,
+        clearError,
+        openModal,
+        closeModal,
+        setModalSubmissionError
+    });
+
+    // Конфигурация колонок таблицы
+    const categoryColumns = getCategoryColumns(handleEditClick, handleDeleteClick, DEFAULT_CATEGORY_NAME);
+
+    // Вычисляемые значения
+    const displayError = error;
+    const isInitialLoading = loading && categories === null;
+    const showEmptyMessage = categories !== null && categories.length === 0 && !loading;
+    const showList = categories !== null && categories.length > 0;
+    const isBackgroundLoading = loading && categories !== null;
+
+    // Функция рендеринга контента
+    const renderContent = () => {
+        if (isInitialLoading) {
+            return (
+                <div className="text-center p-4">
+                    <Text variant="body">Загрузка категорий...</Text>
+                </div>
+            );
+        }
+
+        if (showEmptyMessage) {
+            return (
+                <div className="text-center">
+                    <Text variant="body">У вас пока нет категорий. Создайте первую!</Text>
+                </div>
+            );
+        }
+
+        if (showList) {
+            return (
+                <>
+                    <Table
+                        data={categories}
+                        columns={categoryColumns}
+                        loading={loading}
+                        emptyMessage="У вас пока нет категорий. Создайте первую!"
+                        className="hidden md:table"
+                    />
+                    <CategoriesCardList
+                        className="block md:hidden"
+                        categories={categories}
+                        loading={loading}
+                        handleEditClick={handleEditClick}
+                        handleDeleteClick={handleDeleteClick}
+                        defaultCategoryName={DEFAULT_CATEGORY_NAME}
+                    />
+                    {isBackgroundLoading && (
+                        <div className="text-center mt-4">
+                            <Text variant="body">Обновление списка категорий...</Text>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        return null;
+    };
+
+    return (
+        <div className="bg-secondary-50">
+            <main className="max-w-7xl mx-auto p-4">
+                <div className="flex justify-between items-center">
+                    <Text variant="h2">Категории расходов</Text>
+                    <TextButton onClick={handleAddClick} disabled={loading}>
+                        <Text variant="button">Добавить категорию</Text>
+                    </TextButton>
+                </div>
+
+                {displayError && modalType === null && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-300 text-gray-800 rounded-md">
+                        {displayError.message}
+                    </div>
+                )}
+
+                <div className="p-4">
+                    {renderContent()}
+                </div>
+            </main>
+
+            {modalType && modalType !== 'confirmDelete' && <Modal {...modalProps} />}
+            {modalType === 'confirmDelete' && (
+                <ConfirmModal
+                    isOpen={true}
+                    title={modalProps.title}
+                    message={modalProps.message}
+                    confirmText={modalProps.confirmText}
+                    onConfirm={modalProps.onConfirm}
+                    onClose={closeModal}
+                />
+            )}
+        </div>
+    );
+}
