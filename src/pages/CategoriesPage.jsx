@@ -1,14 +1,14 @@
 // src/pages/CategoriesPage.jsx
-import {InformationCircleIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import TextButton from '../components/ui/TextButton';
-import IconButton from '../components/ui/IconButton';
 import Text from '../components/ui/Text';
 import useCategoryStore from '../stores/categoryStore';
 import useModalStore from '../stores/modalStore.js';
 import CategoriesCardList from '../components/mobile/CategoriesCardList.jsx';
-import Tooltip from "../components/ui/Tooltip.jsx";
 import {DEFAULT_CATEGORY_NAME} from "../constants/categories.js";
 import {dataCoordinator} from '../dataCoordinator.js';
+import SimpleTextCell from "../components/ui/cells/SimpleTextCell.jsx";
+import CategoryActionsCell from "../components/ui/cells/CategoryActionsCell.jsx";
+import Table from "../components/ui/Table.jsx";
 
 const categoryFields = [
     {name: 'name', label: 'Название', required: true, type: 'text', placeholder: 'Например: Еда'},
@@ -138,14 +138,96 @@ export default function CategoriesPage() {
     // Проверяем, идет ли фоновая загрузка (loading: true, но categories уже не null)
     const isBackgroundLoading = loading && categories !== null;
 
+
+    const categoryColumns = [
+        {
+            key: 'name',
+            header: 'Название',
+            component: SimpleTextCell,
+            props: {field: 'name', variant: 'tdPrimary'},
+            cellClassName: 'p-4'
+        },
+        {
+            key: 'description',
+            header: 'Описание',
+            component: SimpleTextCell,
+            props: {field: 'description', variant: 'tdSecondary'},
+            cellClassName: 'p-4'
+        },
+        {
+            key: 'actions',
+            header: 'Действия',
+            component: CategoryActionsCell,
+            props: {
+                onEdit: handleEditClick,
+                onDelete: handleDeleteClick,
+                defaultCategoryName: DEFAULT_CATEGORY_NAME
+            },
+            cellClassName: 'px-2 py-4'
+        }
+    ];
+
+    const renderContent = () => {
+        // Early return для первичной загрузки
+        if (isInitialLoading) {
+            return (
+                <div className="text-center p-4">
+                    <Text variant="body">Загрузка категорий...</Text>
+                </div>
+            );
+        }
+
+        // Early return для пустого списка
+        if (showEmptyMessage) {
+            return (
+                <div className="text-center">
+                    <Text variant="body">У вас пока нет категорий. Создайте первую!</Text>
+                </div>
+            );
+        }
+
+        // Рендер списка категорий
+        if (showList) {
+            return (
+                <>
+                    {/* Десктопная таблица */}
+                    <Table
+                        data={categories}
+                        columns={categoryColumns}
+                        loading={loading}
+                        emptyMessage="У вас пока нет категорий. Создайте первую!"
+                        className="hidden md:table"
+                    />
+
+                    {/* Мобильный список карточек */}
+                    <CategoriesCardList
+                        className="block md:hidden"
+                        categories={categories}
+                        loading={loading}
+                        handleEditClick={handleEditClick}
+                        handleDeleteClick={handleDeleteClick}
+                        defaultCategoryName={DEFAULT_CATEGORY_NAME}
+                    />
+
+                    {/* Индикатор фоновой загрузки */}
+                    {isBackgroundLoading && (
+                        <div className="text-center mt-4">
+                            <Text variant="body">Обновление списка категорий...</Text>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        return null;
+    };
+
     return (
         <div className="bg-secondary-50">
             <main className="max-w-7xl mx-auto p-4">
                 {/* Заголовок страницы и кнопка "Добавить категорию" */}
                 <div className="flex justify-between items-center">
                     <Text variant="h2">Категории расходов</Text>
-                    {/* Кнопка теперь вызывает handleAddClick */}
-                    {/* Отключаем кнопку, если идет загрузка (первичная или фоновая) */}
                     <TextButton onClick={handleAddClick} disabled={loading}>
                         <Text variant="button">Добавить категорию</Text>
                     </TextButton>
@@ -158,100 +240,10 @@ export default function CategoriesPage() {
                     </div>
                 )}
 
-                {/* Основная область контента: Индикатор загрузки, сообщение об отсутствии или список (таблица/карточки) */}
-
-                {/* Если идет первичная загрузка */}
-                {isInitialLoading ? (
-                    <div className="text-center p-4">
-                        <Text variant="body">Загрузка категорий...</Text>
-                    </div>
-                ) : (
-                    // Контейнер для списка категорий (Таблица на десктопе, Карточки на мобильных)
-                    // Убраны фоновые стили, остается только padding
-                    <div className="p-4"> {/* Этот div теперь просто контейнер с внутренним отступом */}
-                        {/* Если категории загружены и список не пуст */}
-                        {showList && (
-                            <>
-                                {/* Десктопная Таблица (скрыта на мобильных) */}
-                                <table className="min-w-full hidden md:table">
-                                    <thead className="bg-secondary-200">
-                                    <tr>
-                                        <th className="text-left p-4"><Text variant="th">№</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Название</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Описание</Text></th>
-                                        <th className="text-left p-4"><Text variant="th">Действия</Text></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {/* Маппинг по категориям для создания строк таблицы */}
-                                    {categories.map((category, index) => (
-                                        <tr key={category.id}
-                                            className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}>
-                                            <td className="p-4"><Text variant="tdPrimary">{index + 1}</Text></td>
-                                            <td className="p-4"><Text variant="tdPrimary">{category.name}</Text></td>
-                                            <td className="p-4"><Text
-                                                variant="tdSecondary">{category.description}</Text></td>
-                                            <td className="px-2 py-4 flex gap-1">
-                                                {/* ДОБАВЛЕНО: Условный рендеринг для кнопок редактирования и удаления */}
-                                                {category.name !== DEFAULT_CATEGORY_NAME ? (
-                                                    // Если это НЕ категория по умолчанию, показываем кнопки редактирования/удаления
-                                                    <>
-                                                        <IconButton
-                                                            icon={PencilIcon}
-                                                            tooltip="Редактировать"
-                                                            className="p-1 text-primary-600 hover:bg-primary-600/10 hover:text-primary-500"
-                                                            onClick={() => handleEditClick(category)}
-                                                        />
-                                                        <IconButton
-                                                            icon={TrashIcon}
-                                                            tooltip="Удалить"
-                                                            className="p-1 text-accent-error hover:bg-accent-error/10 hover:text-accent-error/80"
-                                                            onClick={() => handleDeleteClick(category.id)}
-                                                        />
-                                                    </>
-                                                ) : (
-                                                    // Если это категория по умолчанию, показываем иконку информации с тултипом
-                                                    <Tooltip text="Эту категорию нельзя удалить.">
-                                                        <InformationCircleIcon
-                                                            className="h-6 w-6 text-gray-500 cursor-help"/>
-                                                    </Tooltip>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-
-                                {/* Мобильный список карточек (скрыт на десктопах) */}
-                                <CategoriesCardList
-                                    className="block md:hidden"
-                                    categories={categories}
-                                    loading={loading} // Передаем статус загрузки для индикатора обновления внутри
-                                    handleEditClick={handleEditClick}
-                                    handleDeleteClick={handleDeleteClick}
-                                    defaultCategoryName={DEFAULT_CATEGORY_NAME}
-                                />
-                            </>
-                        )}
-
-                        {/* Сообщение об отсутствии категорий */}
-                        {showEmptyMessage && (
-                            <div className="text-center"> {/* Без p-4, т.к. внешний div уже имеет p-4 */}
-                                <Text variant="body">У вас пока нет категорий. Создайте первую!</Text>
-                            </div>
-                        )}
-
-                        {/* Индикатор фоновой загрузки (обновление списка) */}
-                        {isBackgroundLoading && (
-                            <div className="text-center mt-4"> {/* Добавлен отступ сверху mt-4 */}
-                                <Text variant="body">Обновление списка категорий...</Text> {/* Индикатор обновления */}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Модальные окна теперь рендерятся в LayoutWithHeader */}
-
+                {/* Основная область контента */}
+                <div className="p-4">
+                    {renderContent()}
+                </div>
             </main>
         </div>
     );
