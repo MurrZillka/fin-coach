@@ -1,9 +1,9 @@
-// CategoriesPage/hooks/useGoalsPageHandlers.js
+// CategoriesPage/utils/goalsPageHandlers.js
 import { dataCoordinator } from '../../../dataCoordinator';
 import useCategoryStore from '../../../stores/categoryStore';
 import { categoryFields } from '../config/modalFields';
 
-export const useCategoriesPageHandlers = ({
+export const categoriesPageHandlers = ({
                                               categories,
                                               clearError,
                                               openModal,

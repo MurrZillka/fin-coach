@@ -1,11 +1,11 @@
-// SpendingsPage/hooks/useCreditsPageHandlers.js
-import {useDateFormatting} from '../../../hooks/useDateFormatting';
-import {useFinancialData} from '../../../hooks/useFinancialData';
+// SpendingsPage/utils/creditsPageHandlers.js
+import {dateFormatting} from '../../../utils/dateFormatting.js';
+import {financialData} from '../../../utils/financialData.js';
 import {dataCoordinator} from '../../../dataCoordinator';
 import useSpendingsStore from '../../../stores/spendingsStore';
 import {getSpendingFields} from '../config/modalFields';
 
-export const useSpendingsPageHandlers = ({
+export const spendingsPageHandlers = ({
                                              categories,
                                              clearError,
                                              clearCategoriesError,
@@ -13,8 +13,8 @@ export const useSpendingsPageHandlers = ({
                                              closeModal,
                                              setModalSubmissionError
                                          }) => {
-    const { prepareInitialData } = useDateFormatting();
-    const { prepareDataForSubmit } = useFinancialData();
+    const { prepareInitialData } = dateFormatting();
+    const { prepareDataForSubmit } = financialData();
 
     // API хендлеры
     const handleAddSubmit = async (formData) => {

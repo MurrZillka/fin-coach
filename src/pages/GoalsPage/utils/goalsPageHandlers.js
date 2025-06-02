@@ -1,8 +1,8 @@
-// GoalsPage/hooks/useGoalsPageHandlers.js
+// GoalsPage/utils/goalsPageHandlers.js
 import {dataCoordinator} from '../../../dataCoordinator';
 import {goalFields} from '../config/modalFields';
 
-export const useGoalsPageHandlers = ({
+export const goalsPageHandlers = ({
                                          currentGoal,
                                          clearError,
                                          openModal,

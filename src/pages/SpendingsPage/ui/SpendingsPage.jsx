@@ -8,7 +8,7 @@ import TextButton from '../../../components/ui/TextButton';
 import Table from '../../../components/ui/Table';
 import SpendingCardList from '../../../components/mobile/SpendingCardList';
 import Modal from '../../../components/ui/Modals/Modal';
-import {useSpendingsPageHandlers} from '../hooks/useSpendingsPageHandlers';
+import {spendingsPageHandlers} from '../utils/spendingsPageHandlers.js';
 import {getSpendingColumns} from '../config/tableColumns';
 import ConfirmModal from "../../../components/ui/Modals/ConfirmModal.jsx";
 
@@ -19,7 +19,7 @@ export default function SpendingsPage() {
     const { modalType, modalProps, openModal, closeModal, setModalSubmissionError } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
-    const { handleAddClick, handleEditClick, handleDeleteClick } = useSpendingsPageHandlers({
+    const { handleAddClick, handleEditClick, handleDeleteClick } = spendingsPageHandlers({
         categories,
         clearError,
         clearCategoriesError,

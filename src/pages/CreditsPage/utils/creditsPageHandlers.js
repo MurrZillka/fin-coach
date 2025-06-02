@@ -1,18 +1,18 @@
-// CreditsPage/hooks/useCreditsPageHandlers.js
-import {useDateFormatting} from '../../../hooks/useDateFormatting';
-import {useFinancialData} from '../../../hooks/useFinancialData';
+// CreditsPage/utils/creditsPageHandlers.js
+import {dateFormatting} from '../../../utils/dateFormatting.js';
+import {financialData} from '../../../utils/financialData.js';
 import {dataCoordinator} from '../../../dataCoordinator';
 import useCreditStore from '../../../stores/creditStore';
 import {getCreditFields} from '../config/modalFields';
 
-export const useCreditsPageHandlers = ({
+export const creditsPageHandlers = ({
                                            clearError,
                                            openModal,
                                            closeModal,
                                            setModalSubmissionError
                                        }) => {
-    const {prepareInitialData} = useDateFormatting();
-    const {prepareDataForSubmit} = useFinancialData();
+    const {prepareInitialData} = dateFormatting();
+    const {prepareDataForSubmit} = financialData();
 
     // API хендлеры
     const handleAddSubmit = async (formData) => {

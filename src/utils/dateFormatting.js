@@ -1,5 +1,5 @@
-// src/hooks/useDateFormatting.js
-export const useDateFormatting = () => {
+// src/utils/dateFormatting.js
+export const dateFormatting = () => {
     const formatDateForForm = (dateString) => {
         if (!dateString || dateString === '0001-01-01T00:00:00Z' || dateString === '0001-01-01') {
             return '';

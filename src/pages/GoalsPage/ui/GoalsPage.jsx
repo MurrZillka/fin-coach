@@ -9,7 +9,7 @@ import GoalsCardList from '../../../components/mobile/GoalsCardList';
 import Table from '../../../components/ui/Table';
 import Modal from '../../../components/ui/Modals/Modal';
 import ConfirmModal from '../../../components/ui/Modals/ConfirmModal';
-import { useGoalsPageHandlers } from '../hooks/useGoalsPageHandlers';
+import { goalsPageHandlers } from '../utils/goalsPageHandlers.js';
 import { getGoalColumns } from '../config/tableColumns';
 
 export default function GoalsPage() {
@@ -19,7 +19,7 @@ export default function GoalsPage() {
     const { openModal, closeModal, modalType, modalProps } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
-    const { handleAddClick, handleEditClick, handleDeleteClick, handleSetCurrentClick } = useGoalsPageHandlers({
+    const { handleAddClick, handleEditClick, handleDeleteClick, handleSetCurrentClick } = goalsPageHandlers({
         currentGoal,
         clearError,
         openModal,

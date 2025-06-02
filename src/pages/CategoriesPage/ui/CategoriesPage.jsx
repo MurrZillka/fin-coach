@@ -9,7 +9,7 @@ import { DEFAULT_CATEGORY_NAME } from "../../../constants/categories";
 import Table from "../../../components/ui/Table";
 import Modal from '../../../components/ui/Modals/Modal';
 import ConfirmModal from '../../../components/ui/Modals/ConfirmModal';
-import { useCategoriesPageHandlers } from '../hooks/useCategoriesPageHandlers';
+import { categoriesPageHandlers } from '../utils/categoriesPageHandlers.js';
 import { getCategoryColumns } from '../config/tableColumns';
 
 export default function CategoriesPage() {
@@ -18,7 +18,7 @@ export default function CategoriesPage() {
     const { openModal, closeModal, setModalSubmissionError, modalType, modalProps } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
-    const { handleAddClick, handleEditClick, handleDeleteClick } = useCategoriesPageHandlers({
+    const { handleAddClick, handleEditClick, handleDeleteClick } = categoriesPageHandlers({
         categories,
         clearError,
         openModal,

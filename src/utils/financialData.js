@@ -1,5 +1,5 @@
-// src/hooks/useFinancialData.js
-export const useFinancialData = () => {
+// src/utils/financialData.js
+export const financialData = () => {
     const prepareDataForSubmit = (formData, isFinishedField) => {
         const dataToSend = {...formData};
         if (dataToSend.is_permanent) {

@@ -7,7 +7,7 @@ import TextButton from '../../../components/ui/TextButton';
 import Table from '../../../components/ui/Table';
 import CreditCardList from '../../../components/mobile/CreditCardList';
 import Modal from '../../../components/ui/Modals/Modal';
-import { useCreditsPageHandlers } from '../hooks/useCreditsPageHandlers';
+import { creditsPageHandlers } from '../utils/creditsPageHandlers.js';
 import { getCreditColumns } from '../config/tableColumns';
 import ConfirmModal from "../../../components/ui/Modals/ConfirmModal.jsx";
 
@@ -17,7 +17,7 @@ export default function CreditsPage() {
     const { modalType, modalProps, openModal, closeModal, setModalSubmissionError } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
-    const { handleAddClick, handleEditClick, handleDeleteClick } = useCreditsPageHandlers({
+    const { handleAddClick, handleEditClick, handleDeleteClick } = creditsPageHandlers({
         clearError,
         openModal,
         closeModal,
