@@ -5,17 +5,15 @@ import Text from '../../../components/ui/Text';
 import useCategoryStore from '../../../stores/categoryStore';
 import useModalStore from '../../../stores/modalStore';
 import CategoriesCardList from '../../../components/mobile/CategoriesCardList';
-import { DEFAULT_CATEGORY_NAME } from "../../../constants/categories";
+import {DEFAULT_CATEGORY_NAME} from "../../../constants/categories";
 import Table from "../../../components/ui/Table";
-import Modal from '../../../components/ui/Modals/Modal';
-import ConfirmModal from '../../../components/ui/Modals/ConfirmModal';
-import { categoriesPageHandlers } from '../utils/categoriesPageHandlers.js';
-import { getCategoryColumns } from '../config/tableColumns';
+import {categoriesPageHandlers} from '../utils/categoriesPageHandlers.js';
+import {getCategoryColumns} from '../config/tableColumns';
 
 export default function CategoriesPage() {
     // Хуки сторов
     const { categories, loading, error, clearError } = useCategoryStore();
-    const { openModal, closeModal, setModalSubmissionError, modalType, modalProps } = useModalStore();
+    const { openModal, closeModal, setModalSubmissionError, modalType } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
     const { handleAddClick, handleEditClick, handleDeleteClick } = categoriesPageHandlers({
@@ -104,18 +102,6 @@ export default function CategoriesPage() {
                     {renderContent()}
                 </div>
             </main>
-
-            {modalType && modalType !== 'confirmDelete' && <Modal {...modalProps} />}
-            {modalType === 'confirmDelete' && (
-                <ConfirmModal
-                    isOpen={true}
-                    title={modalProps.title}
-                    message={modalProps.message}
-                    confirmText={modalProps.confirmText}
-                    onConfirm={modalProps.onConfirm}
-                    onClose={closeModal}
-                />
-            )}
         </div>
     );
 }

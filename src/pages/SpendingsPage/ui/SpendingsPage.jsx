@@ -7,16 +7,14 @@ import Text from '../../../components/ui/Text';
 import TextButton from '../../../components/ui/TextButton';
 import Table from '../../../components/ui/Table';
 import SpendingCardList from '../../../components/mobile/SpendingCardList';
-import Modal from '../../../components/ui/Modals/Modal';
 import {spendingsPageHandlers} from '../utils/spendingsPageHandlers.js';
 import {getSpendingColumns} from '../config/tableColumns';
-import ConfirmModal from "../../../components/ui/Modals/ConfirmModal.jsx";
 
 export default function SpendingsPage() {
     // Хуки сторов
     const { spendings, loading, error, clearError } = useSpendingsStore();
     const { categories, loading: categoriesLoading, error: categoriesError, clearError: clearCategoriesError } = useCategoryStore();
-    const { modalType, modalProps, openModal, closeModal, setModalSubmissionError } = useModalStore();
+    const { modalType, openModal, closeModal, setModalSubmissionError } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
     const { handleAddClick, handleEditClick, handleDeleteClick } = spendingsPageHandlers({
@@ -101,18 +99,6 @@ export default function SpendingsPage() {
                     {renderContent()}
                 </div>
             </main>
-
-            {modalType && modalType !== 'confirmDelete' && <Modal {...modalProps} />}
-            {modalType === 'confirmDelete' && (
-                <ConfirmModal
-                    isOpen={true}
-                    title={modalProps.title}
-                    message={modalProps.message}
-                    confirmText={modalProps.confirmText}
-                    onConfirm={modalProps.onConfirm}
-                    onClose={closeModal}
-                />
-            )}
         </div>
     );
 }

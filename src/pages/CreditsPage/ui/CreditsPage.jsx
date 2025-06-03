@@ -6,15 +6,13 @@ import Text from '../../../components/ui/Text';
 import TextButton from '../../../components/ui/TextButton';
 import Table from '../../../components/ui/Table';
 import CreditCardList from '../../../components/mobile/CreditCardList';
-import Modal from '../../../components/ui/Modals/Modal';
-import { creditsPageHandlers } from '../utils/creditsPageHandlers.js';
-import { getCreditColumns } from '../config/tableColumns';
-import ConfirmModal from "../../../components/ui/Modals/ConfirmModal.jsx";
+import {creditsPageHandlers} from '../utils/creditsPageHandlers.js';
+import {getCreditColumns} from '../config/tableColumns';
 
 export default function CreditsPage() {
     // Хуки сторов
     const { credits, loading, error, clearError } = useCreditStore();
-    const { modalType, modalProps, openModal, closeModal, setModalSubmissionError } = useModalStore();
+    const { modalType, openModal, closeModal, setModalSubmissionError } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
     const { handleAddClick, handleEditClick, handleDeleteClick } = creditsPageHandlers({
@@ -96,18 +94,6 @@ export default function CreditsPage() {
                     {renderContent()}
                 </div>
             </main>
-
-            {modalType && modalType !== 'confirmDelete' && <Modal {...modalProps} />}
-            {modalType === 'confirmDelete' && (
-                <ConfirmModal
-                    isOpen={true}
-                    title={modalProps.title}
-                    message={modalProps.message}
-                    confirmText={modalProps.confirmText}
-                    onConfirm={modalProps.onConfirm}
-                    onClose={closeModal}
-                />
-            )}
         </div>
     );
 }

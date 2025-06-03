@@ -7,16 +7,14 @@ import useModalStore from '../../../stores/modalStore';
 import useBalanceStore from '../../../stores/balanceStore';
 import GoalsCardList from '../../../components/mobile/GoalsCardList';
 import Table from '../../../components/ui/Table';
-import Modal from '../../../components/ui/Modals/Modal';
-import ConfirmModal from '../../../components/ui/Modals/ConfirmModal';
-import { goalsPageHandlers } from '../utils/goalsPageHandlers.js';
-import { getGoalColumns } from '../config/tableColumns';
+import {goalsPageHandlers} from '../utils/goalsPageHandlers.js';
+import {getGoalColumns} from '../config/tableColumns';
 
 export default function GoalsPage() {
     // Хуки сторов
     const { goals, loading, error, currentGoal, clearError } = useGoalsStore();
     const { balance, isLoading: isBalanceLoading } = useBalanceStore();
-    const { openModal, closeModal, modalType, modalProps } = useModalStore();
+    const { openModal, closeModal } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
     const { handleAddClick, handleEditClick, handleDeleteClick, handleSetCurrentClick } = goalsPageHandlers({
@@ -153,18 +151,6 @@ export default function GoalsPage() {
                     {renderGoalsContent()}
                 </div>
             </main>
-
-            {modalType && !modalType.startsWith('confirm') && <Modal {...modalProps} />}
-            {(modalType === 'confirmDeleteGoal' || modalType === 'confirmSetCurrentGoal') && (
-                <ConfirmModal
-                    isOpen={true}
-                    title={modalProps.title}
-                    message={modalProps.message}
-                    confirmText={modalProps.confirmText}
-                    onConfirm={modalProps.onConfirm}
-                    onClose={closeModal}
-                />
-            )}
         </div>
     );
 }
