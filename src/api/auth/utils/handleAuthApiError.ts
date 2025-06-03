@@ -1,6 +1,8 @@
-// utils/handleAuthApiError.js
-export const handleAuthApiError = (error) => {
-    let userMessage;
+//src/api/auth/utils/handleAuthApiError.ts
+import { ApiError } from '../../../types';
+
+export const handleAuthApiError = (error: ApiError): ApiError => {
+    let userMessage: string;
 
     if (error.status === 403) {
         userMessage = 'Неверный логин или пароль. Пожалуйста, проверьте введенные данные.';

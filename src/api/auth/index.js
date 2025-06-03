@@ -1,5 +1,5 @@
 // src/api/auth/index.js
-import apiClient from '../client';
+import apiClient from '../client.js';
 
 export const signup = async (data) => {
     return apiClient.post('/signup', data);

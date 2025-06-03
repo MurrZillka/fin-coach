@@ -1,5 +1,5 @@
 // src/api/categories/index.js
-import apiClient from '../client.js';
+import apiClient from '../client.ts';
 
 export const getCategories = async () => {
     return apiClient.get('/Categories');

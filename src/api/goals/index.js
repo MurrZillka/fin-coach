@@ -1,5 +1,5 @@
 // src/api/goals/index.js
-import apiClient from '../client.js';
+import apiClient from '../client.ts';
 
 export const getGoals = async () => {
     return apiClient.get('/Goals');

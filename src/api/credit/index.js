@@ -1,5 +1,5 @@
 // src/api/credit/index.js
-import apiClient from '../client';
+import apiClient from '../client.js';
 
 export const addCredit = async (data) => {
     return apiClient.post('/AddCredit', data)
