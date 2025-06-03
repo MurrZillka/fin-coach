@@ -3,10 +3,9 @@ import './index.css';
 import useAuthStore from "./stores/authStore.js";
 import App from "./App.jsx";
 
-useAuthStore.getState().initAuth()
+const initApp = async () => {
+    await useAuthStore.getState().initAuth();
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+};
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-    //<React.StrictMode>
-    <App />
-    //</React.StrictMode>,
-);
+initApp();

@@ -1,6 +1,6 @@
 import {create} from 'zustand';
 import {subscribeWithSelector} from 'zustand/middleware';
-import {login as loginApi, signup as signupApi, logout as logoutApi} from '../api/auth';
+import {login as loginApi, signup as signupApi, logout as logoutApi, validateToken} from '../api/auth';
 import {handleAuthApiError} from "../api/auth/utils/handleAuthApiError.js";
 
 const useAuthStore = create()(
@@ -84,18 +84,38 @@ const useAuthStore = create()(
 
         clearError: () => set({error: null}),
 
-        initAuth: () => {
+        initAuth: async () => {
             set({status: 'initializing'});
             const token = localStorage.getItem('token');
             const userName = localStorage.getItem('userName');
-            if (token) {
-                set({
-                    isAuthenticated: true,
-                    user: {access_token: token, userName: userName || 'Пользователь'},
-                    status: 'succeeded',
-                    error: null,
+
+            if (!token) {
+                set({status: 'succeeded'});
+                get().resetAuthState();
+                return;
+            }
+
+            try {
+                const isValid = await validateToken();
+
+                if (isValid) {
+                    set({
+                        isAuthenticated: true,
+                        user: {access_token: token, userName: userName || 'Пользователь'},
+                        status: 'succeeded',
+                        error: null,
+                    });
+                } else {
+                    set({status: 'succeeded'});
+                    get().resetAuthState();
+                }
+            } catch (error) {
+                console.error('authStore: Token validation failed:', {
+                    message: error.message,
+                    status: error.status,
+                    url: error.config?.url
                 });
-            } else {
+                set({status: 'succeeded'});
                 get().resetAuthState();
             }
         },

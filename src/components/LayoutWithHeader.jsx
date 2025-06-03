@@ -1,5 +1,5 @@
 // src/components/LayoutWithHeader.jsx
-import {Route, Routes, useLocation} from 'react-router-dom';
+import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
 import Header from './Header.jsx';
 import HeaderAuth from './HeaderAuth.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
@@ -14,12 +14,18 @@ import BalanceWidget from './widgets/BalanceWidget.jsx';
 export default function LayoutWithHeader() {
     const location = useLocation();
     const {isAuthenticated} = useAuthStore();
+    const {modalType, modalProps, closeModal, submissionError} = useModalStore();
+
+    // ✅ Добавь редирект авторизованных с публичных страниц
+    if (isAuthenticated && ['/login', '/signup', '/demo'].includes(location.pathname)) {
+        console.log('🔀 Redirecting authenticated user from', location.pathname, 'to /main');
+        return <Navigate to="/main" replace />;
+    }
 
     const isAuthPage = ['/login', '/signup', '/demo'].includes(location.pathname);
     const showAuthHeader = isAuthPage;
     const showRegularHeader = isAuthenticated && !isAuthPage;
 
-    const {modalType, modalProps, closeModal, submissionError} = useModalStore();
 
     const validPaths = routes
         .filter(route => route.path !== '*')

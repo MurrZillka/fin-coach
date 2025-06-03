@@ -12,3 +12,13 @@ export const login = async (data) => {
 export const logout = async () => {
     return apiClient.get('/logout');
 };
+
+export const validateToken = async () => {
+    try {
+        const response = await apiClient.get('/Balance');
+        return response.error === null;
+    } catch (error) {
+        console.error('api_auth, validateToken:', error);
+        return false;
+    }
+};

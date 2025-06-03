@@ -3,15 +3,25 @@ import useAuthStore from '../stores/authStore';
 import Loader from "./ui/Loader.jsx";
 
 export default function ProtectedRoute({ children }) {
-    const { isAuthenticated, isInitializing } = useAuthStore();
+    const { isAuthenticated, status, user } = useAuthStore();
 
-    if (isInitializing) {
+    console.log('🛡️ ProtectedRoute check:', {
+        isAuthenticated,
+        status,
+        hasUser: !!user,
+        path: window.location.pathname
+    });
+
+    if (status === 'initializing') {
+        console.log('🔄 ProtectedRoute: Showing loader (initializing)');
         return <Loader/>;
     }
 
     if (!isAuthenticated) {
+        console.log('❌ ProtectedRoute: Not authenticated, redirecting to login');
         return <Navigate to="/login" replace />;
     }
 
+    console.log('✅ ProtectedRoute: Authenticated, rendering children');
     return children;
 }
