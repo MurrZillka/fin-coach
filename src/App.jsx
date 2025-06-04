@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react';
 import {BrowserRouter as Router} from 'react-router-dom';
-import useAuthStore from './stores/authStore';
-import LayoutWithHeader from './components/LayoutWithHeader';
-import Loader from './components/ui/Loader.jsx';
-import Text from './components/ui/Text.jsx';
+import useAuthStore from './02_stores/authStore';
+import LayoutWithHeader from './04_components/LayoutWithHeader';
+import Loader from './04_components/ui/Loader.jsx';
+import Text from './04_components/ui/Text.jsx';
 import {dataCoordinator} from "./dataCoordinator.js";
 
 function App() {

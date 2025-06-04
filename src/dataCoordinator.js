@@ -1,12 +1,12 @@
 // src/dataCoordinator.js
-import useAuthStore from './stores/authStore';
-import useBalanceStore from './stores/balanceStore';
-import useCreditStore from './stores/creditStore';
-import useSpendingsStore from './stores/spendingsStore';
-import useCategoryStore from './stores/categoryStore';
-import useGoalsStore from './stores/goalsStore';
-import useMainPageStore from './stores/mainPageStore';
-import useRemindersStore from "./stores/remindersStore.js";
+import useAuthStore from './02_stores/authStore';
+import useBalanceStore from './02_stores/balanceStore';
+import useCreditStore from './02_stores/creditStore';
+import useSpendingsStore from './02_stores/spendingsStore';
+import useCategoryStore from './02_stores/categoryStore';
+import useGoalsStore from './02_stores/goalsStore';
+import useMainPageStore from './02_stores/mainPageStore';
+import useRemindersStore from "./02_stores/remindersStore.js";
 
 function isUserAuthenticated() {
     return useAuthStore.getState().isAuthenticated;
