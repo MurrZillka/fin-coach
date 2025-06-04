@@ -13,7 +13,7 @@ import useSpendingsStore from '../../02_stores/spendingsStore.js';
 import useCategoryStore from '../../02_stores/categoryStore.js'; // НОВОЕ: Импортируем categoryStore
 
 // Импортируем нашу функцию агрегации
-import { aggregateSpendingsByCategory } from '../../utils/spendingAggregator.js';
+import { aggregateSpendingsByCategory } from '../../07_utils/spendingAggregator.js';
 
 // УДАЛЯЕМ старую константу COLORS, она теперь в constants/colors.js и управляется стором
 // const COLORS = [

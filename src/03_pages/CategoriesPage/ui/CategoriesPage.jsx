@@ -1,12 +1,12 @@
 // CategoriesPage/ui/CategoriesPage.jsx
 import React from 'react';
-import TextButton from '../../../components/ui/TextButton';
-import Text from '../../../components/ui/Text';
+import TextButton from '../../../04_components/ui/TextButton';
+import Text from '../../../04_components/ui/Text';
 import useCategoryStore from '../../../02_stores/categoryStore';
 import useModalStore from '../../../02_stores/modalStore';
-import CategoriesCardList from '../../../components/mobile/CategoriesCardList';
+import CategoriesCardList from '../../../04_components/mobile/CategoriesCardList';
 import {DEFAULT_CATEGORY_NAME} from "../../../constants/categories";
-import Table from "../../../components/ui/Table";
+import Table from "../../../04_components/ui/Table";
 import {categoriesPageHandlers} from '../utils/categoriesPageHandlers.js';
 import {getCategoryColumns} from '../config/tableColumns';
 

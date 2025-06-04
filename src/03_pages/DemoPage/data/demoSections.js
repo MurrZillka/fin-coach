@@ -1,10 +1,10 @@
-import creditsDesktop from '../../../assets/images/credits-desktop.png';
-import spendingsDesktop from '../../../assets/images/spendings-desktop.png';
-import mainPageChartDesktop from '../../../assets/images/mainPageChart-desktop.png';
-import goalsDesktop from '../../../assets/images/goals-desktop.png';
-import recomendationsDesktop from '../../../assets/images/recomendations-desktop.png';
-import balanceDesktop from '../../../assets/images/balanc-desktop.png';
-import mobileDesktop from '../../../assets/images/mobile-vew-desktop.png';
+import creditsDesktop from '../../../05_assets/images/credits-desktop.png';
+import spendingsDesktop from '../../../05_assets/images/spendings-desktop.png';
+import mainPageChartDesktop from '../../../05_assets/images/mainPageChart-desktop.png';
+import goalsDesktop from '../../../05_assets/images/goals-desktop.png';
+import recomendationsDesktop from '../../../05_assets/images/recomendations-desktop.png';
+import balanceDesktop from '../../../05_assets/images/balanc-desktop.png';
+import mobileDesktop from '../../../05_assets/images/mobile-vew-desktop.png';
 
 export const demoSections = [
     {

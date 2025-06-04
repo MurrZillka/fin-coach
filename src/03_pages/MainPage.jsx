@@ -1,10 +1,10 @@
 import React, {useMemo, useState} from 'react';
-import Text from '../components/ui/Text';
-import Loader from '../components/ui/Loader';
-import RecommendationsModal from '../components/ui/RecommendationsModal.jsx';
+import Text from '../04_components/ui/Text';
+import Loader from '../04_components/ui/Loader';
+import RecommendationsModal from '../04_components/ui/RecommendationsModal.jsx';
 
-import CategoryDistributionWidget from '../components/widgets/CategoryDistributionWidget.jsx';
-import CategoryDistributionChartModal from '../components/charts/CategoryDistributionChartModal.jsx';
+import CategoryDistributionWidget from '../04_components/widgets/CategoryDistributionWidget.jsx';
+import CategoryDistributionChartModal from '../04_components/charts/CategoryDistributionChartModal.jsx';
 import useSpendingsStore from '../02_stores/spendingsStore';
 import useCreditStore from '../02_stores/creditStore';
 import useGoalsStore from '../02_stores/goalsStore';
@@ -12,14 +12,14 @@ import useBalanceStore from '../02_stores/balanceStore';
 import useMainPageStore from '../02_stores/mainPageStore';
 import useModalStore from '../02_stores/modalStore';
 import useCategoryStore from '../02_stores/categoryStore'; // Импортируем useCategoryStore
-import TextButton from '../components/ui/TextButton';
+import TextButton from '../04_components/ui/TextButton';
 
-import RecentIncomeWidget from '../components/widgets/RecentIncomeWidget.jsx';
-import RecentExpenseWidget from '../components/widgets/RecentExpenseWidget.jsx';
-import GoalsSummaryWidget from '../components/widgets/GoalsSummaryWidget.jsx';
-import IncomeExpenseChart from '../components/charts/IncomeExpenseChart.jsx';
+import RecentIncomeWidget from '../04_components/widgets/RecentIncomeWidget.jsx';
+import RecentExpenseWidget from '../04_components/widgets/RecentExpenseWidget.jsx';
+import GoalsSummaryWidget from '../04_components/widgets/GoalsSummaryWidget.jsx';
+import IncomeExpenseChart from '../04_components/charts/IncomeExpenseChart.jsx';
 import {useNavigate} from "react-router-dom";
-import {aggregateSpendingsByCategory} from "../utils/spendingAggregator.js";
+import {aggregateSpendingsByCategory} from "../07_utils/spendingAggregator.js";
 
 
 export default function MainPage() {
