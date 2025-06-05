@@ -1,4 +1,4 @@
-// src/utils/handleBalanceApiError.ts
+// src/api/balance/utils/handleBalanceApiError.ts
 import {ApiError, ApiErrorWithMessage} from "../../apiTypes";
 
 export const handleBalanceApiError = (error: ApiError): ApiErrorWithMessage => {

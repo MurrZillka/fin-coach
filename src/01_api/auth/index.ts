@@ -5,8 +5,8 @@ import {
     SignupResponse,
     LoginRequest,
     LoginResponse,
-    BalanceResponse,
-} from '../apiTypes';
+} from './types';
+import {BalanceResponse} from "../balance/types";
 
 // Регистрация
 export const signup = async (data: SignupRequest) => {

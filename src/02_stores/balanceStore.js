@@ -29,10 +29,7 @@ const useBalanceStore = create()(subscribeWithSelector((set, get) => ({
         try {
             const result = await fetchBalanceApi();
             console.log('balanceStore: API getBalance result:', result);
-
-            // API возвращает { balance: 792502 }
-            const { balance } = result.data || {};
-            set({ balance: balance || null });
+            set({ balance: result.balance ?? null });
         } catch (error) {
             get().handleError(error, 'fetchBalance');
         } finally {
