@@ -1,7 +1,7 @@
 // src/02_stores/categoryStore.js
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import * as categoryAPI from '../01_api/categories/index.js';
+import * as categoryAPI from '../01_api/categories/index.ts';
 import { handleCategoryApiError } from '../01_api/categories/utils/handleCategoryApiError.ts';
 import { CHART_COLORS } from '../constants/colors';
 
@@ -34,12 +34,10 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
     fetchCategories: async () => {
         set({ loading: true, error: null });
         try {
-            const result = await categoryAPI.getCategories();
-            console.log('categoryStore: API getCategories result:', result);
-
-            const { Categories: categories } = result.data || {};
-            set({ categories: categories || [] });
-            get()._updateCategoryColorMap(categories);
+            const {Categories} = await categoryAPI.getCategories();
+            console.log('categoryStore: API getCategories result:', Categories);
+            set({ categories: Categories || [] });
+            get()._updateCategoryColorMap(Categories || []);
         } catch (error) {
             get().handleError(error, 'fetchCategories');
         } finally {
@@ -53,7 +51,7 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
         try {
             const result = await categoryAPI.addCategory(categoryData);
             await get().fetchCategories();
-            return result.data;
+            return result;
         } catch (error) {
             get().handleError(error, 'addCategory');
         } finally {
@@ -68,7 +66,7 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
             const result = await categoryAPI.updateCategoryById(id, categoryData);
             console.log('categoryStore: API updateCategory result:', result);
             await get().fetchCategories();
-            return result.data;
+            return result;
         } catch (error) {
             get().handleError(error, 'updateCategory');
         } finally {
@@ -83,7 +81,7 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
             const result = await categoryAPI.deleteCategoryById(id);
             console.log('categoryStore: API deleteCategory result:', result);
             await get().fetchCategories();
-            return result.data;
+            return result;
         } catch (error) {
             get().handleError(error, 'deleteCategory');
         } finally {
@@ -96,9 +94,8 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
         try {
             const result = await categoryAPI.getCategoriesMonth();
             console.log('categoryStore: API getCategoriesMonth result:', result);
-
             // API возвращает { Categories: {Еда2: 34536, Разное: 38008} }
-            const { Categories: categoriesMonth = {} } = result.data || {}; // ← ИСПРАВЬ ЭТУ СТРОКУ
+            const categoriesMonth = result.Categories ?? {};
             set({ categoriesMonth });
         } catch (error) {
             get().handleError(error, 'getCategoriesMonth');
