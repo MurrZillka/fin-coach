@@ -1,4 +1,4 @@
-// src/api/auth/apiTypes.ts
+// src/api/auth/index.ts
 import apiClient from '../client';
 import {
     SignupRequest,
