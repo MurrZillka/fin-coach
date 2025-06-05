@@ -1,7 +1,7 @@
 // src/02_stores/goalsStore.js
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import * as goalsAPI from '../01_api/goals/index';
+import * as goalsAPI from '../01_api/goals/index.js';
 import { handleGoalsApiError } from '../01_api/goals/utils/handleGoalsApiError.js';
 
 const initialState = {
@@ -29,10 +29,10 @@ const useGoalsStore = create()(subscribeWithSelector((set, get) => ({
     fetchGoals: async () => {
         set({ loading: true, error: null });
         try {
-            const result = await goalsAPI.getGoals();
-            console.log('goalsStore: API getGoals result:', result);
+            const data = await goalsAPI.getGoals();
+            console.log('goalsStore: API getGoals result:', data);
 
-            const { Goals: goals = [] } = result.data || {};
+            const { Goals: goals = [] } = data || {};
             set({ goals });
         } catch (error) {
             get().handleError(error, 'fetchGoals');
@@ -44,12 +44,12 @@ const useGoalsStore = create()(subscribeWithSelector((set, get) => ({
     getCurrentGoal: async () => {
         set({ loading: true, error: null });
         try {
-            const result = await goalsAPI.getCurrentGoal();
-            console.log('goalsStore: API getCurrentGoal result:', result);
+            const data = await goalsAPI.getCurrentGoal();
+            console.log('goalsStore: API getCurrentGoal result:', data);
 
             // Специальная обработка "no current goal found"
-            if (result.data?.Goal) {
-                set({ currentGoal: result.data.Goal });
+            if (data?.Goal) {
+                set({ currentGoal: data.Goal });
             } else {
                 set({ currentGoal: null });
             }
@@ -69,10 +69,10 @@ const useGoalsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('goalsStore: addGoal started');
         try {
-            const result = await goalsAPI.addGoal(goalData);
+            const data = await goalsAPI.addGoal(goalData);
             await get().fetchGoals();
             await get().getCurrentGoal();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'addGoal');
         } finally {
@@ -84,10 +84,10 @@ const useGoalsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('goalsStore: updateGoal started');
         try {
-            const result = await goalsAPI.updateGoalById(id, goalData);
+            const data = await goalsAPI.updateGoalById(id, goalData);
             await get().fetchGoals();
             await get().getCurrentGoal();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'updateGoal');
         } finally {
@@ -99,10 +99,10 @@ const useGoalsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('goalsStore: deleteGoal started');
         try {
-            const result = await goalsAPI.deleteGoalById(id);
+            const data = await goalsAPI.deleteGoalById(id);
             await get().fetchGoals();
             await get().getCurrentGoal();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'deleteGoal');
         } finally {
@@ -114,10 +114,10 @@ const useGoalsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('goalsStore: setCurrentGoal started');
         try {
-            const result = await goalsAPI.setCurrentGoal(id);
+            const data = await goalsAPI.setCurrentGoal(id);
             await get().fetchGoals();
             await get().getCurrentGoal();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'setCurrentGoal');
         } finally {
