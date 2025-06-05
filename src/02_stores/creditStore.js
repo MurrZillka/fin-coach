@@ -28,9 +28,9 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
     fetchCredits: async () => {
         set({loading: true, error: null});
         try {
-            const result = await creditAPI.getCredits();
-            console.log('creditStore: API getCredits result:', result);
-            set({credits: result.data.Credits || []});
+            const data = await creditAPI.getCredits();
+            console.log('creditStore: API getCredits result:', data);
+            set({credits: data.Credits ?? []});
         } catch (error) {
             get().handleError(error, 'fetchCredits');
         } finally {
@@ -43,9 +43,9 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
         set({loading: true, error: null});
         console.log('creditStore: addCredit started');
         try {
-            const result = await creditAPI.addCredit(creditData);
+            const data = await creditAPI.addCredit(creditData);
             await get().fetchCredits();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'addCredit')
         } finally {
@@ -58,10 +58,10 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
         set({loading: true, error: null});
         console.log('creditStore: updateCredit started');
         try {
-            const result = await creditAPI.updateCreditById(id, creditData);
-            console.log('creditStore: API updateCredit result:', result);
+            const data = await creditAPI.updateCreditById(id, creditData);
+            console.log('creditStore: API updateCredit result:', data);
             await get().fetchCredits();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'updateCredit')
         } finally {
@@ -74,10 +74,10 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
         set({loading: true, error: null});
         console.log('creditStore: deleteCredit started');
         try {
-            const result = await creditAPI.deleteCreditById(id);
-            console.log('creditStore: API deleteCredit result:', result);
+            const data = await creditAPI.deleteCreditById(id);
+            console.log('creditStore: API deleteCredit result:', data);
             await get().fetchCredits();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'deleteCredit')
         } finally {

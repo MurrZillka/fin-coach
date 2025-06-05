@@ -8,7 +8,7 @@ import {
 
 // Получить все кредиты
 export const getCredits = async (): Promise<GetCreditsResponse> => {
-    const response = await apiClient.get<GetCreditsResponse>('/GetCredits');
+    const response = await apiClient.get<GetCreditsResponse>('/Credits');
     return response.data;
 };
 
