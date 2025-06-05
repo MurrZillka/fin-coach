@@ -1,6 +1,9 @@
 // src/utils/handleCreditApiError.js
-export const handleCreditApiError = (error) => {
-    const errorMappings = {
+import { ApiError } from '../../apiTypes';
+import {CreditFieldError} from "../types";
+
+export const handleCreditApiError = (error: ApiError): CreditFieldError => {
+    const errorMappings: Record<string, { message: string; field: string }> = {
         'credit end_date must be greater than credit date': {
             message: 'Дата окончания дохода должна быть больше или равна дате начала.',
             field: 'end_date'
@@ -33,9 +36,10 @@ export const handleCreditApiError = (error) => {
     }
 
     // Общие ошибки без привязки к полю
-    const userMessage = error.status >= 400 && error.status < 500
-        ? 'Ошибка в данных формы. Проверьте введенные значения.'
-        : 'Ошибка связи или сервера. Попробуйте позже.';
+    const userMessage =
+        error.status && error.status >= 400 && error.status < 500
+            ? 'Ошибка в данных формы. Проверьте введенные значения.'
+            : 'Ошибка связи или сервера. Попробуйте позже.';
 
     console.error('handleCreditApiError: Processed error -', {
         original: error.message,

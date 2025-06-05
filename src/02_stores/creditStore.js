@@ -1,8 +1,8 @@
 // src/02_stores/creditStore.js
 import {create} from 'zustand';
-import * as creditAPI from '../01_api/credit/index';
+import * as creditAPI from '../01_api/credit/index.js';
 import {subscribeWithSelector} from "zustand/middleware";
-import {handleCreditApiError} from "../01_api/credit/utils/handleCreditApiError.js";
+import {handleCreditApiError} from "../01_api/credit/utils/handleCreditApiError.ts";
 
 const initialState = {
     credits: null,
