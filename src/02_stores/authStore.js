@@ -35,8 +35,7 @@ const useAuthStore = create()(
         login: async (credentials) => {
             set({status: 'loading', error: null});
             try {
-                const result = await loginApi(credentials);
-                const {data} = result;
+                const data = await loginApi(credentials);
                 if (data && data.access_token) get().setToken(data.access_token);
                 if (data && data.userName) get().setUserName(data.userName);
                 set({user: data, isAuthenticated: true, status: 'succeeded', error: null});
@@ -50,9 +49,9 @@ const useAuthStore = create()(
         signup: async (userData) => {
             set({status: 'loading', error: null});
             try {
-                const result = await signupApi(userData);
+                const data = await signupApi(userData);
                 set({status: 'succeeded', error: null});
-                return result.data;
+                return data;
             } catch (error) {
                 get().handleError(error);
                 throw error;
@@ -67,7 +66,7 @@ const useAuthStore = create()(
                 error: null
             });
             localStorage.removeItem('token');
-            localStorage.removeItem('name');
+            localStorage.removeItem('userName');
         },
         logout: async () => {
             set({status: 'loading'});
