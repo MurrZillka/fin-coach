@@ -1,6 +1,6 @@
 // src/dataCoordinator.js
 import useAuthStore from './02_stores/authStore/authStore.ts';
-import useBalanceStore from './02_stores/balanceStore';
+import useBalanceStore from './02_stores/balanceStore/balanceStore.ts';
 import useCreditStore from './02_stores/creditStore';
 import useSpendingsStore from './02_stores/spendingsStore';
 import useCategoryStore from './02_stores/categoryStore';

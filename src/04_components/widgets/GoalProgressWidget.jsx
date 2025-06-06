@@ -1,7 +1,7 @@
 // src/components/GoalProgressWidget.jsx
 import React from 'react';
 import useGoalsStore from '../../02_stores/goalsStore.js'; // Импортируем стор Целей
-import useBalanceStore from '../../02_stores/balanceStore.js'; // Импортируем стор Баланса
+import useBalanceStore from '../../02_stores/balanceStore/balanceStore.ts'; // Импортируем стор Баланса
 import Text from '../ui/Text.jsx'; // Импортируем компонент Text
 
 

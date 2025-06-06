@@ -8,7 +8,7 @@ import CategoryDistributionChartModal from '../04_components/charts/CategoryDist
 import useSpendingsStore from '../02_stores/spendingsStore';
 import useCreditStore from '../02_stores/creditStore';
 import useGoalsStore from '../02_stores/goalsStore';
-import useBalanceStore from '../02_stores/balanceStore';
+import useBalanceStore from '../02_stores/balanceStore/balanceStore.ts';
 import useMainPageStore from '../02_stores/mainPageStore';
 import useModalStore from '../02_stores/modalStore';
 import useCategoryStore from '../02_stores/categoryStore'; // Импортируем useCategoryStore

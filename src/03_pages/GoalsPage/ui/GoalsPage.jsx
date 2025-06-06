@@ -4,7 +4,7 @@ import Text from '../../../04_components/ui/Text';
 import TextButton from '../../../04_components/ui/TextButton';
 import useGoalsStore from '../../../02_stores/goalsStore';
 import useModalStore from '../../../02_stores/modalStore';
-import useBalanceStore from '../../../02_stores/balanceStore';
+import useBalanceStore from '../../../02_stores/balanceStore/balanceStore.ts';
 import GoalsCardList from '../../../04_components/mobile/GoalsCardList';
 import Table from '../../../04_components/ui/Table';
 import {goalsPageHandlers} from '../utils/goalsPageHandlers.js';

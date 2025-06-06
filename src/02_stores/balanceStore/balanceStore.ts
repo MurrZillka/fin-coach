@@ -1,18 +1,20 @@
-// src/02_stores/balanceStore.js
+// src/02_stores/balanceStore.ts
+
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { getBalance as fetchBalanceApi } from '../01_api/balance/index.js';
-import { handleBalanceApiError } from '../01_api/balance/utils/handleBalanceApiError.ts';
+import { getBalance as fetchBalanceApi } from '../../01_api/balance/index';
+import { handleBalanceApiError } from '../../01_api/balance/utils/handleBalanceApiError';
+import type {BalanceStore, BalanceStoreActions} from './types';
 
-const initialState = {
+const initialState: Omit<BalanceStore, keyof BalanceStoreActions> = {
     balance: null,
     loading: false,
     error: null,
 };
 
-const useBalanceStore = create()(subscribeWithSelector((set, get) => ({
-    // --- Состояние (State) ---
+const useBalanceStore = create<BalanceStore>()(subscribeWithSelector((set, get) => ({
     ...initialState,
+
     setBalance: (balance) => set({ balance }),
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
@@ -23,7 +25,6 @@ const useBalanceStore = create()(subscribeWithSelector((set, get) => ({
         throw processedError;
     },
 
-    // --- Действия (Actions) ---
     fetchBalance: async () => {
         set({ loading: true, error: null });
         try {

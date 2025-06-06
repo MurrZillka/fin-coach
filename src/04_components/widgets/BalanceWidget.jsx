@@ -1,7 +1,7 @@
 // src/components/BalanceWidget.jsx
 import React from 'react';
 // Убедись, что путь к useBalanceStore корректный
-import useBalanceStore from '../../02_stores/balanceStore.js'; // Импортируем стор баланса
+import useBalanceStore from '../../02_stores/balanceStore/balanceStore.ts'; // Импортируем стор баланса
 // Убедись, что путь к Text корректный относительно этой папки components
 import Text from '../ui/Text.jsx'; // Импортируем компонент Text
 // --- ДОБАВЛЕНО: Импортируем новый компонент виджета прогресса цели ---

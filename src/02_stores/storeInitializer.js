@@ -3,7 +3,7 @@
 
 // Импортируем все сторы. Важно, чтобы все сторы были импортированы здесь.
 import useAuthStore from './authStore/authStore.ts';
-import useBalanceStore from './balanceStore';
+import useBalanceStore from './balanceStore/balanceStore.ts';
 import useCreditStore from './creditStore';
 import useSpendingsStore from './spendingsStore';
 import useCategoryStore from './categoryStore';
