@@ -1,8 +1,8 @@
 // src/02_stores/remindersStore.js
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import * as remindersAPI from '../01_api/reminders/index';
-import { handleRemindersApiError } from '../01_api/reminders/utils/handleRemindersApiError.js';
+import * as remindersAPI from '../01_api/reminders/index.js';
+import { handleRemindersApiError } from '../01_api/reminders/utils/handleRemindersApiError.ts';
 
 const initialState = {
     todayReminder: null,
