@@ -2,7 +2,7 @@
 // Этот файл инициализирует подписки между сторами ПОСЛЕ того, как все сторы определены.
 
 // Импортируем все сторы. Важно, чтобы все сторы были импортированы здесь.
-import useAuthStore from './authStore';
+import useAuthStore from './authStore/authStore.ts';
 import useBalanceStore from './balanceStore';
 import useCreditStore from './creditStore';
 import useSpendingsStore from './spendingsStore';

@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import useAuthStore from '../02_stores/authStore';
+import useAuthStore from '../02_stores/authStore/authStore.ts';
 import Loader from "./ui/Loader.jsx";
 
 export default function ProtectedRoute({ children }) {

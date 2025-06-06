@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 import { useNavigate } from 'react-router-dom';
-import useAuthStore from '../02_stores/authStore';
+import useAuthStore from '../02_stores/authStore/authStore.ts';
 import useRemindersStore from '../02_stores/remindersStore';
 import useModalStore from '../02_stores/modalStore';
 import Text from './ui/Text';

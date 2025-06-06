@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import Text from '../04_components/ui/Text';
 import Input from '../04_components/ui/Input';
-import useAuthStore from '../02_stores/authStore';
+import useAuthStore from '../02_stores/authStore/authStore.ts';
 
 export default function SignupPage() {
     const navigate = useNavigate();

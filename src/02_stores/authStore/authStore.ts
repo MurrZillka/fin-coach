@@ -1,18 +1,22 @@
-import {create} from 'zustand';
-import {subscribeWithSelector} from 'zustand/middleware';
-import {login as loginApi, signup as signupApi, logout as logoutApi, validateToken} from '../01_api/auth/index.js';
-import {handleAuthApiError} from "../01_api/auth/utils/handleAuthApiError.ts";
+// src/stores/authStore.ts
 
-const useAuthStore = create()(
+import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
+import { login as loginApi, signup as signupApi, logout as logoutApi, validateToken } from '../../01_api/auth/index';
+import { handleAuthApiError } from "../../01_api/auth/utils/handleAuthApiError";
+import type { LoginResponse } from '../../01_api/auth/types';
+import type { AuthStore } from './types.ts';
+
+export const useAuthStore = create<AuthStore>()(
     subscribeWithSelector((set, get) => ({
         user: null,
         isAuthenticated: false,
         status: 'idle',
         error: null,
 
-        setToken: (token) => localStorage.setItem('token', token),
+        setToken: (token: string) => localStorage.setItem('token', token),
         clearToken: () => localStorage.removeItem('token'),
-        setUserName: (userName) => localStorage.setItem('userName', userName),
+        setUserName: (userName: string) => localStorage.setItem('userName', userName),
         clearUserName: () => localStorage.removeItem('userName'),
 
         resetAuthState: () => {
@@ -26,19 +30,19 @@ const useAuthStore = create()(
             get().clearUserName();
         },
 
-        handleError: (error) => {
-            const processedError = handleAuthApiError(error); // Преобразование
-            set({status: 'failed', error: processedError}); // Управление состоянием
-            console.error('authStore: Error occurred:', error); // Логирование
+        handleError: (error: any) => {
+            const processedError = handleAuthApiError(error);
+            set({ status: 'failed', error: processedError });
+            console.error('authStore: Error occurred:', error);
         },
 
-        login: async (credentials) => {
-            set({status: 'loading', error: null});
+        login: async (credentials: { login: string; password: string }) => {
+            set({ status: 'loading', error: null });
             try {
                 const data = await loginApi(credentials);
                 if (data && data.access_token) get().setToken(data.access_token);
                 if (data && data.userName) get().setUserName(data.userName);
-                set({user: data, isAuthenticated: true, status: 'succeeded', error: null});
+                set({ user: data, isAuthenticated: true, status: 'succeeded', error: null });
                 return data;
             } catch (error) {
                 get().resetAuthState();
@@ -46,19 +50,20 @@ const useAuthStore = create()(
                 throw error;
             }
         },
-        signup: async (userData) => {
-            set({status: 'loading', error: null});
+
+        signup: async (userData: { user_name: string; login: string; password: string }) => {
+            set({ status: 'loading', error: null });
             try {
                 const data = await signupApi(userData);
-                set({status: 'succeeded', error: null});
+                set({ status: 'succeeded', error: null });
                 return data;
             } catch (error) {
                 get().handleError(error);
                 throw error;
             }
         },
+
         logoutLocal: () => {
-            // Только сброс состояния, без API-запроса
             set({
                 user: null,
                 isAuthenticated: false,
@@ -68,28 +73,29 @@ const useAuthStore = create()(
             localStorage.removeItem('token');
             localStorage.removeItem('userName');
         },
+
         logout: async () => {
-            set({status: 'loading'});
+            set({ status: 'loading' });
             try {
                 await logoutApi();
-                localStorage.setItem('logout_event', Date.now());
+                localStorage.setItem('logout_event', Date.now().toString());
                 localStorage.removeItem('logout_event');
             } catch (error) {
                 get().handleError(error);
             } finally {
-                get().resetAuthState(); // Только один set() в конце
+                get().resetAuthState();
             }
         },
 
-        clearError: () => set({error: null}),
+        clearError: () => set({ error: null }),
 
         initAuth: async () => {
-            set({status: 'initializing'});
+            set({ status: 'initializing' });
             const token = localStorage.getItem('token');
             const userName = localStorage.getItem('userName');
 
             if (!token) {
-                set({status: 'succeeded'});
+                set({ status: 'succeeded' });
                 get().resetAuthState();
                 return;
             }
@@ -100,12 +106,12 @@ const useAuthStore = create()(
                 if (isValid) {
                     set({
                         isAuthenticated: true,
-                        user: {access_token: token, userName: userName || 'Пользователь'},
+                        user: { access_token: token, userName: userName || 'Пользователь' } as LoginResponse,
                         status: 'succeeded',
                         error: null,
                     });
                 } else {
-                    set({status: 'succeeded'});
+                    set({ status: 'succeeded' });
                     get().resetAuthState();
                 }
             } catch (error) {
@@ -114,7 +120,7 @@ const useAuthStore = create()(
                     status: error.status,
                     url: error.config?.url
                 });
-                set({status: 'succeeded'});
+                set({ status: 'succeeded' });
                 get().resetAuthState();
             }
         },

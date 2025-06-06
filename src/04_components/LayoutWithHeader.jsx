@@ -4,7 +4,7 @@ import Header from './Header.jsx';
 import HeaderAuth from './HeaderAuth.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import routes from '../06_routes';
-import useAuthStore from '../02_stores/authStore.js';
+import useAuthStore from '../02_stores/authStore/authStore.ts';
 import useModalStore from '../02_stores/modalStore.js';
 import Modal from './ui/Modals/Modal.jsx';
 import ConfirmModal from './ui/Modals/ConfirmModal.jsx';

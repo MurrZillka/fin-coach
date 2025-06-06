@@ -1,7 +1,7 @@
 import React from 'react'; // Добавляем useEffect
 import {useNavigate} from 'react-router-dom'; // Добавляем useNavigate
 import Text from '../04_components/ui/Text';
-import useAuthStore from '../02_stores/authStore'; // Импортируем useAuthStore
+import useAuthStore from '../02_stores/authStore/authStore.ts'; // Импортируем useAuthStore
 
 export default function PageNotFound() {
     const navigate = useNavigate();

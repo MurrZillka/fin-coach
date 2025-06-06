@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import useAuthStore from "./02_stores/authStore.js";
+import useAuthStore from "./02_stores/authStore/authStore.ts";
 import App from "./App.jsx";
 
 const initApp = async () => {
