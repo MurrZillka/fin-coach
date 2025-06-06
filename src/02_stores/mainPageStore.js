@@ -27,11 +27,11 @@ const useMainPageStore = create()(subscribeWithSelector((set, get) => ({
     fetchRecommendations: async () => {
         set({ loading: true, error: null });
         try {
-            const result = await mainPageAPI.getRecommendations();
-            console.log('mainPageStore: API getRecommendations result:', result);
+            const data = await mainPageAPI.getRecommendations();
+            console.log('mainPageStore: API getRecommendations result:', data);
 
             // API возвращает { Recommendations: [...] }
-            const { Recommendations: recommendations = [] } = result.data || {};
+            const { Recommendations: recommendations = [] } = data || {};
             set({ recommendations });
         } catch (error) {
             get().handleError(error, 'fetchRecommendations');
