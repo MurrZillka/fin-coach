@@ -100,5 +100,3 @@ const useCreditStore = create()(subscribeWithSelector((set, get) => ({
 })));
 
 export default useCreditStore;
-
-//todo - разобраться с появлением в модалке подписей к ошибкам в датах.

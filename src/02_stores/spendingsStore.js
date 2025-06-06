@@ -26,9 +26,9 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
     fetchSpendings: async () => {
         set({ loading: true, error: null });
         try {
-            const result = await spendingsAPI.getSpendings();
-            console.log('spendingsStore: API getSpendings result:', result);
-            set({ spendings: result.data.Spendings || [] });
+            const data = await spendingsAPI.getSpendings();
+            console.log('spendingsStore: API getSpendings result:', data);
+            set({ spendings: data.Spendings ?? [] });
         } catch (error) {
             get().handleError(error, 'fetchSpendings');
         } finally {
@@ -40,9 +40,9 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('spendingsStore: addSpending started');
         try {
-            const result = await spendingsAPI.addSpending(spendingData);
+            const data = await spendingsAPI.addSpending(spendingData);
             await get().fetchSpendings();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'addSpending');
         } finally {
@@ -54,10 +54,10 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('spendingsStore: updateSpending started');
         try {
-            const result = await spendingsAPI.updateSpendingById(id, spendingData);
-            console.log('spendingsStore: API updateSpending result:', result);
+            const data = await spendingsAPI.updateSpendingById(id, spendingData);
+            console.log('spendingsStore: API updateSpending result:', data);
             await get().fetchSpendings();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'updateSpending');
         } finally {
@@ -69,10 +69,10 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         console.log('spendingsStore: deleteSpending started');
         try {
-            const result = await spendingsAPI.deleteSpendingById(id);
-            console.log('spendingsStore: API deleteSpending result:', result);
+            const data = await spendingsAPI.deleteSpendingById(id);
+            console.log('spendingsStore: API deleteSpending result:', data);
             await get().fetchSpendings();
-            return result.data;
+            return data;
         } catch (error) {
             get().handleError(error, 'deleteSpending');
         } finally {
@@ -92,4 +92,3 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
 })));
 
 export default useSpendingsStore;
-//todo - разобраться с появлением в модалке подписей к ошибкам в датах.
