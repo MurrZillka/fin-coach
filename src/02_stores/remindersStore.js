@@ -27,11 +27,11 @@ const useRemindersStore = create()(subscribeWithSelector((set, get) => ({
     fetchTodayReminder: async () => {
         set({ loading: true, error: null });
         try {
-            const result = await remindersAPI.getTodayReminder();
-            console.log('remindersStore: API getTodayReminder result:', result);
+            const data = await remindersAPI.getTodayReminder();
+            console.log('remindersStore: API getTodayReminder result:', data);
 
             // API возвращает данные о напоминании
-            set({ todayReminder: result.data });
+            set({ todayReminder: data });
         } catch (error) {
             get().handleError(error, 'fetchTodayReminder');
         } finally {
