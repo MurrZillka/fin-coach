@@ -2,7 +2,7 @@
 import {dateFormatting} from '../../../07_utils/dateFormatting.js';
 import {financialData} from '../../../07_utils/financialData.js';
 import {dataCoordinator} from '../../../dataCoordinator';
-import useCreditStore from '../../../02_stores/creditStore';
+import useCreditStore from '../../../02_stores/creditsStore/creditStore.ts';
 import {getCreditFields} from '../config/modalFields';
 
 export const creditsPageHandlers = ({

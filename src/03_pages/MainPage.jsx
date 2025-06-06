@@ -6,7 +6,7 @@ import RecommendationsModal from '../04_components/ui/RecommendationsModal.jsx';
 import CategoryDistributionWidget from '../04_components/widgets/CategoryDistributionWidget.jsx';
 import CategoryDistributionChartModal from '../04_components/charts/CategoryDistributionChartModal.jsx';
 import useSpendingsStore from '../02_stores/spendingsStore';
-import useCreditStore from '../02_stores/creditStore';
+import useCreditStore from '../02_stores/creditsStore/creditStore.ts';
 import useGoalsStore from '../02_stores/goalsStore';
 import useBalanceStore from '../02_stores/balanceStore/balanceStore.ts';
 import useMainPageStore from '../02_stores/mainPageStore';
