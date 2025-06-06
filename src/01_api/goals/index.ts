@@ -1,4 +1,4 @@
-// src/api/goals/apiTypes.ts
+// src/api/goals/index.ts
 import apiClient from '../client';
 import { Goal, GoalRequest, GoalActionResponse } from './types';
 

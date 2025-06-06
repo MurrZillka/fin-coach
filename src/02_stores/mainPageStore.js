@@ -1,8 +1,8 @@
 // src/02_stores/mainPageStore.js
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import * as mainPageAPI from '../01_api/recommendations/index';
-import { handleMainPageApiError } from '../01_api/recommendations/utils/handleMainPageApiError.js';
+import * as mainPageAPI from '../01_api/recommendations/index.js';
+import { handleMainPageApiError } from '../01_api/recommendations/utils/handleMainPageApiError.ts';
 
 const initialState = {
     recommendations: null,

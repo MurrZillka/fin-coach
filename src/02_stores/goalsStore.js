@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import * as goalsAPI from '../01_api/goals/index.js';
-import { handleGoalsApiError } from '../01_api/goals/utils/handleGoalsApiError.js';
+import { handleGoalsApiError } from '../01_api/goals/utils/handleGoalsApiError.ts';
 
 const initialState = {
     goals: null,
