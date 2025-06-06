@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import * as spendingsAPI from '../01_api/spendings/index';
-import { handleSpendingApiError } from '../01_api/spendings/utils/handleSpendingApiError.js';
+import * as spendingsAPI from '../01_api/spendings/index.js';
+import { handleSpendingApiError } from '../01_api/spendings/utils/handleSpendingApiError.ts';
 
 const initialState = {
     spendings: null,

@@ -1,6 +1,13 @@
-// src/api/spending/utils/handleSpendingApiError.js (или где у тебя теперь лежит)
-export const handleSpendingApiError = (error) => {
-    const errorMappings = {
+// src/api/spending/utils/handleSpendingApiError.ts
+
+import { ApiError, ApiErrorWithMessage } from '../../apiTypes';
+
+export interface SpendingFieldError extends ApiErrorWithMessage {
+    field: string | null;
+}
+
+export const handleSpendingApiError = (error: ApiError): SpendingFieldError => {
+    const errorMappings: Record<string, { message: string; field: string }> = {
         'spending end_date must be greater than spending date': {
             message: 'Дата окончания расхода должна быть больше или равна дате начала расхода.',
             field: 'end_date'
@@ -33,7 +40,7 @@ export const handleSpendingApiError = (error) => {
     }
 
     // Общие ошибки без привязки к полю
-    const userMessage = error.status >= 400 && error.status < 500
+    const userMessage = error.status != null && error.status >= 400 && error.status < 500
         ? 'Ошибка в данных формы. Проверьте введенные значения.'
         : 'Ошибка связи или сервера. Попробуйте позже.';
 
