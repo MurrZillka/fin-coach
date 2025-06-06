@@ -1,11 +1,13 @@
-// src/02_stores/categoryStore.js
-import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
-import * as categoryAPI from '../01_api/categories/index.ts';
-import { handleCategoryApiError } from '../01_api/categories/utils/handleCategoryApiError.ts';
-import { CHART_COLORS } from '../constants/colors';
+// src/02_stores/categoryStore/categoryStore.ts
 
-const initialState = {
+import {create} from 'zustand';
+import {subscribeWithSelector} from 'zustand/middleware';
+import * as categoryAPI from '../../01_api/categories/index';
+import {handleCategoryApiError} from '../../01_api/categories/utils/handleCategoryApiError';
+import {CHART_COLORS} from '../../constants/colors';
+import type {CategoryStore, CategoryStoreActions} from './types';
+
+const initialState: Omit<CategoryStore, keyof CategoryStoreActions> = {
     categories: null,
     categoriesMonth: null,
     categoryColorMap: {},
@@ -14,11 +16,11 @@ const initialState = {
     error: null,
 };
 
-const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
-    // --- Состояние (State) ---
+const useCategoryStore = create<CategoryStore>()(subscribeWithSelector((set, get) => ({
     ...initialState,
+
     setCategories: (categories) => set({ categories }),
-    etCategoriesMonth: (categoriesMonth) => set({ categoriesMonth }),
+    setCategoriesMonth: (categoriesMonth) => set({ categoriesMonth }),
     setCategoryColorMap: (categoryColorMap) => set({ categoryColorMap }),
     setNextColorIndex: (nextColorIndex) => set({ nextColorIndex }),
     setLoading: (loading) => set({ loading }),
@@ -30,12 +32,10 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
         throw processedError;
     },
 
-    // --- Действия (Actions) ---
     fetchCategories: async () => {
         set({ loading: true, error: null });
         try {
-            const {Categories} = await categoryAPI.getCategories();
-            console.log('categoryStore: API getCategories result:', Categories);
+            const { Categories } = await categoryAPI.getCategories();
             set({ categories: Categories || [] });
             get()._updateCategoryColorMap(Categories || []);
         } catch (error) {
@@ -47,7 +47,6 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
 
     addCategory: async (categoryData) => {
         set({ loading: true, error: null });
-        console.log('categoryStore: addCategory started');
         try {
             const result = await categoryAPI.addCategory(categoryData);
             await get().fetchCategories();
@@ -61,10 +60,8 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
 
     updateCategory: async (id, categoryData) => {
         set({ loading: true, error: null });
-        console.log('categoryStore: updateCategory started');
         try {
             const result = await categoryAPI.updateCategoryById(id, categoryData);
-            console.log('categoryStore: API updateCategory result:', result);
             await get().fetchCategories();
             return result;
         } catch (error) {
@@ -76,10 +73,8 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
 
     deleteCategory: async (id) => {
         set({ loading: true, error: null });
-        console.log('categoryStore: deleteCategory started');
         try {
             const result = await categoryAPI.deleteCategoryById(id);
-            console.log('categoryStore: API deleteCategory result:', result);
             await get().fetchCategories();
             return result;
         } catch (error) {
@@ -93,8 +88,6 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
         set({ loading: true, error: null });
         try {
             const result = await categoryAPI.getCategoriesMonth();
-            console.log('categoryStore: API getCategoriesMonth result:', result);
-            // API возвращает { Categories: {Еда2: 34536, Разное: 38008} }
             const categoriesMonth = result.Categories ?? {};
             set({ categoriesMonth });
         } catch (error) {
@@ -117,16 +110,13 @@ const useCategoryStore = create()(subscribeWithSelector((set, get) => ({
         });
 
         set({ categoryColorMap: updatedMap, nextColorIndex: currentIndex });
-        console.log('categoryStore: categoryColorMap updated', updatedMap);
     },
 
     resetCategories: () => {
-        console.log('categoryStore: resetCategories called.');
         set(initialState);
     },
 
     clearError: () => {
-        console.log('categoryStore: clearError called.');
         set({ error: null });
     },
 })));

@@ -6,7 +6,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import TooltipCustom from '../ui/Tooltip.jsx'; // Переименованный импорт UI-тултипа
 
 // НОВОЕ: Импортируем useCategoryStore
-import useCategoryStore from '../../02_stores/categoryStore.js';
+import useCategoryStore from '../../02_stores/categoryStore/categoryStore.ts';
 
 // УДАЛЯЕМ старую константу COLORS
 // const COLORS = [

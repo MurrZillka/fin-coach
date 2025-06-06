@@ -1,6 +1,6 @@
 // CategoriesPage/utils/goalsPageHandlers.js
 import { dataCoordinator } from '../../../dataCoordinator';
-import useCategoryStore from '../../../02_stores/categoryStore';
+import useCategoryStore from '../../../02_stores/categoryStore/categoryStore.ts';
 import { categoryFields } from '../config/modalFields';
 
 export const categoriesPageHandlers = ({

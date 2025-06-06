@@ -10,7 +10,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 
 // Импортируем сторы для получения данных
 import useSpendingsStore from '../../02_stores/spendingsStore.js';
-import useCategoryStore from '../../02_stores/categoryStore.js'; // НОВОЕ: Импортируем categoryStore
+import useCategoryStore from '../../02_stores/categoryStore/categoryStore.ts'; // НОВОЕ: Импортируем categoryStore
 
 // Импортируем нашу функцию агрегации
 import { aggregateSpendingsByCategory } from '../../07_utils/spendingAggregator.js';
