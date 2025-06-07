@@ -1,9 +1,12 @@
-import Text from './ui/Text.tsx';
-import NavLinkItem from './ui/NavLinkItem.tsx';
-import MobileMenu from './ui/MobileMenu.tsx'; // Новый импорт
+// src/components/HeaderAuth.tsx
+import React from 'react';
+import Text from './ui/Text';
+import NavLinkItem from './ui/NavLinkItem';
+import MobileMenu from './ui/MobileMenu';
+import {LinkItem} from "../06_routes/types";
 
-const HeaderAuth = () => {
-    const links = [
+const HeaderAuth = (): React.JSX.Element => {
+    const links: LinkItem[] = [
         { path: '/demo', label: 'Обзор' },
         { path: '/login', label: 'Войти' },
         { path: '/signup', label: 'Зарегистрироваться' },
@@ -27,4 +30,5 @@ const HeaderAuth = () => {
 };
 
 HeaderAuth.displayName = 'HeaderAuth';
+
 export default HeaderAuth;

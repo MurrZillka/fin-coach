@@ -6,11 +6,7 @@ import NavLinkItem from './NavLinkItem';
 import Text from './Text';
 import IconButton from './IconButton';
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
-
-interface LinkItem {
-    path: string;
-    label: string;
-}
+import {LinkItem} from "../../06_routes/types";
 
 interface MobileMenuProps {
     links: LinkItem[];
