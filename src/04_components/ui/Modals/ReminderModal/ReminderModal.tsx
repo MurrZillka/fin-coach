@@ -1,12 +1,14 @@
-// src/components/ui/ReminderModal.jsx
-import React from 'react';
-import useModalStore from '../../../02_stores/modalStore/modalStore.ts'; // Путь к твоему store
-import Text from '../Text.tsx'; // Путь к твоему Text компоненту
-import TextButton from '../TextButton.tsx'; // Путь к твоему TextButton компоненту
-import IconButton from '../IconButton.tsx'; // Путь к твоему IconButton
-import { XMarkIcon } from '@heroicons/react/24/outline'; // Иконка крестика
+//src/04_components/ui/ReminderModal/ReminderModal.tsx
 
-export default function ReminderModal({ modalProps }) {
+import React, { useRef, useEffect } from 'react';
+import useModalStore from '../../../../02_stores/modalStore/modalStore';
+import Text from '../../Text';
+import TextButton from '../../TextButton';
+import IconButton from '../../IconButton';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import type { ReminderModalProps } from './types';
+
+const ReminderModal: React.FC<ReminderModalProps> = ({ modalProps }) => {
     const { closeModal } = useModalStore();
     const {
         title,
@@ -19,9 +21,8 @@ export default function ReminderModal({ modalProps }) {
         onThirdButtonClick
     } = modalProps;
 
-    const confirmButtonRef = React.useRef(null); // Добавляем реф для фокуса
+    const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
-    // Функции-обработчики для кнопок
     const handleConfirm = () => {
         if (onConfirm) onConfirm();
         closeModal();
@@ -33,20 +34,18 @@ export default function ReminderModal({ modalProps }) {
     };
 
     const handleThirdButton = () => {
-        if (onThirdButtonClick)
+        if (onThirdButtonClick) onThirdButtonClick();
         closeModal();
     };
 
-    // Закрытие модалки по клику на оверлее
-    const handleOverlayClick = (event) => {
+    const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
         if (event.target === event.currentTarget) {
             closeModal();
         }
     };
 
-    // Закрытие по Escape
-    React.useEffect(() => {
-        const handleEscapeKey = (event) => {
+    useEffect(() => {
+        const handleEscapeKey = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 closeModal();
             }
@@ -57,16 +56,17 @@ export default function ReminderModal({ modalProps }) {
         };
     }, [closeModal]);
 
-    // Фокус на кнопке подтверждения при открытии (если confirmText существует)
-    React.useEffect(() => {
-        if (confirmText && confirmButtonRef.current) { // Добавлено условие confirmText
+    useEffect(() => {
+        if (confirmText && confirmButtonRef.current) {
             confirmButtonRef.current.focus();
         }
-    }, [modalProps, confirmText]); // Добавлена зависимость confirmText
+    }, [modalProps, confirmText]);
 
     return (
-        <div className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50 backdrop-blur-xs bg-black/20"
-             onClick={handleOverlayClick}
+        <div
+            className="fixed inset-0 flex items-start justify-center pt-[25vh] z-50 backdrop-blur-xs bg-black/20"
+            onClick={handleOverlayClick}
+            data-testid="reminder-modal-overlay"
         >
             <div className="p-3 rounded-lg shadow-2xl w-full max-w-md bg-red-100 border border-gray-300 mx-4">
                 <div className="flex justify-between items-center md:mb-2">
@@ -78,20 +78,20 @@ export default function ReminderModal({ modalProps }) {
                         onClick={closeModal}
                         className="text-gray-500 hover:text-gray-700"
                         tooltip="Закрыть"
+                        data-testid="close-reminder-btn"
                     />
                 </div>
                 <Text className="mb-6 text-center text-sm md:text-lg text-secondary-800">
                     {message || 'Тут будет важное сообщение.'}
                 </Text>
-
-                {/* ИЗМЕНЕНИЕ ЗДЕСЬ: контейнер кнопок и стили кнопок */}
-                <div className="flex justify-center mt-4 gap-4"> {/* Используем justify-center и gap-4 для расположения рядом */}
+                <div className="flex justify-center mt-4 gap-4">
                     {confirmText && (
                         <TextButton
                             ref={confirmButtonRef}
                             onClick={handleConfirm}
                             variant="primary"
-                            className="rounded-md px-2 py-1" // Убрал w-full
+                            className="rounded-md px-2 py-1"
+                            data-testid="reminder-confirm-btn"
                         >
                             {confirmText}
                         </TextButton>
@@ -100,7 +100,8 @@ export default function ReminderModal({ modalProps }) {
                         <TextButton
                             onClick={handleCancel}
                             variant="primary"
-                            className="rounded-md px-2 py-1" // Убрал w-full
+                            className="rounded-md px-2 py-1"
+                            data-testid="reminder-cancel-btn"
                         >
                             {cancelText}
                         </TextButton>
@@ -109,7 +110,8 @@ export default function ReminderModal({ modalProps }) {
                         <TextButton
                             onClick={handleThirdButton}
                             variant="secondary"
-                            className="rounded-md px-2 py-1 text-gray-600 hover:text-gray-900" // Убрал w-full
+                            className="rounded-md px-2 py-1 text-gray-600 hover:text-gray-900"
+                            data-testid="reminder-third-btn"
                         >
                             {thirdButtonText}
                         </TextButton>
@@ -118,6 +120,6 @@ export default function ReminderModal({ modalProps }) {
             </div>
         </div>
     );
-}
+};
 
-ReminderModal.displayName = 'ReminderModal';
+export default ReminderModal;

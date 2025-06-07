@@ -1,5 +1,9 @@
-// src/utils/reminderModal.js
-export const createReminderModalProps = (navigate) => ({
+// src/utils/reminderModal.ts
+import type { ReminderModalProps } from './types';
+
+type NavigateFn = (path: string) => void;
+
+export const createReminderModalProps = (navigate: NavigateFn): ReminderModalProps['modalProps'] => ({
     title: 'Важное напоминание!',
     message: 'Пора обновить доходы и расходы, иначе может нарушиться точность учета финансов.',
     confirmText: 'Внести расходы',
@@ -12,6 +16,6 @@ export const createReminderModalProps = (navigate) => ({
     },
     thirdButtonText: 'Закрыть',
     onThirdButtonClick: () => {
-        // Просто закрываем модалку
+        // Просто закрываем модалку (ничего не делаем, closeModal вызовется в ReminderModal)
     }
-});
+})

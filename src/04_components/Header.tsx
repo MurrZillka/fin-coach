@@ -10,7 +10,7 @@ import MobileMenu from './ui/MobileMenu';
 import ReminderButton from './ui/ReminderButton';
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import { APP_NAME, NAVIGATION_LINKS } from '../constants/navigation';
-import { createReminderModalProps } from './ui/Modals/utils/reminderModal';
+import { createReminderModalProps } from './ui/Modals/ReminderModal/reminderModalProps';
 
 export default function Header() {
     const navigate = useNavigate();

@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import useAuthStore from './02_stores/authStore/authStore';
 import App from './App';
-
+console.log("start")
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {

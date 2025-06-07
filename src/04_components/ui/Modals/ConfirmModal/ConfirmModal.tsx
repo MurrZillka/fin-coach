@@ -1,9 +1,9 @@
-// src/04_components/ui/ConfirmModal.tsx
+// src/04_components/ui/ConfirmModal/ConfirmModal.tsx
 
-import Text from '../../../../ui/Text';
-import TextButton from '../../../../ui/TextButton';
+import Text from '../../Text';
+import TextButton from '../../TextButton';
 import { useEffect, useRef } from 'react';
-import IconButton from '../../../../ui/IconButton';
+import IconButton from '../../IconButton';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import type { ConfirmModalProps } from './types';
 

@@ -1,4 +1,4 @@
-// src/04_components/ui/ConfirmModal.test.tsx
+// src/04_components/ui/ConfirmModal/ConfirmModal.test.tsx
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import ConfirmModal from './ConfirmModal';
