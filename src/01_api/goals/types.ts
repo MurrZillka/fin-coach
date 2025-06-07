@@ -1,4 +1,4 @@
-// src/api/goals/types.ts
+// src/01_api/goals/types.ts
 export interface Goal {
     id: number;
     user_id: number;

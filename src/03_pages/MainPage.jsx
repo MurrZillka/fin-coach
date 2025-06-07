@@ -14,9 +14,9 @@ import useModalStore from '../02_stores/modalStore';
 import useCategoryStore from '../02_stores/categoryStore/categoryStore.ts'; // Импортируем useCategoryStore
 import TextButton from '../04_components/ui/TextButton.js';
 
-import RecentIncomeWidget from '../04_components/widgets/RecentIncomeWidget.jsx';
-import RecentExpenseWidget from '../04_components/widgets/RecentExpenseWidget.jsx';
-import GoalsSummaryWidget from '../04_components/widgets/GoalsSummaryWidget.jsx';
+import RecentCreditsWidget from '../04_components/widgets/RecentCreditsWidget.tsx';
+import RecentExpenseWidget from '../04_components/widgets/RecentExpenseWidget.tsx';
+import GoalsSummaryWidget from '../04_components/widgets/GoalsSummaryWidget.tsx';
 import IncomeExpenseChart from '../04_components/charts/IncomeExpenseChart.jsx';
 import {useNavigate} from "react-router-dom";
 import {aggregateSpendingsByCategory} from "../07_utils/spendingAggregator.js";
@@ -206,8 +206,8 @@ export default function MainPage() {
 
                         {/* Эти виджеты уже имеют col-span-full md:col-span-1, они автоматически займут по 1 колонке из 4 */}
                         <div className="col-span-full md:col-span-1 bg-white p-4 rounded-md shadow-md">
-                            <RecentIncomeWidget
-                                recentIncomes={credits}
+                            <RecentCreditsWidget
+                                recentCredits={credits}
                                 loading={creditsLoading}
                                 onViewCategoryClick={handleViewIncomeClick}
                                 categoryName="Доходы"

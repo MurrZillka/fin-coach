@@ -72,7 +72,7 @@ const CategoryDistributionWidget: React.FC<CategoryDistributionWidgetProps> = ({
                 onClick={onOpenChart}
                 title="Перейти к распределению расходов"
             >
-                <Text variant="h3" className="flex-grow mr-2">Структура расходов</Text>
+                <Text variant="h3" className="flex-grow mr-2 opacity-70">Структура расходов</Text>
                 <TooltipCustom text="Перейти к распределению расходов">
                     <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-primary-700" />
                 </TooltipCustom>
