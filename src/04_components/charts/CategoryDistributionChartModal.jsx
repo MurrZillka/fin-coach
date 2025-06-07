@@ -9,7 +9,7 @@ import { XMarkIcon as XIcon } from '@heroicons/react/24/outline';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 // Импортируем сторы для получения данных
-import useSpendingsStore from '../../02_stores/spendingsStore.js';
+import useSpendingsStore from '../../02_stores/spendingsStore/spendingsStore.ts';
 import useCategoryStore from '../../02_stores/categoryStore/categoryStore.ts'; // НОВОЕ: Импортируем categoryStore
 
 // Импортируем нашу функцию агрегации

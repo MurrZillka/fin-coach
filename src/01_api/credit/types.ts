@@ -1,4 +1,4 @@
-// Одна запись о кредите
+//src/01_api/credit/types.ts
 export interface Credit {
     id: number;
     user_id: number;

@@ -2,7 +2,7 @@
 import {dateFormatting} from '../../../07_utils/dateFormatting.js';
 import {financialData} from '../../../07_utils/financialData.js';
 import {dataCoordinator} from '../../../dataCoordinator';
-import useSpendingsStore from '../../../02_stores/spendingsStore';
+import useSpendingsStore from '../../../02_stores/spendingsStore/spendingsStore.ts';
 import {getSpendingFields} from '../config/modalFields';
 
 export const spendingsPageHandlers = ({

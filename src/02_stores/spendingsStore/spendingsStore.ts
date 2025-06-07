@@ -1,33 +1,37 @@
-import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
-import * as spendingsAPI from '../01_api/spendings/index.js';
-import { handleSpendingApiError } from '../01_api/spendings/utils/handleSpendingApiError.ts';
+// src/02_stores/spendingsStore/spendingsStore.ts
+import {create} from 'zustand';
+import {subscribeWithSelector} from 'zustand/middleware';
+import * as spendingsAPI from '../../01_api/spendings/index';
+import {handleSpendingApiError} from '../../01_api/spendings/utils/handleSpendingApiError';
+import type {SpendingsStore, SpendingsStoreState} from './types';
+import type {SpendingRequest} from '../../01_api/spendings/types';
+import {ApiError} from "../../01_api/apiTypes";
 
-const initialState = {
+const initialState: SpendingsStoreState = {
     spendings: null,
     loading: false,
     error: null,
 };
 
-const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
-    // --- Состояние (State) ---
+
+const useSpendingsStore = create<SpendingsStore>()(subscribeWithSelector((set, get) => ({
     ...initialState,
+
     setSpendings: (spendings) => set({ spendings }),
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
+
     handleError: (error, actionName) => {
-        const processedError = handleSpendingApiError(error);
+        const processedError = handleSpendingApiError(error as ApiError);
         set({ error: processedError, loading: false });
         console.error(`Ошибка ${actionName}:`, error);
         throw processedError;
     },
 
-    // --- Действия (Actions) ---
     fetchSpendings: async () => {
         set({ loading: true, error: null });
         try {
             const data = await spendingsAPI.getSpendings();
-            console.log('spendingsStore: API getSpendings result:', data);
             set({ spendings: data.Spendings ?? [] });
         } catch (error) {
             get().handleError(error, 'fetchSpendings');
@@ -36,9 +40,8 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
         }
     },
 
-    addSpending: async (spendingData) => {
+    addSpending: async (spendingData: SpendingRequest) => {
         set({ loading: true, error: null });
-        console.log('spendingsStore: addSpending started');
         try {
             const data = await spendingsAPI.addSpending(spendingData);
             await get().fetchSpendings();
@@ -50,12 +53,10 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
         }
     },
 
-    updateSpending: async (id, spendingData) => {
+    updateSpending: async (id: number, spendingData: SpendingRequest) => {
         set({ loading: true, error: null });
-        console.log('spendingsStore: updateSpending started');
         try {
             const data = await spendingsAPI.updateSpendingById(id, spendingData);
-            console.log('spendingsStore: API updateSpending result:', data);
             await get().fetchSpendings();
             return data;
         } catch (error) {
@@ -65,12 +66,10 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
         }
     },
 
-    deleteSpending: async (id) => {
+    deleteSpending: async (id: number) => {
         set({ loading: true, error: null });
-        console.log('spendingsStore: deleteSpending started');
         try {
             const data = await spendingsAPI.deleteSpendingById(id);
-            console.log('spendingsStore: API deleteSpending result:', data);
             await get().fetchSpendings();
             return data;
         } catch (error) {
@@ -81,12 +80,10 @@ const useSpendingsStore = create()(subscribeWithSelector((set, get) => ({
     },
 
     resetSpendings: () => {
-        console.log('spendingsStore: resetSpendings called.');
         set(initialState);
     },
 
     clearError: () => {
-        console.log('spendingsStore: clearError called.');
         set({ error: null });
     },
 })));

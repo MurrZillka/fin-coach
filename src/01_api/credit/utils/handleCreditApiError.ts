@@ -1,4 +1,4 @@
-// src/utils/handleCreditApiError.js
+// src/01_credit/utils/handleCreditApiError.js
 import { ApiError } from '../../apiTypes';
 import {CreditFieldError} from "../types";
 

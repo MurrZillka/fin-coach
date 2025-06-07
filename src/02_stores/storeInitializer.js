@@ -5,7 +5,7 @@
 import useAuthStore from './authStore/authStore.ts';
 import useBalanceStore from './balanceStore/balanceStore.ts';
 import useCreditStore from './creditsStore/creditStore.ts';
-import useSpendingsStore from './spendingsStore';
+import useSpendingsStore from './spendingsStore/spendingsStore.ts';
 import useCategoryStore from './categoryStore/categoryStore.ts';
 // --- ДОБАВЛЕНО: Импортируем стор Целей ---
 import useGoalsStore from './goalsStore/goalsStore.ts';

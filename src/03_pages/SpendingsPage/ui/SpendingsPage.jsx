@@ -1,6 +1,6 @@
 // SpendingsPage/ui/SpendingsPage.jsx
 import React from 'react';
-import useSpendingsStore from '../../../02_stores/spendingsStore';
+import useSpendingsStore from '../../../02_stores/spendingsStore/spendingsStore.ts';
 import useCategoryStore from '../../../02_stores/categoryStore/categoryStore.ts';
 import useModalStore from '../../../02_stores/modalStore';
 import Text from '../../../04_components/ui/Text';
