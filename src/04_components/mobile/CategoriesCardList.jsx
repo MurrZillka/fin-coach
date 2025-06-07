@@ -3,7 +3,7 @@ import React from 'react';
 import Text from '../ui/Text.jsx';
 import IconButton from '../ui/IconButton.jsx';
 import { PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
-import Tooltip from '../ui/Tooltip.jsx';
+import Tooltip from '../ui/Tooltip.tsx';
 
 const CategoriesCardList = ({
                                 categories,

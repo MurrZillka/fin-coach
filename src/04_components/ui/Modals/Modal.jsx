@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from 'react';
 import Text from '../Text.jsx';
 import Input from '../Input.jsx';
 import TextButton from '../TextButton.jsx';
-import Tooltip from '../Tooltip.jsx';
+import Tooltip from '../Tooltip.tsx';
 import {XMarkIcon} from '@heroicons/react/24/outline';
 import IconButton from '../IconButton.jsx';
 import useModalStore from '../../../02_stores/modalStore.js';

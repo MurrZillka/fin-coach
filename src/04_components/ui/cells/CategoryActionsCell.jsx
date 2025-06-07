@@ -1,6 +1,6 @@
 // src/components/ui/cells/CategoryActionsCell.jsx
 import IconButton from '../IconButton';
-import Tooltip from '../Tooltip';
+import Tooltip from '../Tooltip.js';
 import { PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 export default function CategoryActionsCell({

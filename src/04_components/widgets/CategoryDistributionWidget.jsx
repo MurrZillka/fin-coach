@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import Text from '../ui/Text.jsx';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import TooltipCustom from '../ui/Tooltip.jsx'; // Переименованный импорт UI-тултипа
+import TooltipCustom from '../ui/Tooltip.tsx'; // Переименованный импорт UI-тултипа
 
 // НОВОЕ: Импортируем useCategoryStore
 import useCategoryStore from '../../02_stores/categoryStore/categoryStore.ts';

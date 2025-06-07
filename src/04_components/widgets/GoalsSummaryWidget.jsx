@@ -3,7 +3,7 @@ import React from 'react';
 import Text from '../ui/Text.jsx';
 // import TextButton from './ui/TextButton'; // TextButton больше не нужен
 import { ChevronRightIcon } from '@heroicons/react/24/outline'; // Импортируем иконку стрелки
-import Tooltip from '../ui/Tooltip.jsx'; // Импортируем компонент Tooltip
+import Tooltip from '../ui/Tooltip.tsx'; // Импортируем компонент Tooltip
 
 
 const GoalsSummaryWidget = ({

@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import Tooltip from './Tooltip';
+import Tooltip from './Tooltip.js';
 
 // eslint-disable-next-line no-unused-vars
 const IconButton = forwardRef(({ icon: Icon, onClick, className = '', tooltip, disabled = false }, ref) => {

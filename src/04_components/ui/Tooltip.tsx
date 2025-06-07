@@ -1,11 +1,21 @@
-import { forwardRef } from 'react';
+// src/components/ui/Tooltip.tsx
+import { forwardRef, ForwardedRef, ReactNode } from 'react';
 
-const Tooltip = forwardRef(({
-                                children,
-                                text,
-                                position = 'top',
-                                className = ''
-                            }, ref) => {
+type Position = 'top' | 'bottom' | 'left' | 'right';
+
+interface TooltipProps {
+    children: ReactNode;
+    text: string;
+    position?: Position;
+    className?: string;
+}
+
+const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(({
+                                                               children,
+                                                               text,
+                                                               position = 'top',
+                                                               className = ''
+                                                           }, ref: ForwardedRef<HTMLSpanElement>) => {
     const positionClasses = {
         top: 'bottom-full left-1/2 transform -translate-x-1/2 mb-2',
         bottom: 'top-full left-1/2 transform -translate-x-1/2 mt-2',
