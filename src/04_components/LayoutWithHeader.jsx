@@ -2,7 +2,7 @@
 import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
 import Header from './Header.jsx';
 import HeaderAuth from './HeaderAuth.jsx';
-import ProtectedRoute from './ProtectedRoute.jsx';
+import ProtectedRoute from './ProtectedRoute.tsx';
 import routes from '../06_routes/index.js';
 import useAuthStore from '../02_stores/authStore/authStore.ts';
 import useModalStore from '../02_stores/modalStore.js';

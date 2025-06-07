@@ -1,8 +1,14 @@
+// src/02_components/ProtectedRoute/ProtectedRoute.tsx
+import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import useAuthStore from '../02_stores/authStore/authStore.ts';
-import Loader from "./ui/Loader.jsx";
+import useAuthStore from '../02_stores/authStore/authStore';
+import Loader from './ui/Loader.jsx';
 
-export default function ProtectedRoute({ children }) {
+interface ProtectedRouteProps {
+    children: ReactNode;
+}
+
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { isAuthenticated, status, user } = useAuthStore();
 
     console.log('🛡️ ProtectedRoute check:', {
@@ -14,7 +20,7 @@ export default function ProtectedRoute({ children }) {
 
     if (status === 'initializing') {
         console.log('🔄 ProtectedRoute: Showing loader (initializing)');
-        return <Loader/>;
+        return <Loader />;
     }
 
     if (!isAuthenticated) {
