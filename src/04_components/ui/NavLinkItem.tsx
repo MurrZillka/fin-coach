@@ -7,6 +7,7 @@ interface NavLinkItemProps {
     to: string;
     label: string;
     onClick?: () => void;
+    className?: string;
 }
 
 const NavLinkItem = ({ to, label, onClick }: NavLinkItemProps) => {
