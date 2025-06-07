@@ -1,16 +1,16 @@
-// src/components/Header.jsx
+// src/components/Header.tsx
 import { useNavigate } from 'react-router-dom';
-import useAuthStore from '../02_stores/authStore/authStore.ts';
+import useAuthStore from '../02_stores/authStore/authStore';
 import useRemindersStore from '../02_stores/remindersStore';
 import useModalStore from '../02_stores/modalStore';
-import Text from './ui/Text.js';
-import IconButton from './ui/IconButton.js';
-import NavLinkItem from './ui/NavLinkItem.js';
-import MobileMenu from './ui/MobileMenu.js';
-import ReminderButton from './ui/ReminderButton.tsx';
+import Text from './ui/Text';
+import IconButton from './ui/IconButton';
+import NavLinkItem from './ui/NavLinkItem';
+import MobileMenu from './ui/MobileMenu';
+import ReminderButton from './ui/ReminderButton';
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import { APP_NAME, NAVIGATION_LINKS } from '../constants/navigation';
-import { createReminderModalProps } from './ui/Modals/utils/reminderModal.js';
+import { createReminderModalProps } from './ui/Modals/utils/reminderModal';
 
 export default function Header() {
     const navigate = useNavigate();
@@ -21,18 +21,18 @@ export default function Header() {
     const clearError = useRemindersStore(state => state.clearError);
     const openModal = useModalStore(state => state.openModal);
 
-    const getUserName = () => {
+    const getUserName = (): string => {
         const storedName = localStorage.getItem('userName');
         return storedName || 'Пользователь';
     };
 
-    const handleLogout = () => {
+    const handleLogout = (): void => {
         logout();
         console.log('Header: Logout triggered.');
         navigate('/login', { replace: true });
     };
 
-    const handleReminderClick = () => {
+    const handleReminderClick = (): void => {
         console.log('Header: Reminder icon clicked. Opening reminder modal.');
         clearError();
         openModal('reminderNotification', createReminderModalProps(navigate));

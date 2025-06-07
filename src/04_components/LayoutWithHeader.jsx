@@ -1,6 +1,6 @@
 // src/components/LayoutWithHeader.jsx
 import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
-import Header from './Header.jsx';
+import Header from './Header.tsx';
 import HeaderAuth from './HeaderAuth.jsx';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import routes from '../06_routes/index.js';

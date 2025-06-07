@@ -16,6 +16,8 @@ interface MobileMenuProps {
     links: LinkItem[];
     userName?: string;
     onLogout?: () => void;
+    hasReminder?: boolean;
+    onReminderClick?: () => void;
 }
 
 const MobileMenu = ({ links, userName, onLogout }: MobileMenuProps) => {
