@@ -19,6 +19,7 @@ const variants = {
     tooltip: 'text-xs font-normal text-background',
     navLink: 'text-base font-normal text-secondary-200 hover:text-primary-500',
     th: 'text-base font-semibold text-secondary-800',
+    navLinkInactive: 'text-base font-normal opacity-50 cursor-default',
     empty: ''
 };
 

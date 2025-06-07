@@ -1,5 +1,5 @@
 import Text from './ui/Text.tsx';
-import NavLinkItem from './ui/NavLinkItem.jsx';
+import NavLinkItem from './ui/NavLinkItem.tsx';
 import MobileMenu from './ui/MobileMenu.jsx'; // Новый импорт
 
 const HeaderAuth = () => {
