@@ -1,16 +1,23 @@
-// routes/index.jsx
-import {Navigate} from 'react-router-dom';
+// src/routes/index.tsx
+import { Navigate } from 'react-router-dom';
 import LoginPage from '../03_pages/LoginPage';
 import SignupPage from '../03_pages/SignupPage';
 import CategoriesPage from '../03_pages/CategoriesPage';
 import CreditsPage from '../03_pages/CreditsPage';
-import SpendingsPage from '../03_pages/SpendingsPage/ui/SpendingsPage.jsx';
+import SpendingsPage from '../03_pages/SpendingsPage/ui/SpendingsPage';
 import DemoPage from '../03_pages/DemoPage';
 import MainPage from '../03_pages/MainPage';
-import GoalsPage from '../03_pages/GoalsPage/ui/GoalsPage.jsx';
-import PageNotFound from "../03_pages/PageNotFound.jsx";
+import GoalsPage from '../03_pages/GoalsPage/ui/GoalsPage';
+import PageNotFound from "../03_pages/PageNotFound";
+import React from "react";
 
-const routes = [
+export interface RouteItem {
+    path: string;
+    element: React.JSX.Element;
+    isProtected?: boolean;
+}
+
+const routes: RouteItem[] = [
     { path: '/', element: <Navigate to="/demo" /> },
     { path: '/demo', element: <DemoPage /> },
     { path: '/login', element: <LoginPage /> },
@@ -21,7 +28,7 @@ const routes = [
     { path: '/credits', element: <CreditsPage />, isProtected: true },
     { path: '/spendings', element: <SpendingsPage />, isProtected: true },
     { path: '/goals', element: <GoalsPage />, isProtected: true },
-    { path: '*', element: <PageNotFound /> }// Добавляем маршрут для страницы Целей
+    { path: '*', element: <PageNotFound /> }
 ];
 
 export default routes;
