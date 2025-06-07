@@ -1,15 +1,22 @@
-// components/ui/ReminderButton.jsx
+// components/ui/ReminderButton.tsx
 import { useState, useEffect, useRef } from 'react';
 import { BellAlertIcon } from '@heroicons/react/24/outline';
+
+interface ReminderButtonProps {
+    needRemind: boolean;
+    isLoading: boolean;
+    onClick: () => void;
+    className?: string;
+}
 
 export default function ReminderButton({
                                            needRemind,
                                            isLoading,
                                            onClick,
                                            className = '',
-                                       }) {
+                                       }: ReminderButtonProps) {
     const [isBlinking, setIsBlinking] = useState(false);
-    const intervalRef = useRef(null);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (intervalRef.current) {

@@ -7,7 +7,7 @@ import Text from './ui/Text.js';
 import IconButton from './ui/IconButton';
 import NavLinkItem from './ui/NavLinkItem';
 import MobileMenu from './ui/MobileMenu';
-import ReminderButton from './ui/ReminderButton.jsx';
+import ReminderButton from './ui/ReminderButton.tsx';
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import { APP_NAME, NAVIGATION_LINKS } from '../constants/navigation';
 import { createReminderModalProps } from './ui/Modals/utils/reminderModal.js';
