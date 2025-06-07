@@ -1,4 +1,4 @@
-// Одна цель
+// src/api/goals/types.ts
 export interface Goal {
     id: number;
     user_id: number;
@@ -11,14 +11,20 @@ export interface Goal {
     is_delete: boolean;
 }
 
-// Запрос на создание/обновление цели
 export interface GoalRequest {
     description: string;
     amount: number;
     wish_date: string; // 'YYYY-MM-DD'
 }
 
-// Ответ на действия с целью
 export interface GoalActionResponse {
     message: string;
+}
+
+export interface GoalsResponse {
+    Goals: Goal[];
+}
+
+export interface CurrentGoalResponse {
+    Goal: Goal | null;
 }

@@ -1,11 +1,17 @@
 // src/api/goals/index.ts
 import apiClient from '../client';
-import { Goal, GoalRequest, GoalActionResponse } from './types';
+import type {
+    Goal,
+    GoalRequest,
+    GoalActionResponse,
+    GoalsResponse,
+    CurrentGoalResponse
+} from './types';
 
 // Получить все цели
 export const getGoals = async (): Promise<Goal[]> => {
-    const response = await apiClient.get<Goal[]>('/Goals');
-    return response.data;
+    const response = await apiClient.get<GoalsResponse>('/Goals');
+    return response.data.Goals;
 };
 
 // Добавить цель
@@ -27,9 +33,9 @@ export const deleteGoalById = async (id: number): Promise<GoalActionResponse> =>
 };
 
 // Получить текущую цель
-export const getCurrentGoal = async (): Promise<Goal> => {
-    const response = await apiClient.get<Goal>('/CurrentGoal');
-    return response.data;
+export const getCurrentGoal = async (): Promise<Goal | null> => {
+    const response = await apiClient.get<CurrentGoalResponse>('/CurrentGoal');
+    return response.data.Goal;
 };
 
 // Установить текущую цель по id

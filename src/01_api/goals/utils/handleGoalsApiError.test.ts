@@ -66,8 +66,9 @@ describe('handleGoalsApiError', () => {
         })
 
         it('should use default status 500 when status is not provided for known errors', () => {
-            const error: Omit<ApiError, 'status'> & { status?: number } = {
-                message: 'goal_not_found'
+            const error: ApiError = {
+                message: 'goal_not_found',
+                status: undefined
             }
 
             const result = handleGoalsApiError(error)
@@ -115,13 +116,14 @@ describe('handleGoalsApiError', () => {
 
             expect(result).toEqual({
                 message: 'Ошибка связи или сервера. Попробуйте позже.',
-                status: 500  // ← 0 || 500 = 500
+                status: 500
             })
         })
 
         it('should handle errors without status with default 500', () => {
-            const error: Omit<ApiError, 'status'> & { status?: number } = {
-                message: 'Network error'
+            const error: ApiError = {
+                message: 'Network error',
+                status: undefined
             }
 
             const result = handleGoalsApiError(error)

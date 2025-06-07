@@ -7,7 +7,7 @@ import CategoryDistributionWidget from '../04_components/widgets/CategoryDistrib
 import CategoryDistributionChartModal from '../04_components/charts/CategoryDistributionChartModal.jsx';
 import useSpendingsStore from '../02_stores/spendingsStore';
 import useCreditStore from '../02_stores/creditsStore/creditStore.ts';
-import useGoalsStore from '../02_stores/goalsStore';
+import useGoalsStore from '../02_stores/goalsStore/goalsStore.ts';
 import useBalanceStore from '../02_stores/balanceStore/balanceStore.ts';
 import useMainPageStore from '../02_stores/mainPageStore';
 import useModalStore from '../02_stores/modalStore';

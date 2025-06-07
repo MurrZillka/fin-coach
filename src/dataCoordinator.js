@@ -4,7 +4,7 @@ import useBalanceStore from './02_stores/balanceStore/balanceStore.ts';
 import useCreditStore from './02_stores/creditsStore/creditStore.ts';
 import useSpendingsStore from './02_stores/spendingsStore';
 import useCategoryStore from './02_stores/categoryStore/categoryStore.ts';
-import useGoalsStore from './02_stores/goalsStore';
+import useGoalsStore from './02_stores/goalsStore/goalsStore.ts';
 import useMainPageStore from './02_stores/mainPageStore';
 import useRemindersStore from "./02_stores/remindersStore.js";
 

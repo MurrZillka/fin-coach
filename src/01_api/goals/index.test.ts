@@ -1,14 +1,8 @@
 // src/api/goals/index.test.ts
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import {
-    getGoals,
-    addGoal,
-    updateGoalById,
-    deleteGoalById,
-    getCurrentGoal,
-    setCurrentGoal
-} from './index'
+import {afterEach, describe, expect, it, vi} from 'vitest'
+import {addGoal, deleteGoalById, getCurrentGoal, getGoals, setCurrentGoal, updateGoalById} from './index'
 import apiClient from '../client'
+import type {GoalActionResponse, GoalRequest} from './types'
 
 vi.mock('../client')
 
@@ -21,29 +15,31 @@ describe('goals API', () => {
 
     describe('getGoals', () => {
         it('should return goals data on successful request', async () => {
-            const mockData = [
-                {
-                    id: 1,
-                    user_id: 1,
-                    amount: 1000000,
-                    description: "Машина",
-                    wish_date: "2025-12-31T00:00:00Z",
-                    achievement_date: "0001-01-01T00:00:00Z",
-                    is_achieved: false,
-                    is_current: false,
-                    is_delete: false
-                }
-            ]
+            const mockData = {
+                Goals: [
+                    {
+                        id: 1,
+                        user_id: 1,
+                        amount: 1000000,
+                        description: "Машина",
+                        wish_date: "2025-12-31T00:00:00Z",
+                        achievement_date: "0001-01-01T00:00:00Z",
+                        is_achieved: false,
+                        is_current: false,
+                        is_delete: false
+                    }
+                ]
+            }
             mockedApiClient.get.mockResolvedValue({ data: mockData })
 
             const result = await getGoals()
 
-            expect(result).toEqual(mockData)
+            expect(result).toEqual(mockData.Goals)
             expect(mockedApiClient.get).toHaveBeenCalledWith('/Goals')
         })
 
         it('should return empty array if no goals', async () => {
-            mockedApiClient.get.mockResolvedValue({ data: [] })
+            mockedApiClient.get.mockResolvedValue({ data: { Goals: [] } })
 
             const result = await getGoals()
 
@@ -59,12 +55,12 @@ describe('goals API', () => {
 
     describe('addGoal', () => {
         it('should add goal successfully', async () => {
-            const goalData = {
+            const goalData: GoalRequest = {
                 description: "Квартира",
                 amount: 5000000,
                 wish_date: "2027-01-01"
             }
-            const mockResponse = { message: "Goal added successfully" }
+            const mockResponse: GoalActionResponse = { message: "Goal added successfully" }
             mockedApiClient.post.mockResolvedValue({ data: mockResponse })
 
             const result = await addGoal(goalData)
@@ -96,12 +92,12 @@ describe('goals API', () => {
 
     describe('updateGoalById', () => {
         it('should update goal successfully', async () => {
-            const goalData = {
+            const goalData: GoalRequest = {
                 description: "Машина обновленная",
                 amount: 1200000,
                 wish_date: "2026-01-01"
             }
-            const mockResponse = { message: "Goal updated successfully" }
+            const mockResponse: GoalActionResponse = { message: "Goal updated successfully" }
             mockedApiClient.put.mockResolvedValue({ data: mockResponse })
 
             const result = await updateGoalById(1, goalData)
@@ -133,7 +129,7 @@ describe('goals API', () => {
 
     describe('deleteGoalById', () => {
         it('should delete goal successfully', async () => {
-            const mockResponse = { message: "Goal deleted successfully" }
+            const mockResponse: GoalActionResponse = { message: "Goal deleted successfully" }
             mockedApiClient.delete.mockResolvedValue({ data: mockResponse })
 
             const result = await deleteGoalById(1)
@@ -158,28 +154,32 @@ describe('goals API', () => {
     describe('getCurrentGoal', () => {
         it('should return current goal on successful request', async () => {
             const mockData = {
-                id: 1,
-                user_id: 1,
-                amount: 1000000,
-                description: "Машина",
-                wish_date: "2025-12-31T00:00:00Z",
-                achievement_date: "0001-01-01T00:00:00Z",
-                is_achieved: false,
-                is_current: true,
-                is_delete: false
+                Goal: {
+                    id: 1,
+                    user_id: 1,
+                    amount: 1000000,
+                    description: "Машина",
+                    wish_date: "2025-12-31T00:00:00Z",
+                    achievement_date: "0001-01-01T00:00:00Z",
+                    is_achieved: false,
+                    is_current: true,
+                    is_delete: false
+                }
             }
             mockedApiClient.get.mockResolvedValue({ data: mockData })
 
             const result = await getCurrentGoal()
 
-            expect(result).toEqual(mockData)
+            expect(result).toEqual(mockData.Goal)
             expect(mockedApiClient.get).toHaveBeenCalledWith('/CurrentGoal')
         })
 
-        it('should throw error if no current goal found', async () => {
-            mockedApiClient.get.mockRejectedValue(new Error('no current goal found'))
+        it('should return null if no current goal found', async () => {
+            mockedApiClient.get.mockResolvedValue({ data: { Goal: null } })
 
-            await expect(getCurrentGoal()).rejects.toThrow('no current goal found')
+            const result = await getCurrentGoal()
+
+            expect(result).toBeNull()
         })
 
         it('should throw error on server error', async () => {
@@ -191,7 +191,7 @@ describe('goals API', () => {
 
     describe('setCurrentGoal', () => {
         it('should set current goal successfully', async () => {
-            const mockResponse = { message: "Goal updated successfully" }
+            const mockResponse: GoalActionResponse = { message: "Goal updated successfully" }
             mockedApiClient.put.mockResolvedValue({ data: mockResponse })
 
             const result = await setCurrentGoal(1)
