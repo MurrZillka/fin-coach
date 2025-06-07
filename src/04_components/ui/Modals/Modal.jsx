@@ -1,7 +1,7 @@
 // src/components/ui/Modals.jsx
 import {useEffect, useRef, useState} from 'react';
 import Text from '../Text.tsx';
-import Input from '../Input.jsx';
+import Input from '../Input.tsx';
 import TextButton from '../TextButton.jsx';
 import Tooltip from '../Tooltip.tsx';
 import {XMarkIcon} from '@heroicons/react/24/outline';
@@ -328,10 +328,10 @@ const Modal = ({
                                 name={field.name}
                                 type={field.type || 'text'}
                                 // Для чекбокса передаем value как булево, для остальных - value как строку/число/null
-                                // Input.jsx теперь ожидает value как булево для checkbox в пропе value
+                                // Input.tsx теперь ожидает value как булево для checkbox в пропе value
                                 // Value для полей даты теперь всегдаY-MM-DD или 0001-01-01 из состояния formData
                                 value={field.type === 'checkbox' ? !!formData[field.name] : formData[field.name] || ''} // Передаем булево для чекбокса
-                                // checked проп в Input.jsx больше не нужен или используется внутренне
+                                // checked проп в Input.tsx больше не нужен или используется внутренне
                                 onChange={handleChange} // <-- Input вызовет ее с (name, value)
                                 error={errors[field.name]} // Здесь показываем локальные ошибки Modals И ошибки для дат, установленные useEffect
                                 placeholder={field.placeholder}

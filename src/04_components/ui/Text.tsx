@@ -51,6 +51,8 @@ interface TextProps {
     children: React.ReactNode;
     className?: string;
     as?: AllowedTags;
+    htmlFor?: string;   // добавляем
+    id?: string;
 }
 
 export default function Text({
