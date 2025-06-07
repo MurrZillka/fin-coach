@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bars3Icon } from '@heroicons/react/24/solid';
 import NavLinkItem from './NavLinkItem';
-import Text from './Text';
+import Text from './Text.js';
 import IconButton from './IconButton';
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 

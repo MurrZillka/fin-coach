@@ -1,5 +1,5 @@
 // src/components/ui/cells/CurrencyCell.jsx
-import Text from '../Text';
+import Text from '../Text.js';
 
 export default function CurrencyCell({
                                          data,

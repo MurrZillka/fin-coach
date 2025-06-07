@@ -1,5 +1,5 @@
 // src/components/ui/cells/CreditAmountCell.jsx
-import Text from '../Text';
+import Text from '../Text.js';
 
 export default function CreditAmountCell({ data }) {
     if (data.is_permanent) {

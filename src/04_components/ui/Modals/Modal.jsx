@@ -1,6 +1,6 @@
 // src/components/ui/Modals.jsx
 import {useEffect, useRef, useState} from 'react';
-import Text from '../Text.jsx';
+import Text from '../Text.tsx';
 import Input from '../Input.jsx';
 import TextButton from '../TextButton.jsx';
 import Tooltip from '../Tooltip.tsx';

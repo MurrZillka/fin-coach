@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import Text from '../04_components/ui/Text';
+import Text from '../04_components/ui/Text.js';
 import Loader from '../04_components/ui/Loader';
 import RecommendationsModal from '../04_components/ui/RecommendationsModal.jsx';
 

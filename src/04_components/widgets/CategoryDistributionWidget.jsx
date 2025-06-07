@@ -1,6 +1,6 @@
 // src/components/CategoryDistributionWidget.jsx
 import React, { useMemo } from 'react';
-import Text from '../ui/Text.jsx';
+import Text from '../ui/Text.tsx';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import TooltipCustom from '../ui/Tooltip.tsx'; // Переименованный импорт UI-тултипа

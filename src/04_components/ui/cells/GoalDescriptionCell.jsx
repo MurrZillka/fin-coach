@@ -1,5 +1,5 @@
 // src/components/ui/cells/GoalDescriptionCell.jsx
-import Text from '../Text';
+import Text from '../Text.js';
 import { StarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function GoalDescriptionCell({

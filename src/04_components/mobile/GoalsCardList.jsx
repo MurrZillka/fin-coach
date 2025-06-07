@@ -1,6 +1,6 @@
 // src/components/GoalsCardList.jsx
 import React from 'react';
-import Text from '../ui/Text.jsx';
+import Text from '../ui/Text.tsx';
 import IconButton from '../ui/IconButton.jsx';
 import {CheckCircleIcon, PencilIcon, StarIcon, TrashIcon, XCircleIcon} from '@heroicons/react/24/outline'; // Добавлен StarIcon
 

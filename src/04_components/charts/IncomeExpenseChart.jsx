@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import Text from '../ui/Text.jsx';
+import Text from '../ui/Text.tsx';
 
 import {
     Bar,

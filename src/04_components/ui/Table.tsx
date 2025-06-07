@@ -1,13 +1,31 @@
-// src/components/ui/Table.jsx
-import Text from './Text';
+// src/components/ui/Table.tsx
+import React from 'react';
+import Text from './Text'; // Путь поправишь, если нужно
 
-export default function Table({
-                                  data = [],
-                                  columns = [],
-                                  loading = false,
-                                  emptyMessage = "Нет данных для отображения",
-                                  className = ""
-                              }) {
+interface Column<T> {
+    key: string;
+    header: string;
+    headerClassName?: string;
+    cellClassName?: string;
+    component: React.ComponentType<{ data: T; index: number }>;
+    props?: Record<string, unknown>;
+}
+
+interface TableProps<T> {
+    data?: T[];
+    columns?: Column<T>[];
+    loading?: boolean;
+    emptyMessage?: string;
+    className?: string;
+}
+
+function Table<T extends { id?: string | number }>({
+    data = [],
+    columns = [],
+    loading = false,
+    emptyMessage = "Нет данных для отображения",
+    className = ""
+}: TableProps<T>) {
     if (loading && (!data || data.length === 0)) {
         return (
             <div className="text-center p-4">
@@ -47,12 +65,9 @@ export default function Table({
                     key={row.id || index}
                     className={index % 2 === 0 ? 'bg-background' : 'bg-secondary-50'}
                 >
-                    {/* Номер строки */}
                     <td className="pl-4 pr-0 py-4">
-                        <Text variant="tdPrimary">{index + 1}</Text>
+                        <Text variant="body">{index + 1}</Text>
                     </td>
-
-                    {/* Данные колонок */}
                     {columns.map((column) => (
                         <td
                             key={column.key}
@@ -71,3 +86,5 @@ export default function Table({
         </table>
     );
 }
+
+export default Table;

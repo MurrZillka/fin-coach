@@ -1,7 +1,7 @@
 import React from 'react';
 // eslint-disable-next-line
 import { motion } from 'framer-motion';
-import Text from '../../../04_components/ui/Text';
+import Text from '../../../04_components/ui/Text.js';
 
 const DemoSlide = ({ section, direction }) => {
     const slideVariants = {

@@ -1,5 +1,5 @@
 // src/components/ui/cells/SpendingAmountCell.jsx
-import Text from '../Text';
+import Text from '../Text.js';
 
 export default function SpendingAmountCell({ data }) {
     if (data.is_permanent) {

@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import IconButton from './IconButton.jsx'; // Предполагаем, что IconButton находится в папке ui
-import Text from './Text.jsx'; // Предполагаем, что Text находится в папке ui
+import Text from './Text.tsx'; // Предполагаем, что Text находится в папке ui
 
 
 const RecommendationsModal = ({ isOpen, onClose, title, children }) => {

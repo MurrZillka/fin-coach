@@ -1,4 +1,4 @@
-import Text from './ui/Text.jsx';
+import Text from './ui/Text.tsx';
 import NavLinkItem from './ui/NavLinkItem.jsx';
 import MobileMenu from './ui/MobileMenu.jsx'; // Новый импорт
 

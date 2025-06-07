@@ -1,5 +1,5 @@
 // src/components/ui/cells/DateCell.jsx
-import Text from '../Text';
+import Text from '../Text.js';
 
 export default function DateCell({
                                      data,

@@ -1,5 +1,5 @@
 // src/components/ui/cells/CategoryCell.jsx
-import Text from '../Text';
+import Text from '../Text.js';
 
 export default function CategoryCell({ data, categories }) {
     const category = categories?.find(cat => cat.id === data.category_id);

@@ -1,5 +1,5 @@
 // src/components/ui/ConfirmModal.jsx
-import Text from '../Text.jsx';
+import Text from '../Text.tsx';
 import TextButton from '../TextButton.jsx';
 import {useEffect, useRef} from "react";
 import IconButton from "../IconButton.jsx";

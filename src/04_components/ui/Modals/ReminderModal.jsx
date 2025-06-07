@@ -1,7 +1,7 @@
 // src/components/ui/ReminderModal.jsx
 import React from 'react';
 import useModalStore from '../../../02_stores/modalStore.js'; // Путь к твоему store
-import Text from '../Text.jsx'; // Путь к твоему Text компоненту
+import Text from '../Text.tsx'; // Путь к твоему Text компоненту
 import TextButton from '../TextButton.jsx'; // Путь к твоему TextButton компоненту
 import IconButton from '../IconButton.jsx'; // Путь к твоему IconButton
 import { XMarkIcon } from '@heroicons/react/24/outline'; // Иконка крестика

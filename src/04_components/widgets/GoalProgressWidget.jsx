@@ -2,7 +2,7 @@
 import React from 'react';
 import useGoalsStore from '../../02_stores/goalsStore/goalsStore.ts'; // Импортируем стор Целей
 import useBalanceStore from '../../02_stores/balanceStore/balanceStore.ts'; // Импортируем стор Баланса
-import Text from '../ui/Text.jsx'; // Импортируем компонент Text
+import Text from '../ui/Text.tsx'; // Импортируем компонент Text
 
 
 // --- Вспомогательная функция для правильного склонения слова "день" ---

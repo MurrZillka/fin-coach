@@ -1,12 +1,12 @@
 // GoalsPage/ui/GoalsPage.jsx
 import React from 'react';
-import Text from '../../../04_components/ui/Text';
+import Text from '../../../04_components/ui/Text.js';
 import TextButton from '../../../04_components/ui/TextButton';
 import useGoalsStore from '../../../02_stores/goalsStore/goalsStore.ts';
 import useModalStore from '../../../02_stores/modalStore';
 import useBalanceStore from '../../../02_stores/balanceStore/balanceStore.ts';
 import GoalsCardList from '../../../04_components/mobile/GoalsCardList';
-import Table from '../../../04_components/ui/Table';
+import Table from '../../../04_components/ui/Table.js';
 import {goalsPageHandlers} from '../utils/goalsPageHandlers.js';
 import {getGoalColumns} from '../config/tableColumns';
 

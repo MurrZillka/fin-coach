@@ -1,6 +1,6 @@
 // src/components/ui/Input.jsx
 import PropTypes from 'prop-types';
-import Text from './Text';
+import Text from './Text.js';
 import { forwardRef } from 'react';
 
 // --- Определяем propTypes для опций выпадающего списка ---

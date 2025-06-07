@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 // eslint-disable-next-line
 import { motion, AnimatePresence } from 'framer-motion';
-import Text from '../ui/Text.jsx';
+import Text from '../ui/Text.tsx';
 import IconButton from '../ui/IconButton.jsx';
 import TextButton from '../ui/TextButton.jsx';
 import { XMarkIcon as XIcon } from '@heroicons/react/24/outline';
