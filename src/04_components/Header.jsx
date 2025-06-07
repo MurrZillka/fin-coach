@@ -6,7 +6,7 @@ import useModalStore from '../02_stores/modalStore';
 import Text from './ui/Text.js';
 import IconButton from './ui/IconButton.js';
 import NavLinkItem from './ui/NavLinkItem.js';
-import MobileMenu from './ui/MobileMenu';
+import MobileMenu from './ui/MobileMenu.js';
 import ReminderButton from './ui/ReminderButton.tsx';
 import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import { APP_NAME, NAVIGATION_LINKS } from '../constants/navigation';
