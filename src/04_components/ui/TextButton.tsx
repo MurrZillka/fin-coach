@@ -36,6 +36,7 @@ const TextButton = forwardRef<HTMLButtonElement, TextButtonProps>(({
                                                                        type = 'button',
                                                                        variant = 'primary',
                                                                        size = 'md',
+                                                                       ...rest
                                                                    }, ref: ForwardedRef<HTMLButtonElement>) => {
     const variantClass = variantStyles[variant] || variantStyles.primary;
     const sizeClass = sizeStyles[size] || sizeStyles.md;
@@ -47,6 +48,7 @@ const TextButton = forwardRef<HTMLButtonElement, TextButtonProps>(({
             disabled={disabled}
             type={type}
             className={`${baseStyles} ${variantClass} ${sizeClass} ${className}`}
+            {...rest}
         >
             {children}
         </button>
