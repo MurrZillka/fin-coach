@@ -1,5 +1,5 @@
 // src/components/ui/cells/ActionsCell.jsx
-import IconButton from '../IconButton';
+import IconButton from '../IconButton.js';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 export default function ActionsCell({

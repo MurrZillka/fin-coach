@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import Text from '../04_components/ui/Text.js';
 import Loader from '../04_components/ui/Loader';
-import RecommendationsModal from '../04_components/ui/RecommendationsModal.jsx';
+import RecommendationsModal from '../04_components/ui/RecommendationsModal.tsx';
 
 import CategoryDistributionWidget from '../04_components/widgets/CategoryDistributionWidget.jsx';
 import CategoryDistributionChartModal from '../04_components/charts/CategoryDistributionChartModal.jsx';

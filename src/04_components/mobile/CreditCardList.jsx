@@ -1,6 +1,6 @@
 import React from 'react';
 import Text from '../ui/Text.tsx';
-import IconButton from '../ui/IconButton.jsx';
+import IconButton from '../ui/IconButton.tsx';
 import {CheckCircleIcon, XCircleIcon, PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
 import {isDateTodayOrEarlier} from '../../07_utils/dateUtils.js';
 

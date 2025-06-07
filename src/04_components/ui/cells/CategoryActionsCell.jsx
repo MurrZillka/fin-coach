@@ -1,5 +1,5 @@
 // src/components/ui/cells/CategoryActionsCell.jsx
-import IconButton from '../IconButton';
+import IconButton from '../IconButton.js';
 import Tooltip from '../Tooltip.js';
 import { PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 

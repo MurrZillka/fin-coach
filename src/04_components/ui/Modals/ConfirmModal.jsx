@@ -2,7 +2,7 @@
 import Text from '../Text.tsx';
 import TextButton from '../TextButton.jsx';
 import {useEffect, useRef} from "react";
-import IconButton from "../IconButton.jsx";
+import IconButton from "../IconButton.tsx";
 import { XMarkIcon } from '@heroicons/react/24/outline'; // Добавлен импорт XMarkIcon
 
 // Компонент модального окна подтверждения

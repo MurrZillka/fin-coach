@@ -1,5 +1,5 @@
 // src/components/ui/cells/GoalActionsCell.jsx
-import IconButton from '../IconButton';
+import IconButton from '../IconButton.js';
 import { PencilIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 export default function GoalActionsCell({

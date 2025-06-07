@@ -4,7 +4,7 @@ import useAuthStore from '../02_stores/authStore/authStore.ts';
 import useRemindersStore from '../02_stores/remindersStore';
 import useModalStore from '../02_stores/modalStore';
 import Text from './ui/Text.js';
-import IconButton from './ui/IconButton';
+import IconButton from './ui/IconButton.js';
 import NavLinkItem from './ui/NavLinkItem';
 import MobileMenu from './ui/MobileMenu';
 import ReminderButton from './ui/ReminderButton.tsx';

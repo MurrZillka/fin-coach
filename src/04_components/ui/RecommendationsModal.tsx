@@ -1,16 +1,26 @@
-// src/components/RecommendationsModal.jsx
+// src/components/RecommendationsModal.tsx
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import IconButton from './IconButton.jsx'; // Предполагаем, что IconButton находится в папке ui
-import Text from './Text.tsx'; // Предполагаем, что Text находится в папке ui
+import IconButton from './IconButton'; // Предполагаем, что IconButton находится в папке ui
+import Text from './Text'; // Предполагаем, что Text находится в папке ui
 
+interface RecommendationsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    children?: React.ReactNode;
+}
 
-const RecommendationsModal = ({ isOpen, onClose, title, children }) => {
+const RecommendationsModal = ({
+                                  isOpen,
+                                  onClose,
+                                  title,
+                                  children = null,
+                              }: RecommendationsModalProps) => {
 
     // Эффект для закрытия модалки по нажатию клавиши Escape
     useEffect(() => {
-        const handleEscapeKey = (event) => {
+        const handleEscapeKey = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 onClose();
             }
@@ -23,7 +33,7 @@ const RecommendationsModal = ({ isOpen, onClose, title, children }) => {
         return () => {
             document.removeEventListener('keydown', handleEscapeKey);
         };
-    }, [isOpen, onClose]); // Зависимости эффекта
+    }, [isOpen, onClose]);
 
     if (!isOpen) return null; // Если модалка не открыта, ничего не рендерим
 
@@ -41,11 +51,10 @@ const RecommendationsModal = ({ isOpen, onClose, title, children }) => {
             {/* Контейнер содержимого модалки: центрирован, скругленные углы, тени, фон, отступы */}
             {/* max-w-md для средней ширины, max-h-[80vh] для ограничения высоты и overflow-y-auto для прокрутки */}
             <div className="p-4 rounded-lg shadow-2xl w-full max-w-xl bg-white border border-gray-300 relative max-h-[80vh] overflow-y-auto">
-
                 {/* Заголовок и кнопка закрытия */}
                 <div className="flex justify-between items-center mb-4">
                     {/* Заголовок модалки */}
-                    <Text variant="h3" className="mr-4">{title}</Text> {/* Используем h3 для заголовка модалки */}
+                    <Text variant="h3" className="mr-4">{title}</Text>
                     {/* Кнопка закрытия */}
                     <IconButton
                         icon={XMarkIcon}
@@ -53,27 +62,13 @@ const RecommendationsModal = ({ isOpen, onClose, title, children }) => {
                         className="text-gray-500 hover:text-gray-700"
                     />
                 </div>
-
-                {/* Область для содержимого (куда будет передаваться список рекомендаций) */}
-                <div className="space-y-4"> {/* Добавим небольшой отступ между элементами содержимого */}
-                    {children} {/* Здесь будет рендериться содержимое, переданное в проп children */}
+                {/* Область для содержимого */}
+                <div className="space-y-4">
+                    {children}
                 </div>
-
             </div>
         </div>
     );
 };
-
-RecommendationsModal.propTypes = {
-    isOpen: PropTypes.bool.isRequired, // Управляет видимостью модалки
-    onClose: PropTypes.func.isRequired, // Функция для закрытия модалки
-    title: PropTypes.string.isRequired, // Заголовок модалки
-    children: PropTypes.node, // Содержимое модалки (список рекомендаций и т.п.)
-};
-
-RecommendationsModal.defaultProps = {
-    children: null,
-};
-
 
 export default RecommendationsModal;
