@@ -1,6 +1,7 @@
+// src/components/ui/Loader.tsx
 import React from 'react';
 
-export default function Loader() {
+export default function Loader(): React.JSX.Element {
     return (
         <div className="flex justify-center min-h-screen bg-secondary-50 pt-[15vh]">
             <div className="flex space-x-2">

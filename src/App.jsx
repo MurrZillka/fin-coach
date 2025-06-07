@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {BrowserRouter as Router} from 'react-router-dom';
 import useAuthStore from './02_stores/authStore/authStore.ts';
 import LayoutWithHeader from './04_components/LayoutWithHeader';
-import Loader from './04_components/ui/Loader.jsx';
+import Loader from './04_components/ui/Loader.tsx';
 import Text from './04_components/ui/Text.tsx';
 import {dataCoordinator} from "./dataCoordinator.js";
 
