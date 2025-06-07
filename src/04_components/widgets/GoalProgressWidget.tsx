@@ -1,12 +1,11 @@
-// src/components/GoalProgressWidget.jsx
+// src/components/GoalProgressWidget.tsx
 import React from 'react';
-import useGoalsStore from '../../02_stores/goalsStore/goalsStore.ts'; // Импортируем стор Целей
-import useBalanceStore from '../../02_stores/balanceStore/balanceStore.ts'; // Импортируем стор Баланса
-import Text from '../ui/Text.tsx'; // Импортируем компонент Text
+import useGoalsStore from '../../02_stores/goalsStore/goalsStore';
+import useBalanceStore from '../../02_stores/balanceStore/balanceStore';
+import Text from '../ui/Text';
 
-
-// --- Вспомогательная функция для правильного склонения слова "день" ---
-const getDaysNoun = (num) => {
+// Вспомогательная функция для склонения слова "день"
+const getDaysNoun = (num: number): string => {
     const absNum = Math.abs(num);
     if (absNum % 100 >= 11 && absNum % 100 <= 19) {
         return 'дней';
@@ -21,16 +20,15 @@ const getDaysNoun = (num) => {
     }
 };
 
+export default function GoalProgressWidget(): React.JSX.Element {
+    const { currentGoal, loading } = useGoalsStore();
+    const { balance, loading: isBalanceLoading } = useBalanceStore();
 
-export default function GoalProgressWidget() {
-    const { currentGoal, currentGoalLoading } = useGoalsStore();
-    const { balance, isLoading: isBalanceLoading } = useBalanceStore();
-
-    const isLoading = currentGoalLoading || isBalanceLoading;
+    const isLoading = loading || isBalanceLoading;
 
     // --- Расчеты Прогресса ---
     let percentage = 0;
-    let remainingAmount = null;
+    let remainingAmount: number | null = null;
 
     if (currentGoal && typeof balance === 'number' && typeof currentGoal.amount === 'number' && currentGoal.amount > 0) {
         const achieved = balance >= 0 ? balance : 0;
@@ -39,7 +37,7 @@ export default function GoalProgressWidget() {
     }
 
     // --- Расчет Оставшихся Дней и формирование текста даты ---
-    let remainingDays = null;
+    let remainingDays: number | null = null;
     let daysText = '';
 
     if (currentGoal && currentGoal.wish_date && currentGoal.wish_date !== "0001-01-01T00:00:00Z") {
@@ -70,12 +68,11 @@ export default function GoalProgressWidget() {
     }
     // --- Конец Расчета Оставшихся Дней ---
 
-
     // --- Логика Определения Цвета Сегментов ---
     const numSegments = 40;
     const segments = Array.from({ length: numSegments });
 
-    const getSegmentColorClass = (segmentIndex, totalPercentage) => {
+    const getSegmentColorClass = (segmentIndex: number, totalPercentage: number): string => {
         const segmentEndPercentage = ((segmentIndex + 1) / numSegments) * 100;
 
         if (totalPercentage >= segmentEndPercentage) {
@@ -86,7 +83,6 @@ export default function GoalProgressWidget() {
             if (barPercentagePoint <= 75) return 'bg-yellow-500';
             if (barPercentagePoint <= 100) return 'bg-green-500';
             return 'bg-green-500';
-
         } else {
             return 'bg-gray-300';
         }
@@ -96,8 +92,7 @@ export default function GoalProgressWidget() {
 
     if (isLoading) {
         return (
-            // Контейнер плейсхолдера: ширина w-full на мобильных, w-2/3 на десктопах
-            <div className="flex-shrink-0 w-full md:w-2/3 text-right"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
+            <div className="flex-shrink-0 w-full md:w-2/3 text-right">
                 <Text variant="body" className="text-secondary-600 italic">
                     Загрузка цели и баланса...
                 </Text>
@@ -107,8 +102,7 @@ export default function GoalProgressWidget() {
 
     if (!currentGoal) {
         return (
-            // Контейнер для сообщения об отсутствии цели: ширина w-full на мобильных, w-2/3 на дескпопах
-            <div className="flex-shrink-0 w-full md:w-2/3 text-left"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
+            <div className="flex-shrink-0 w-full md:w-2/3 text-left">
                 <Text variant="body" className="text-blue-700 font-semibold italic">
                     Вы еще не установили для себя главную финансовую цель. Усильте мотивацию, выберите цель!
                 </Text>
@@ -121,14 +115,13 @@ export default function GoalProgressWidget() {
         if (currentGoal.achievement_date && currentGoal.achievement_date !== "0001-01-01T00:00:00Z") {
             try {
                 const achievedDate = new Date(currentGoal.achievement_date);
-                achievedText = `Установленная Вами цель достигнута ${achievedDate.toLocaleDateString('ru-RU')}! Поздравляем! 🎉`; // Формат даты
+                achievedText = `Установленная Вами цель достигнута ${achievedDate.toLocaleDateString('ru-RU')}! Поздравляем! 🎉`;
             } catch (e) {
                 console.error("Error formatting achievement date:", e);
             }
         }
         return (
-            // Контейнер для сообщения о достижении цели: ширина w-full на мобильных, w-2/3 на десктопах
-            <div className=" flex-shrink-0 w-full md:w-2/3 text-left"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
+            <div className="flex-shrink-0 w-full md:w-2/3 text-left">
                 <Text variant="body" className="text-green-700 font-semibold italic">
                     {achievedText}
                 </Text>
@@ -136,11 +129,9 @@ export default function GoalProgressWidget() {
         );
     }
 
-
     if (typeof currentGoal.amount !== 'number' || currentGoal.amount <= 0) {
         return (
-            // Сообщение об ошибке суммы цели: ширина w-full на мобильных, w-2/3 на десктопах
-            <div className="flex-shrink-0 w-full md:w-2/3 text-right"> {/* ИЗМЕНЕНО w-1/3 на w-2/3, добавлен w-full */}
+            <div className="flex-shrink-0 w-full md:w-2/3 text-right">
                 <Text variant="body" className="text-red-500 italic">
                     Сумма цели должна быть &gt; 0.
                 </Text>
@@ -155,8 +146,7 @@ export default function GoalProgressWidget() {
     // Формируем полную строку текста для верхней строки, ВКЛЮЧАЯ неразрывный значок рубля
     let infoText = '';
     const daysPart = (daysText && daysText !== 'Дата не указана' && daysText !== 'Некорректная дата') ? `${daysText}, ` : '';
-    // Используем неразрывный пробел перед знаком рубля
-    infoText = `До текущей цели осталось ${daysPart}${formattedRemainingAmount}${'\u00A0'}₽`; // Неразрывный пробел перед знаком рубля
+    infoText = `До текущей цели осталось ${daysPart}${formattedRemainingAmount}${'\u00A0'}₽`;
 
     if (daysText === 'Дата не указана' || daysText === 'Некорректная дата') {
         infoText += ` (${daysText})`;
@@ -164,33 +154,14 @@ export default function GoalProgressWidget() {
 
     const formattedPercentage = percentage.toFixed(0);
     return (
-        // Главный контейнер виджета прогресса
-        // flex-shrink-0: предотвращает сжатие
-        // w-full: занимает всю доступную ширину на мобильных/планшетах
-        // md:w-2/3: занимает 2/3 ширины на десктопах
-        // flex flex-col: элементы внутри выстраиваются в колонку
-        // items-start: выравнивает ДОЧЕРНИЕ ЭЛЕМЕНТЫ КОЛОНКИ по левому краю
-        <div className="w-full md:w-2/3 flex flex-col items-start"> {/* ИЗМЕНЕНО: w-1/3 на w-2/3, добавлен w-full, удален text-right */}
-
-            {/* Верхняя строка текста (со значком рубля) */}
-            {/* Обернута в div w-full flex justify-end, чтобы она сама выравнивалась по правому краю */}
+        <div className="w-full md:w-2/3 flex flex-col items-start">
             <div className="w-full flex md:justify-end md:ml-2">
                 <Text variant="body" className="text-secondary-800 text-sm">
                     {infoText}
                 </Text>
             </div>
-
-            {/* Контейнер для Полосы Прогресса и Процентов */}
-            {/* w-full: занимает всю доступную ширину в родительском flex-col */}
-            {/* flex items-center: располагает элементы в строку и выравнивает по центру по вертикали */}
-            {/* Этот контейнер теперь начинается от левого края родителя (из-за items-start) */}
             <div className="w-full flex items-center md:ml-2">
-                {/* Контейнер Полосы Прогресса */}
-                {/* flex-grow: занимает все оставшееся место в строке после блока процентов */}
-                {/* h-4, bg-gray-300, rounded, overflow-hidden */}
-                {/* mr-1: небольшой правый отступ перед блоком процентов */}
                 <div className="flex-grow flex h-4 bg-gray-300 rounded overflow-hidden mr-1">
-                    {/* Отрисовываем сегменты полосы */}
                     {segments.map((_, index) => (
                         <div
                             key={index}
@@ -199,12 +170,7 @@ export default function GoalProgressWidget() {
                         ></div>
                     ))}
                 </div>
-
-                {/* Контейнер для Процентов */}
-                {/* flex-shrink-0: предотвращает сжатие */}
-                {/* text-right: выравнивание текста внутри */}
-                {/* minWidth: чтобы процент всегда помещался */}
-                <div className="flex-shrink-0 text-right" style={{ minWidth: '40px' }}> {/* Удален ml-0, т.к. mr-1 на баре, удален flex-grow */}
+                <div className="flex-shrink-0 text-right" style={{ minWidth: '40px' }}>
                     <Text variant="body" className="text-secondary-800 font-semibold">{formattedPercentage}%</Text>
                 </div>
             </div>

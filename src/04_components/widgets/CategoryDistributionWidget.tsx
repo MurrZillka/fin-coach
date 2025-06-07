@@ -1,22 +1,22 @@
-// src/components/CategoryDistributionWidget.jsx
+// src/components/CategoryDistributionWidget.tsx
 import React, { useMemo } from 'react';
-import Text from '../ui/Text.tsx';
+import Text from '../ui/Text';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
-import TooltipCustom from '../ui/Tooltip.tsx'; // Переименованный импорт UI-тултипа
+import TooltipCustom from '../ui/Tooltip';
+import useCategoryStore from '../../02_stores/categoryStore/categoryStore';
 
-// НОВОЕ: Импортируем useCategoryStore
-import useCategoryStore from '../../02_stores/categoryStore/categoryStore.ts';
+export interface ChartDataItem {
+    name: string;
+    value: number;
+}
 
-// УДАЛЯЕМ старую константу COLORS
-// const COLORS = [
-//     '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042',
-//     '#A4DDED', '#C1A4DE', '#8A2BE2', '#DEB887', '#5F9EA0', '#D2691E', '#FF7F50', '#6495ED',
-//     '#DC143C', '#00FFFF', '#00008B', '#008B8B', '#B8860B', '#A9A9A9', '#006400', '#BDB76B'
-// ];
+interface CustomRechartsTooltipProps {
+    active?: boolean;
+    payload?: Array<{ name: string; value: number }>;
+}
 
-// Кастомный компонент для тултипа Recharts (переименован, чтобы не конфликтовать с ui/Tooltip)
-const CustomRechartsTooltip = ({ active, payload }) => {
+const CustomRechartsTooltip: React.FC<CustomRechartsTooltipProps> = ({ active, payload }) => {
     if (active && payload && payload.length) {
         const data = payload[0];
         return (
@@ -38,8 +38,17 @@ const CustomRechartsTooltip = ({ active, payload }) => {
     return null;
 };
 
-const CategoryDistributionWidget = ({ onOpenChart, loading, allTimeCategoriesSummary }) => {
-    // НОВОЕ: Получаем categoryColorMap из useCategoryStore
+interface CategoryDistributionWidgetProps {
+    onOpenChart?: () => void;
+    loading?: boolean;
+    allTimeCategoriesSummary?: Record<string, number>;
+}
+
+const CategoryDistributionWidget: React.FC<CategoryDistributionWidgetProps> = ({
+                                                                                   onOpenChart,
+                                                                                   loading,
+                                                                                   allTimeCategoriesSummary,
+                                                                               }) => {
     const { categoryColorMap } = useCategoryStore();
 
     const chartData = useMemo(() => {
@@ -48,7 +57,7 @@ const CategoryDistributionWidget = ({ onOpenChart, loading, allTimeCategoriesSum
                 name,
                 value: Number(value)
             }))
-            .sort((a, b) => a.name.localeCompare(b.name)); // СОРТИРОВКА для стабильности
+            .sort((a, b) => a.name.localeCompare(b.name)); // Сортировка для стабильности
     }, [allTimeCategoriesSummary]);
 
     const hasData = chartData.length > 0;
@@ -56,17 +65,12 @@ const CategoryDistributionWidget = ({ onOpenChart, loading, allTimeCategoriesSum
         return chartData.reduce((sum, entry) => sum + entry.value, 0);
     }, [chartData]);
 
-
     return (
-        <div
-            // Убрал onClick и cursor-pointer с этого div, так как кликабельной является область заголовка
-            aria-disabled={loading}
-        >
-            {/* БЛОК ЗАГОЛОВКА, как в RecentIncomeWidget */}
+        <div aria-disabled={loading}>
             <div
                 className="flex justify-between items-center mb-2 cursor-pointer hover:text-primary-700"
-                onClick={onOpenChart} // Обработчик клика на заголовке
-                title="Перейти к распределению расходов" // Стандартный HTML тултип
+                onClick={onOpenChart}
+                title="Перейти к распределению расходов"
             >
                 <Text variant="h3" className="flex-grow mr-2">Структура расходов</Text>
                 <TooltipCustom text="Перейти к распределению расходов">
@@ -94,8 +98,7 @@ const CategoryDistributionWidget = ({ onOpenChart, loading, allTimeCategoriesSum
                         >
                             {chartData.map((entry) => (
                                 <Cell
-                                    key={entry.name} // Используем имя категории как ключ для стабильности
-                                    // НОВОЕ: Получаем цвет из categoryColorMap, переданного из стора
+                                    key={entry.name}
                                     fill={categoryColorMap[entry.name] || '#CCCCCC'} // Резервный цвет
                                 />
                             ))}
