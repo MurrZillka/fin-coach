@@ -1,14 +1,14 @@
-import {useEffect, useState} from 'react';
-import {BrowserRouter as Router} from 'react-router-dom';
-import useAuthStore from './02_stores/authStore/authStore.ts';
-import LayoutWithHeader from './04_components/LayoutWithHeader.js';
-import Loader from './04_components/ui/Loader.tsx';
-import Text from './04_components/ui/Text.tsx';
-import {dataCoordinator} from "./dataCoordinator.js";
+import { useEffect, useState } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import useAuthStore from './02_stores/authStore/authStore';
+import LayoutWithHeader from './04_components/LayoutWithHeader';
+import Loader from './04_components/ui/Loader';
+import Text from './04_components/ui/Text';
+import { dataCoordinator } from './dataCoordinator';
 
-function App() {
-    const {isAuthenticated, status} = useAuthStore();
-    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+function App(): React.JSX.Element {
+    const { isAuthenticated, status } = useAuthStore();
+    const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
 
     useEffect(() => {
         // Только подписка на auth, остальное явно
@@ -30,10 +30,10 @@ function App() {
     }, []);
 
     useEffect(() => {
-        const handleStorageChange = (event) => {
+        const handleStorageChange = (event: StorageEvent) => {
             // Слушаем только событие logout
             if (event.key === 'logout_event') {
-                console.log('App.jsx: Logout detected in another tab');
+                console.log('App.tsx: Logout detected in another tab');
                 // Вызываем logout в текущем окне
                 useAuthStore.getState().logoutLocal();
             }
@@ -56,7 +56,7 @@ function App() {
         };
     }, []);
 
-    console.log('App.jsx: Rendering, status:', status, 'isAuthenticated:', isAuthenticated);
+    console.log('App.tsx: Rendering, status:', status, 'isAuthenticated:', isAuthenticated);
 
     if (screenWidth < 350) {
         return (
@@ -73,10 +73,10 @@ function App() {
     return (
         <>
             {status === 'initializing' ? (
-                <Loader/>
+                <Loader />
             ) : (
                 <Router>
-                    <LayoutWithHeader/>
+                    <LayoutWithHeader />
                 </Router>
             )}
         </>

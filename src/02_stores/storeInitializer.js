@@ -123,4 +123,4 @@ console.log('storeInitializer: RemindersStore subscription set up.');
 
 console.log('storeInitializer: Store subscriptions initialization finished.'); // Лог завершения
 
-// Этот файл не экспортирует ничего, его просто нужно импортировать в корневом файле приложения (например, в main.jsx или App.jsx).
+// Этот файл не экспортирует ничего, его просто нужно импортировать в корневом файле приложения (например, в main.tsx или App.tsx).
