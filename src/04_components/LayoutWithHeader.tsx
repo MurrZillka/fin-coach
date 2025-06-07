@@ -1,22 +1,22 @@
-// src/components/LayoutWithHeader.jsx
+// src/components/LayoutWithHeader.tsx
 import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
-import Header from './Header.tsx';
-import HeaderAuth from './HeaderAuth.tsx';
-import ProtectedRoute from './ProtectedRoute.tsx';
-import routes from '../06_routes/index.js';
-import useAuthStore from '../02_stores/authStore/authStore.ts';
-import useModalStore from '../02_stores/modalStore.js';
-import Modal from './ui/Modals/Modal.jsx';
-import ConfirmModal from './ui/Modals/ConfirmModal.jsx';
-import ReminderModal from './ui/Modals/ReminderModal.jsx'; // Убедимся, что ReminderModal импортирован
-import BalanceWidget from './widgets/BalanceWidget.jsx';
+import Header from './Header';
+import HeaderAuth from './HeaderAuth';
+import ProtectedRoute from './ProtectedRoute';
+import routes from '../06_routes'; // Предполагаем, что routes типизированы
+import useAuthStore from '../02_stores/authStore/authStore';
+import useModalStore from '../02_stores/modalStore';
+import Modal from './ui/Modals/Modal';
+import ConfirmModal from './ui/Modals/ConfirmModal';
+import ReminderModal from './ui/Modals/ReminderModal';
+import BalanceWidget from './widgets/BalanceWidget';
 
-export default function LayoutWithHeader() {
+export default function LayoutWithHeader(): React.JSX.Element {
     const location = useLocation();
-    const {isAuthenticated} = useAuthStore();
-    const {modalType, modalProps, closeModal, submissionError} = useModalStore();
+    const { isAuthenticated } = useAuthStore();
+    const { modalType, modalProps, closeModal, submissionError } = useModalStore();
 
-    // ✅ Добавь редирект авторизованных с публичных страниц
+    // ✅ Редирект авторизованных с публичных страниц
     if (isAuthenticated && ['/login', '/signup', '/demo'].includes(location.pathname)) {
         console.log('🔀 Redirecting authenticated user from', location.pathname, 'to /main');
         return <Navigate to="/main" replace />;
@@ -26,14 +26,13 @@ export default function LayoutWithHeader() {
     const showAuthHeader = isAuthPage;
     const showRegularHeader = isAuthenticated && !isAuthPage;
 
-
     const validPaths = routes
         .filter(route => route.path !== '*')
         .map(route => route.path);
 
     const isNotFoundPage = !validPaths.includes(location.pathname);
 
-    const renderModal = () => {
+    const renderModal = (): React.JSX.Element | null => {
         if (!modalType) return null;
 
         const formModals = ['addCategory', 'editCategory', 'addCredit', 'editCredit', 'addSpending', 'editSpending', 'addGoal', 'editGoal'];
@@ -76,11 +75,10 @@ export default function LayoutWithHeader() {
 
     return (
         <div className="flex flex-col bg-secondary-50 min-h-screen pb-28">
-
             {(showAuthHeader || showRegularHeader) && (
                 <div className="fixed top-0 left-0 right-0 z-20 w-full bg-white shadow-md">
-                    {showAuthHeader && <HeaderAuth/>}
-                    {showRegularHeader && <Header/>}
+                    {showAuthHeader && <HeaderAuth />}
+                    {showRegularHeader && <Header />}
                 </div>
             )}
             <div className="overflow-y-auto max-w-7xl mx-auto mt-[64px] w-full h-[calc(100% - 64px)]">
@@ -102,7 +100,7 @@ export default function LayoutWithHeader() {
             {isAuthenticated && !isAuthPage && !isNotFoundPage && (
                 <div className="fixed bottom-2 left-0 right-0 z-10">
                     <div className="max-w-7xl mx-auto px-4">
-                        <BalanceWidget/>
+                        <BalanceWidget />
                     </div>
                 </div>
             )}

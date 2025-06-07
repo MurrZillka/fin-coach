@@ -9,13 +9,8 @@ import DemoPage from '../03_pages/DemoPage';
 import MainPage from '../03_pages/MainPage';
 import GoalsPage from '../03_pages/GoalsPage/ui/GoalsPage';
 import PageNotFound from "../03_pages/PageNotFound";
+import {RouteItem} from "./types";
 import React from "react";
-
-export interface RouteItem {
-    path: string;
-    element: React.JSX.Element;
-    isProtected?: boolean;
-}
 
 const routes: RouteItem[] = [
     { path: '/', element: <Navigate to="/demo" /> },
