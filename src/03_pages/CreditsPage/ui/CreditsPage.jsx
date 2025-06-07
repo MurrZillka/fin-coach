@@ -1,7 +1,7 @@
 // CreditsPage/ui/CreditsPage.jsx
 import React from 'react';
 import useCreditStore from '../../../02_stores/creditsStore/creditStore.ts';
-import useModalStore from '../../../02_stores/modalStore';
+import useModalStore from '../../../02_stores/modalStore/modalStore.ts';
 import Text from '../../../04_components/ui/Text.js';
 import TextButton from '../../../04_components/ui/TextButton.js';
 import Table from '../../../04_components/ui/Table.js';

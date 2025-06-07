@@ -3,7 +3,7 @@ import React from 'react';
 import Text from '../../../04_components/ui/Text.js';
 import TextButton from '../../../04_components/ui/TextButton.js';
 import useGoalsStore from '../../../02_stores/goalsStore/goalsStore.ts';
-import useModalStore from '../../../02_stores/modalStore';
+import useModalStore from '../../../02_stores/modalStore/modalStore.ts';
 import useBalanceStore from '../../../02_stores/balanceStore/balanceStore.ts';
 import GoalsCardList from '../../../04_components/mobile/GoalsCardList';
 import Table from '../../../04_components/ui/Table.js';

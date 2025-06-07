@@ -6,7 +6,7 @@ import TextButton from '../TextButton.tsx';
 import Tooltip from '../Tooltip.tsx';
 import {XMarkIcon} from '@heroicons/react/24/outline';
 import IconButton from '../IconButton.tsx';
-import useModalStore from '../../../02_stores/modalStore.js';
+import useModalStore from '../../../02_stores/modalStore/modalStore.ts';
 import {clearServerFieldErrors, mapServerErrorToFieldError} from "./utils/fieldErrorMapping.js";
 
 const Modal = ({

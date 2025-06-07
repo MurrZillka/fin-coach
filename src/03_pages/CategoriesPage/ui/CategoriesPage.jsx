@@ -3,7 +3,7 @@ import React from 'react';
 import TextButton from '../../../04_components/ui/TextButton.js';
 import Text from '../../../04_components/ui/Text.js';
 import useCategoryStore from '../../../02_stores/categoryStore/categoryStore.ts';
-import useModalStore from '../../../02_stores/modalStore';
+import useModalStore from '../../../02_stores/modalStore/modalStore.ts';
 import CategoriesCardList from '../../../04_components/mobile/CategoriesCardList';
 import {DEFAULT_CATEGORY_NAME} from "../../../constants/categories";
 import Table from "../../../04_components/ui/Table.js";

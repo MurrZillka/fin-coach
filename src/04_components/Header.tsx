@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../02_stores/authStore/authStore';
 import useRemindersStore from '../02_stores/remindersStore/remindersStore';
-import useModalStore from '../02_stores/modalStore';
+import useModalStore from '../02_stores/modalStore/modalStore';
 import Text from './ui/Text';
 import IconButton from './ui/IconButton';
 import NavLinkItem from './ui/NavLinkItem';

@@ -5,7 +5,7 @@ import HeaderAuth from './HeaderAuth';
 import ProtectedRoute from './ProtectedRoute';
 import routes from '../06_routes'; // Предполагаем, что routes типизированы
 import useAuthStore from '../02_stores/authStore/authStore';
-import useModalStore from '../02_stores/modalStore';
+import useModalStore from '../02_stores/modalStore/modalStore';
 import Modal from './ui/Modals/Modal';
 import ConfirmModal from './ui/Modals/ConfirmModal';
 import ReminderModal from './ui/Modals/ReminderModal';

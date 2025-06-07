@@ -10,7 +10,7 @@ import useCreditStore from '../02_stores/creditsStore/creditStore.ts';
 import useGoalsStore from '../02_stores/goalsStore/goalsStore.ts';
 import useBalanceStore from '../02_stores/balanceStore/balanceStore.ts';
 import useMainPageStore from '../02_stores/mainPageStore/mainPageStore.ts';
-import useModalStore from '../02_stores/modalStore';
+import useModalStore from '../02_stores/modalStore/modalStore.ts';
 import useCategoryStore from '../02_stores/categoryStore/categoryStore.ts'; // Импортируем useCategoryStore
 import TextButton from '../04_components/ui/TextButton.js';
 
