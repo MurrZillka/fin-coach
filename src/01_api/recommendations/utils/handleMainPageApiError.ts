@@ -1,4 +1,4 @@
-// src/utils/handleMainPageApiError.ts
+// src/01_api/recommendations/utils/handleMainPageApiError.ts
 import { ApiError, ApiErrorWithMessage } from '../../apiTypes';
 
 export const handleMainPageApiError = (error: ApiError): ApiErrorWithMessage => {

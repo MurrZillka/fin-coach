@@ -9,7 +9,7 @@ import useSpendingsStore from './spendingsStore/spendingsStore.ts';
 import useCategoryStore from './categoryStore/categoryStore.ts';
 // --- ДОБАВЛЕНО: Импортируем стор Целей ---
 import useGoalsStore from './goalsStore/goalsStore.ts';
-import useMainPageStore from './mainPageStore'; // ДОБАВЛЕНО: Импорт mainPageStore
+import useMainPageStore from './mainPageStore/mainPageStore.ts'; // ДОБАВЛЕНО: Импорт mainPageStore
 // --- Конец ДОБАВЛЕНИЯ ---
 import useRemindersStore from './remindersStore'; // Убедись, что путь корректен
 // --- Конец ДОБАВЛЕНИЯ ---
