@@ -1,3 +1,5 @@
+//src/02_stores/authStore/types.ts
+
 import { LoginResponse } from '../../01_api/auth/types';
 
 export interface AuthStoreState {

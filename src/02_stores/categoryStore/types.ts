@@ -1,3 +1,4 @@
+//src/02_stores/categoryStore/types.ts
 import type { ApiErrorWithMessage } from '../../01_api/apiTypes';
 import type { Category } from '../../01_api/categories/types';
 

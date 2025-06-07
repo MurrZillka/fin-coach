@@ -1,4 +1,4 @@
-// src/goalsStore/types.ts
+// src/02_stores/goalsStore/types.ts
 import type { Goal, GoalRequest, GoalActionResponse } from '../../01_api/goals/types';
 import type { ApiErrorWithMessage } from '../../01_api/apiTypes';
 

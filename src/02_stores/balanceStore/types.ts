@@ -1,3 +1,4 @@
+//src/02_stores/balanceStore/types.ts
 import type { ApiErrorWithMessage } from '../../01_api/apiTypes';
 
 export interface BalanceResponse {

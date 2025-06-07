@@ -1,3 +1,4 @@
+// src/02_stores/goalsStore/types.ts
 import {ApiErrorWithMessage} from "../../01_api/apiTypes";
 
 export interface MainPageStoreState {
