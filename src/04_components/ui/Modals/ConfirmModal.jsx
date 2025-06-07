@@ -1,6 +1,6 @@
 // src/components/ui/ConfirmModal.jsx
 import Text from '../Text.tsx';
-import TextButton from '../TextButton.jsx';
+import TextButton from '../TextButton.tsx';
 import {useEffect, useRef} from "react";
 import IconButton from "../IconButton.tsx";
 import { XMarkIcon } from '@heroicons/react/24/outline'; // Добавлен импорт XMarkIcon

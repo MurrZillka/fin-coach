@@ -1,6 +1,6 @@
 // CategoriesPage/ui/CategoriesPage.jsx
 import React from 'react';
-import TextButton from '../../../04_components/ui/TextButton';
+import TextButton from '../../../04_components/ui/TextButton.js';
 import Text from '../../../04_components/ui/Text.js';
 import useCategoryStore from '../../../02_stores/categoryStore/categoryStore.ts';
 import useModalStore from '../../../02_stores/modalStore';

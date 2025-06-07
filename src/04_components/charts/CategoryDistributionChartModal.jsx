@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Text from '../ui/Text.tsx';
 import IconButton from '../ui/IconButton.tsx';
-import TextButton from '../ui/TextButton.jsx';
+import TextButton from '../ui/TextButton.tsx';
 import { XMarkIcon as XIcon } from '@heroicons/react/24/outline';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 

@@ -1,7 +1,7 @@
 // GoalsPage/ui/GoalsPage.jsx
 import React from 'react';
 import Text from '../../../04_components/ui/Text.js';
-import TextButton from '../../../04_components/ui/TextButton';
+import TextButton from '../../../04_components/ui/TextButton.js';
 import useGoalsStore from '../../../02_stores/goalsStore/goalsStore.ts';
 import useModalStore from '../../../02_stores/modalStore';
 import useBalanceStore from '../../../02_stores/balanceStore/balanceStore.ts';

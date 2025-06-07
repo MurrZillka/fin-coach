@@ -2,7 +2,7 @@
 import {useEffect, useRef, useState} from 'react';
 import Text from '../Text.tsx';
 import Input from '../Input.tsx';
-import TextButton from '../TextButton.jsx';
+import TextButton from '../TextButton.tsx';
 import Tooltip from '../Tooltip.tsx';
 import {XMarkIcon} from '@heroicons/react/24/outline';
 import IconButton from '../IconButton.tsx';

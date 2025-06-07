@@ -12,7 +12,7 @@ import useBalanceStore from '../02_stores/balanceStore/balanceStore.ts';
 import useMainPageStore from '../02_stores/mainPageStore';
 import useModalStore from '../02_stores/modalStore';
 import useCategoryStore from '../02_stores/categoryStore/categoryStore.ts'; // Импортируем useCategoryStore
-import TextButton from '../04_components/ui/TextButton';
+import TextButton from '../04_components/ui/TextButton.js';
 
 import RecentIncomeWidget from '../04_components/widgets/RecentIncomeWidget.jsx';
 import RecentExpenseWidget from '../04_components/widgets/RecentExpenseWidget.jsx';

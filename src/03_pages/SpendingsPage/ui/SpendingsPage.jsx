@@ -4,7 +4,7 @@ import useSpendingsStore from '../../../02_stores/spendingsStore/spendingsStore.
 import useCategoryStore from '../../../02_stores/categoryStore/categoryStore.ts';
 import useModalStore from '../../../02_stores/modalStore';
 import Text from '../../../04_components/ui/Text.js';
-import TextButton from '../../../04_components/ui/TextButton';
+import TextButton from '../../../04_components/ui/TextButton.js';
 import Table from '../../../04_components/ui/Table.js';
 import SpendingCardList from '../../../04_components/mobile/SpendingCardList';
 import {spendingsPageHandlers} from '../utils/spendingsPageHandlers.js';

@@ -3,7 +3,7 @@ import React from 'react';
 import useCreditStore from '../../../02_stores/creditsStore/creditStore.ts';
 import useModalStore from '../../../02_stores/modalStore';
 import Text from '../../../04_components/ui/Text.js';
-import TextButton from '../../../04_components/ui/TextButton';
+import TextButton from '../../../04_components/ui/TextButton.js';
 import Table from '../../../04_components/ui/Table.js';
 import CreditCardList from '../../../04_components/mobile/CreditCardList';
 import {creditsPageHandlers} from '../utils/creditsPageHandlers.js';
