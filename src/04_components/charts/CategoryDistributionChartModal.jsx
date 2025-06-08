@@ -102,7 +102,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         console.log("categoriesMonth available for aggregation (for currentMonth):", categoriesMonth);
 
         if (selectedPeriod === 'currentMonth') {
-            if (categoriesMonth && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonth).length > 0) {
+            if (categoriesMonth && typeof categoriesMonth === 'object' && Object.keys(categoriesMonth).length > 0) {
                 return categoriesMonth;
             }
             return {};
