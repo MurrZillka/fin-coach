@@ -1,5 +1,6 @@
-// src/utils/fieldErrorMapping.js
-export const FIELD_ERROR_MESSAGES = {
+// src/utils/fieldErrorMapping.ts
+
+export const FIELD_ERROR_MESSAGES: Record<string, string> = {
     'date': 'Проверьте дату',
     'end_date': 'Проверьте дату',
     'name': 'Измените имя',
@@ -8,7 +9,20 @@ export const FIELD_ERROR_MESSAGES = {
     'description': 'Проверьте описание'
 };
 
-export const mapServerErrorToFieldError = (submissionError) => {
+export interface SubmissionError {
+    field?: string;
+    message?: string;
+    [key: string]: any;
+}
+
+export interface FieldError {
+    field: string;
+    message: string;
+}
+
+export const mapServerErrorToFieldError = (
+    submissionError: SubmissionError | null | undefined
+): FieldError | null => {
     if (!submissionError?.field) return null;
 
     return {
@@ -17,10 +31,11 @@ export const mapServerErrorToFieldError = (submissionError) => {
     };
 };
 
-export const clearServerFieldErrors = (errors) => {
+export const clearServerFieldErrors = (
+    errors: Record<string, string>
+): Record<string, string> => {
     const newErrors = { ...errors };
 
-    // Убираем только серверные ошибки (по известным сообщениям)
     Object.entries(FIELD_ERROR_MESSAGES).forEach(([field, message]) => {
         if (newErrors[field] === message) {
             delete newErrors[field];
