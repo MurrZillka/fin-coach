@@ -4,7 +4,7 @@ import Loader from '../04_components/ui/Loader.js';
 import RecommendationsModal from '../04_components/ui/RecommendationsModal.tsx';
 
 import CategoryDistributionWidget from '../04_components/widgets/CategoryDistributionWidget.tsx';
-import CategoryDistributionChartModal from '../04_components/charts/CategoryDistributionChartModal.jsx';
+import CategoryDistributionChartModal from '../04_components/charts/CategoryDistributionChartModal.tsx';
 import useSpendingsStore from '../02_stores/spendingsStore/spendingsStore.ts';
 import useCreditStore from '../02_stores/creditsStore/creditStore.ts';
 import useGoalsStore from '../02_stores/goalsStore/goalsStore.ts';

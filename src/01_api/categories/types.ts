@@ -1,4 +1,4 @@
-// Одна категория
+//src/01_api/categories/types.ts
 export interface Category {
     id: number;
     name: string;
