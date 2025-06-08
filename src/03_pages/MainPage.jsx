@@ -17,7 +17,7 @@ import TextButton from '../04_components/ui/TextButton.js';
 import RecentCreditsWidget from '../04_components/widgets/RecentCreditsWidget.tsx';
 import RecentExpenseWidget from '../04_components/widgets/RecentExpenseWidget.tsx';
 import GoalsSummaryWidget from '../04_components/widgets/GoalsSummaryWidget.tsx';
-import IncomeExpenseChart from '../04_components/charts/IncomeExpenseChart.jsx';
+import IncomeExpenseChart from '../04_components/charts/IncomeExpenseChart.tsx';
 import {useNavigate} from "react-router-dom";
 import {aggregateSpendingsByCategory} from "../07_utils/spendingAggregator.js";
 

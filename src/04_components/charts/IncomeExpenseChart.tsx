@@ -1,6 +1,6 @@
+// IncomeExpenseChart.tsx
 import React, { useMemo, useState, useEffect } from 'react';
-import Text from '../ui/Text.tsx';
-
+import Text from '../ui/Text';
 import {
     Bar,
     BarChart,
@@ -14,9 +14,53 @@ import {
     YAxis
 } from 'recharts';
 
-// --- Вспомогательные функции для работы с датами ---
+// Типы
+interface Credit {
+    id: number;
+    date: string;
+    amount: number;
+    is_permanent: boolean;
+    end_date?: string;
+}
 
-const getLocalISODateString = (date) => {
+interface Spending {
+    id: number;
+    date: string;
+    amount: number;
+    is_permanent: boolean;
+    end_date?: string;
+}
+
+interface ChartDataItem {
+    name: string;
+    Доходы: number;
+    Расходы: number;
+    _date?: Date;
+}
+
+interface AggregatedData {
+    [key: string]: {
+        Доходы: number;
+        Расходы: number;
+    };
+}
+
+type ChartType = 'line' | 'bar';
+type SelectedPeriod = 'month' | 'year' | 'all-time';
+type PeriodStep = 'day' | 'month';
+
+interface IncomeExpenseChartProps {
+    credits?: Credit[];
+    spendings?: Spending[];
+    isLoadingData?: boolean;
+}
+
+interface PrepareChartDataResult {
+    data: ChartDataItem[];
+}
+
+// --- Вспомогательные функции для работы с датами ---
+const getLocalISODateString = (date: Date): string | null => {
     if (!date) return null;
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -24,14 +68,14 @@ const getLocalISODateString = (date) => {
     return `${year}-${month}-${day}`;
 };
 
-const getLocalYearMonthString = (date) => {
+const getLocalYearMonthString = (date: Date): string | null => {
     if (!date) return null;
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     return `${year}-${month}`;
 };
 
-const parseLocalEndOfDayDate = (dateString) => {
+const parseLocalEndOfDayDate = (dateString?: string): Date => {
     if (!dateString || dateString.startsWith('0001-01-01')) {
         return new Date(2100, 0, 1, 23, 59, 59, 999);
     }
@@ -47,7 +91,7 @@ const parseLocalEndOfDayDate = (dateString) => {
     return new Date(2100, 0, 1, 23, 59, 59, 999);
 };
 
-const parseLocalDateStartOfDay = (dateString) => {
+const parseLocalDateStartOfDay = (dateString: string): Date | null => {
     if (!dateString) return null;
 
     try {
@@ -67,20 +111,24 @@ const parseLocalDateStartOfDay = (dateString) => {
     return null;
 };
 
-const hasDateOverlap = (start1, end1, start2, end2) => {
+const hasDateOverlap = (start1: Date, end1: Date, start2: Date, end2: Date): boolean => {
     return start1.getTime() <= end2.getTime() && end1.getTime() >= start2.getTime();
 };
 
 // --- Вспомогательная функция для подготовки данных графика ---
-const prepareChartData = (credits, spendings, selectedPeriod) => {
-    let aggregatedData = {};
-    let periodStep = 'day';
+const prepareChartData = (
+        credits: Credit[],
+    spendings: Spending[],
+    selectedPeriod: SelectedPeriod
+): PrepareChartDataResult => {
+    let aggregatedData: AggregatedData = {};
+    let periodStep: PeriodStep = 'day';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let chartStartDate = null;
-    let chartEndDate = null;
+    let chartStartDate: Date;
+    let chartEndDate: Date;
 
     switch (selectedPeriod) {
         case 'month': {
@@ -129,11 +177,12 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         }
     }
 
+    // Инициализация данных
     if (periodStep === 'day') {
         let currentDate = new Date(chartStartDate);
         while (currentDate.getTime() <= chartEndDate.getTime()) {
             const dateString = getLocalISODateString(currentDate);
-            if (!aggregatedData[dateString]) {
+            if (dateString && !aggregatedData[dateString]) {
                 aggregatedData[dateString] = { Доходы: 0, Расходы: 0 };
             }
             const nextDate = new Date(currentDate);
@@ -148,14 +197,14 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         const endMonth = new Date(chartEndDate.getFullYear(), chartEndDate.getMonth(), 1);
         while (currentMonth.getTime() <= endMonth.getTime()) {
             const monthString = getLocalYearMonthString(currentMonth);
-            aggregatedData[monthString] = { Доходы: 0, Расходы: 0 };
+            if (monthString) {
+                aggregatedData[monthString] = { Доходы: 0, Расходы: 0 };
+            }
             currentMonth.setMonth(currentMonth.getMonth() + 1);
         }
     }
 
-    // Отладка
-    console.log("credits received:", credits);
-
+    // Обработка доходов
     credits.forEach(credit => {
         const creditDate = parseLocalDateStartOfDay(credit.date);
         const creditEndDate = parseLocalEndOfDayDate(credit.end_date);
@@ -170,7 +219,9 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
                     if (currentDay.getTime() >= creditDate.getTime() && currentDay.getTime() <= creditEndDate.getTime()) {
                         if (currentDay.getDate() === creditDate.getDate()) {
                             const dayString = getLocalISODateString(currentDay);
-                            aggregatedData[dayString].Доходы += credit.amount;
+                            if (dayString && aggregatedData[dayString]) {
+                                aggregatedData[dayString].Доходы += credit.amount;
+                            }
                         }
                     }
                     currentDay.setDate(currentDay.getDate() + 1);
@@ -182,7 +233,9 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
                     const currentMonthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0, 23, 59, 59, 999);
                     if (hasDateOverlap(currentMonth, currentMonthEnd, creditDate, creditEndDate)) {
                         const monthString = getLocalYearMonthString(currentMonth);
-                        aggregatedData[monthString].Доходы += credit.amount;
+                        if (monthString && aggregatedData[monthString]) {
+                            aggregatedData[monthString].Доходы += credit.amount;
+                        }
                     }
                     currentMonth.setMonth(currentMonth.getMonth() + 1);
                 }
@@ -191,17 +244,22 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
             if (periodStep === 'day') {
                 if (creditDate.getTime() >= chartStartDate.getTime() && creditDate.getTime() <= chartEndDate.getTime()) {
                     const dayString = getLocalISODateString(creditDate);
-                    aggregatedData[dayString].Доходы += credit.amount;
+                    if (dayString && aggregatedData[dayString]) {
+                        aggregatedData[dayString].Доходы += credit.amount;
+                    }
                 }
             } else if (periodStep === 'month') {
                 if (creditDate.getTime() >= chartStartDate.getTime() && creditDate.getTime() <= chartEndDate.getTime()) {
                     const monthString = getLocalYearMonthString(creditDate);
-                    aggregatedData[monthString].Доходы += credit.amount;
+                    if (monthString && aggregatedData[monthString]) {
+                        aggregatedData[monthString].Доходы += credit.amount;
+                    }
                 }
             }
         }
     });
 
+    // Обработка расходов
     spendings.forEach(spending => {
         const spendingDate = parseLocalDateStartOfDay(spending.date);
         const spendingEndDate = parseLocalEndOfDayDate(spending.end_date);
@@ -215,7 +273,9 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
                     if (currentDay.getTime() >= spendingDate.getTime() && currentDay.getTime() <= spendingEndDate.getTime()) {
                         if (currentDay.getDate() === spendingDate.getDate()) {
                             const dayString = getLocalISODateString(currentDay);
-                            aggregatedData[dayString].Расходы += spending.amount;
+                            if (dayString && aggregatedData[dayString]) {
+                                aggregatedData[dayString].Расходы += spending.amount;
+                            }
                         }
                     }
                     currentDay.setDate(currentDay.getDate() + 1);
@@ -227,7 +287,9 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
                     const currentMonthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0, 23, 59, 59, 999);
                     if (hasDateOverlap(currentMonth, currentMonthEnd, spendingDate, spendingEndDate)) {
                         const monthString = getLocalYearMonthString(currentMonth);
-                        aggregatedData[monthString].Расходы += spending.amount;
+                        if (monthString && aggregatedData[monthString]) {
+                            aggregatedData[monthString].Расходы += spending.amount;
+                        }
                     }
                     currentMonth.setMonth(currentMonth.getMonth() + 1);
                 }
@@ -236,21 +298,25 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
             if (periodStep === 'day') {
                 if (spendingDate.getTime() >= chartStartDate.getTime() && spendingDate.getTime() <= chartEndDate.getTime()) {
                     const dayString = getLocalISODateString(spendingDate);
-                    aggregatedData[dayString].Расходы += spending.amount;
+                    if (dayString && aggregatedData[dayString]) {
+                        aggregatedData[dayString].Расходы += spending.amount;
+                    }
                 }
             } else if (periodStep === 'month') {
                 if (spendingDate.getTime() >= chartStartDate.getTime() && spendingDate.getTime() <= chartEndDate.getTime()) {
                     const monthString = getLocalYearMonthString(spendingDate);
-                    aggregatedData[monthString].Расходы += spending.amount;
+                    if (monthString && aggregatedData[monthString]) {
+                        aggregatedData[monthString].Расходы += spending.amount;
+                    }
                 }
             }
         }
     });
 
     const dates = Object.keys(aggregatedData);
-    let chartData = dates.map(dateString => {
+    let chartData: ChartDataItem[] = dates.map(dateString => {
         let name = dateString;
-        let sortDate;
+        let sortDate: Date;
 
         if (periodStep === 'day') {
             const [year, month, day] = dateString.split('-').map(Number);
@@ -273,40 +339,40 @@ const prepareChartData = (credits, spendings, selectedPeriod) => {
         };
     });
 
-    chartData.sort((a, b) => a._date.getTime() - b._date.getTime());
+    chartData.sort((a, b) => (a._date?.getTime() || 0) - (b._date?.getTime() || 0));
     chartData.forEach(item => delete item._date);
-    console.log("Final chart data:", chartData)
+
     return { data: chartData };
 };
 
-// Компонент IncomeExpenseChart (без изменений)
-const IncomeExpenseChart = ({
-                                credits = [],
-                                spendings = [],
-                                isLoadingData = false,
-                            }) => {
-    const [chartType, setChartType] = useState('line');
-    const [selectedPeriod, setSelectedPeriod] = useState('all-time');
+// Компонент IncomeExpenseChart
+const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
+                                                                   credits = [],
+                                                                   spendings = [],
+                                                                   isLoadingData = false,
+                                                               }) => {
+    const [chartType, setChartType] = useState<ChartType>('line');
+    const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod>('all-time');
 
-    const handleChartTypeChange = (type) => setChartType(type);
-    const handlePeriodChange = (period) => setSelectedPeriod(period);
+    const handleChartTypeChange = (type: ChartType): void => setChartType(type);
+    const handlePeriodChange = (period: SelectedPeriod): void => setSelectedPeriod(period);
 
-    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+    const [isSmallScreen, setIsSmallScreen] = useState<boolean>(window.innerWidth < 768);
 
     useEffect(() => {
-        const handleResize = () => {
+        const handleResize = (): void => {
             setIsSmallScreen(window.innerWidth < 768);
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const { data: chartData } = useMemo(() => {
+    const { data: chartData } = useMemo((): PrepareChartDataResult => {
         console.log("prepareChartData called with period:", selectedPeriod);
         return prepareChartData(credits, spendings, selectedPeriod);
     }, [credits, spendings, selectedPeriod]);
 
-    const hasChartData = Array.isArray(chartData) && chartData.length > 0;
+    const hasChartData: boolean = Array.isArray(chartData) && chartData.length > 0;
 
     return (
         <div className="bg-white p-4 rounded-md shadow-md overflow-x-auto">
@@ -359,7 +425,7 @@ const IncomeExpenseChart = ({
                             margin={{ top: 5, right: isSmallScreen ? 10 : 30, left: isSmallScreen ? 0 : 20, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 'auto'} />
+                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 0} />
                             {!isSmallScreen && <YAxis />}
                             <RechartsTooltip />
                             <Legend />
@@ -372,7 +438,7 @@ const IncomeExpenseChart = ({
                             margin={{ top: 5, right: isSmallScreen ? 10 : 30, left: isSmallScreen ? 0 : 20, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 'auto'} />
+                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 0} />
                             {!isSmallScreen && <YAxis />}
                             <RechartsTooltip />
                             <Legend />
