@@ -1,10 +1,10 @@
 // SpendingsPage/config/tableColumns.js
 import SpendingAmountCell from '../../../04_components/ui/cells/SpendingAmountCell';
 import SimpleTextCell from '../../../04_components/ui/cells/SimpleTextCell';
-import CategoryCell from '../../../04_components/ui/cells/CategoryCell';
+import CategoryCell from '../../../04_components/ui/cells/CategoryCell.js';
 import DateCell from '../../../04_components/ui/cells/DateCell';
 import SpendingStatusCell from '../../../04_components/ui/cells/SpendingStatusCell';
-import ActionsCell from '../../../04_components/ui/cells/ActionsCell';
+import ActionsCell from '../../../04_components/ui/cells/ActionsCell.js';
 
 export const getSpendingColumns = (categories, handleEditClick, handleDeleteClick) => [
     {

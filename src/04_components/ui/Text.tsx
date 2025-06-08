@@ -43,7 +43,7 @@ const defaultTags = {
     th: 'span',
 } as const;
 
-type Variant = keyof typeof variants;
+export type Variant = keyof typeof variants;
 type AllowedTags = 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span' | 'label' | string;
 
 interface TextProps {

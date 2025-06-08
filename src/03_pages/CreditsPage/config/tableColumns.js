@@ -1,9 +1,9 @@
 // CreditsPage/config/tableColumns.js
-import CreditAmountCell from '../../../04_components/ui/cells/CreditAmountCell';
+import CreditAmountCell from '../../../04_components/ui/cells/CreditAmountCell.js';
 import SimpleTextCell from '../../../04_components/ui/cells/SimpleTextCell';
 import DateCell from '../../../04_components/ui/cells/DateCell';
-import CreditStatusCell from '../../../04_components/ui/cells/CreditStatusCell';
-import ActionsCell from '../../../04_components/ui/cells/ActionsCell';
+import CreditStatusCell from '../../../04_components/ui/cells/CreditStatusCell.js';
+import ActionsCell from '../../../04_components/ui/cells/ActionsCell.js';
 
 export const getCreditColumns = (handleEditClick, handleDeleteClick) => [
     {

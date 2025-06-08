@@ -1,15 +1,24 @@
-// src/components/ui/cells/CreditAmountCell.jsx
-import Text from '../Text.js';
+// src/04_components/ui/cells/CreditAmountCell.tsx
+import React from 'react';
+import Text from '../Text';
 
-export default function CreditAmountCell({ data }) {
+export interface CreditAmountCellProps {
+    data: {
+        is_permanent: boolean;
+        amount: number | string;
+        full_amount?: number | string;
+    };
+}
+
+export default function CreditAmountCell({ data }: CreditAmountCellProps) {
     if (data.is_permanent) {
         return (
             <>
                 <div className="flex flex-wrap items-baseline mb-1">
-                    <Text variant="tdSecondary" className="font-normal text-[0.7rem] text-gray-600 mr-1 mb-1 whitespace-nowrap">
+                    <Text variant="empty" className="font-normal text-[0.7rem] text-gray-600 mr-1 mb-1 whitespace-nowrap">
                         Разовый платеж:
                     </Text>
-                    <Text variant="tdPrimary" className="text-accent-success font-semibold">
+                    <Text variant="empty" className="text-accent-success font-semibold">
                         {typeof data.amount === 'number'
                             ? data.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : data.amount}
@@ -17,8 +26,8 @@ export default function CreditAmountCell({ data }) {
                     </Text>
                 </div>
                 <div className="flex items-center">
-                    <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Всего:</Text>
-                    <Text variant="tdPrimary" className="text-accent-success font-semibold">
+                    <Text variant="empty" className="font-normal text-gray-600 mr-1">Всего:</Text>
+                    <Text variant="empty" className="text-accent-success font-semibold">
                         {typeof data.full_amount === 'number'
                             ? data.full_amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : data.full_amount}
@@ -31,8 +40,8 @@ export default function CreditAmountCell({ data }) {
 
     return (
         <div className="flex items-center">
-            <Text variant="tdSecondary" className="font-normal text-gray-600 mr-1">Сумма:</Text>
-            <Text variant="tdPrimary" className="text-accent-success font-semibold">
+            <Text variant="empty" className="font-normal text-gray-600 mr-1">Сумма:</Text>
+            <Text variant="empty" className="text-accent-success font-semibold">
                 {typeof data.amount === 'number'
                     ? data.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     : data.amount}

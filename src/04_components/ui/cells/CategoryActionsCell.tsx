@@ -1,19 +1,30 @@
-// src/components/ui/cells/CategoryActionsCell.jsx
-import IconButton from '../IconButton.js';
-import Tooltip from '../Tooltip.js';
+// src/04_components/ui/cells/CategoryActionsCell.tsx
+import React from 'react';
+import IconButton from '../IconButton';
+import Tooltip from '../Tooltip';
 import { PencilIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+
+export interface CategoryActionsCellProps {
+    data: {
+        id: string | number;
+        name: string;
+    };
+    onEdit: (data: { id: string | number; name: string }) => void;
+    onDelete: (id: string | number) => void;
+    defaultCategoryName: string;
+}
 
 export default function CategoryActionsCell({
                                                 data,
                                                 onEdit,
                                                 onDelete,
                                                 defaultCategoryName
-                                            }) {
+                                            }: CategoryActionsCellProps) {
     if (data.name === defaultCategoryName) {
         return (
-            <div className="w-fit"> {/* Ширина по содержимому */}
+            <div className="w-fit">
                 <Tooltip text="Эту категорию нельзя удалить.">
-                    <InformationCircleIcon className="h-6 w-6 text-gray-500 cursor-help"/>
+                    <InformationCircleIcon className="h-6 w-6 text-gray-500 cursor-help" />
                 </Tooltip>
             </div>
         );
