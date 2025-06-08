@@ -1,14 +1,15 @@
-import React from 'react'; // Добавляем useEffect
-import {useNavigate} from 'react-router-dom'; // Добавляем useNavigate
-import Text from '../04_components/ui/Text.js';
-import useAuthStore from '../02_stores/authStore/authStore.ts'; // Импортируем useAuthStore
+// PageNotFound.tsx
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import Text from '../04_components/ui/Text';
+import useAuthStore from '../02_stores/authStore/authStore';
 
-export default function PageNotFound() {
+const PageNotFound: React.FC = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, isInitializing } = useAuthStore(); // Получаем состояние аутентификации
+    const { isAuthenticated, status } = useAuthStore();
 
-    const handleGoHomeClick = () => {
-        if (isInitializing) {
+    const handleGoHomeClick = (): void => {
+        if (status === 'initializing') {
             console.log('PageNotFound: Authentication initialization in progress, cannot redirect yet.');
             return;
         }
@@ -31,7 +32,6 @@ export default function PageNotFound() {
             <Text variant="body" className="text-gray-600 mt-2">
                 Ой! Похоже, вы заблудились.
             </Text>
-            {/* Теперь используем обычную кнопку или Link, но с обработчиком клика */}
             <button
                 onClick={handleGoHomeClick}
                 className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -40,4 +40,6 @@ export default function PageNotFound() {
             </button>
         </div>
     );
-}
+};
+
+export default PageNotFound;
