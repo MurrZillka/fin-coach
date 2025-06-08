@@ -425,7 +425,7 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
                             margin={{ top: 5, right: isSmallScreen ? 10 : 30, left: isSmallScreen ? 0 : 20, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 0} />
+                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 'preserveStartEnd'} />
                             {!isSmallScreen && <YAxis />}
                             <RechartsTooltip />
                             <Legend />
@@ -438,7 +438,7 @@ const IncomeExpenseChart: React.FC<IncomeExpenseChartProps> = ({
                             margin={{ top: 5, right: isSmallScreen ? 10 : 30, left: isSmallScreen ? 0 : 20, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 0} />
+                            <XAxis dataKey="name" interval={isSmallScreen && selectedPeriod === 'month' ? Math.ceil(chartData.length / 7) : 'preserveStartEnd'} />
                             {!isSmallScreen && <YAxis />}
                             <RechartsTooltip />
                             <Legend />
