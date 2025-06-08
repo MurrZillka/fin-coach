@@ -89,6 +89,7 @@ const useCategoryStore = create<CategoryStore>()(subscribeWithSelector((set, get
         try {
             const result = await categoryAPI.getCategoriesMonth();
             const categoriesMonth = result.Categories ?? {};
+            console.log('categoriesStore',categoriesMonth);
             set({ categoriesMonth });
         } catch (error) {
             get().handleError(error, 'getCategoriesMonth');

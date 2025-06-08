@@ -78,8 +78,15 @@ const CustomRechartsTooltip = ({ active, payload }) => {
 
 const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const { spendings, loading: spendingsLoading, fetchSpendings } = useSpendingsStore();
-    // НОВОЕ: Получаем categoryColorMap из useCategoryStore
-    const { categories, categoriesLoading, fetchCategories, categoriesMonthSummary, loading: categoriesMonthSummaryLoading, fetchCategoriesMonthSummary, categoryColorMap } = useCategoryStore();
+    const {
+        categories,
+        categoriesLoading,
+        fetchCategories,
+        categoriesMonth,
+        loading: categoriesMonthLoading,
+        getCategoriesMonth,
+        categoryColorMap
+    } = useCategoryStore();
 
     const [selectedPeriod, setSelectedPeriod] = useState('currentMonth');
     const windowWidth = useWindowWidth();
@@ -88,21 +95,15 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         onClose();
     }, [onClose]);
 
-    // УДАЛЯЕМ: Локальный маппинг цветов, он теперь в сторе
-    // const categoryColorMap = useRef({});
-    // const colorIndex = useRef(0);
-    // const getCategoryColor = useCallback((categoryName) => { /* ... */ }, []);
-
-
-    const aggregatedData = useMemo(() => {
+        const aggregatedData = useMemo(() => {
         console.log("Aggregating data for period:", selectedPeriod);
         console.log("Spendings available for aggregation:", spendings);
         console.log("Categories available for aggregation:", categories);
-        console.log("categoriesMonthSummary available for aggregation (for currentMonth):", categoriesMonthSummary);
+        console.log("categoriesMonth available for aggregation (for currentMonth):", categoriesMonth);
 
         if (selectedPeriod === 'currentMonth') {
-            if (categoriesMonthSummary && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonthSummary).length > 0) {
-                return categoriesMonthSummary;
+            if (categoriesMonth && typeof categoriesMonthSummary === 'object' && Object.keys(categoriesMonth).length > 0) {
+                return categoriesMonth;
             }
             return {};
         } else {
@@ -111,7 +112,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
             }
             return {};
         }
-    }, [spendings, categories, selectedPeriod, categoriesMonthSummary]);
+    }, [spendings, categories, selectedPeriod, categoriesMonth]);
 
     const chartData = useMemo(() => {
         return Object.entries(aggregatedData)
@@ -125,7 +126,7 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
     const hasData = chartData.length > 0;
     const totalAmount = chartData.reduce((sum, entry) => sum + entry.value, 0);
 
-    const isLoading = spendingsLoading || categoriesLoading || categoriesMonthSummaryLoading;
+    const isLoading = spendingsLoading || categoriesLoading || categoriesMonthLoading;
 
     const periodText = useMemo(() => {
         switch (selectedPeriod) {
@@ -150,8 +151,8 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
             if (!categories && !categoriesLoading) {
                 fetchCategories(); // Это вызовет обновление categoryColorMap в сторе
             }
-            if (!categoriesMonthSummary && !categoriesMonthSummaryLoading) {
-                fetchCategoriesMonthSummary();
+            if (!categoriesMonth && !categoriesMonthLoading) {
+                getCategoriesMonth();
             }
 
             const handleEscape = (event) => {
@@ -173,9 +174,9 @@ const CategoryDistributionChartModal = ({ isOpen, onClose, title }) => {
         categories,
         categoriesLoading,
         fetchCategories,
-        categoriesMonthSummary,
-        categoriesMonthSummaryLoading,
-        fetchCategoriesMonthSummary,
+        categoriesMonth,
+        categoriesMonthLoading,
+        getCategoriesMonth,
         handleClose
     ]);
 

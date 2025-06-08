@@ -40,5 +40,5 @@ export const deleteCategoryById = async (id: number): Promise<CategoryActionResp
 // Получить категории за месяц
 export const getCategoriesMonth = async (): Promise<CategoriesMonthResponse> => {
     const response = await apiClient.get<CategoriesMonthResponse>('/CategoriesMonth');
-    return response.data;
+    return response.data
 }
