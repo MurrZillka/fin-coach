@@ -6,7 +6,7 @@ import CategoriesPage from '../03_pages/CategoriesPage';
 import CreditsPage from '../03_pages/CreditsPage';
 import SpendingsPage from '../03_pages/SpendingsPage/ui/SpendingsPage';
 import DemoPage from '../03_pages/DemoPage';
-import MainPage from '../03_pages/MainPage';
+import MainPage from '../03_pages/MainPage/MainPage';
 import GoalsPage from '../03_pages/GoalsPage/ui/GoalsPage';
 import PageNotFound from "../03_pages/PageNotFound";
 import {RouteItem} from "./types";
