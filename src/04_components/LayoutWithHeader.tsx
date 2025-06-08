@@ -6,7 +6,7 @@ import ProtectedRoute from './ProtectedRoute';
 import routes from '../06_routes'; // Предполагаем, что routes типизированы
 import useAuthStore from '../02_stores/authStore/authStore';
 import useModalStore from '../02_stores/modalStore/modalStore';
-import Modal from './ui/Modals/Modal';
+import Modal from './ui/Modals/Modal/Modal';
 import ConfirmModal from './ui/Modals/ConfirmModal/ConfirmModal';
 import ReminderModal from './ui/Modals/ReminderModal/ReminderModal';
 import BalanceWidget from './widgets/BalanceWidget';
@@ -39,10 +39,20 @@ export default function LayoutWithHeader(): React.JSX.Element {
         const confirmModals = ['confirmDelete', 'confirmDeleteGoal', 'confirmSetCurrentGoal'];
 
         if (formModals.includes(modalType)) {
+            // Проверяем, что modalProps содержит все нужные поля
+            const { title, fields, onSubmit } = modalProps || {};
+            if (!title || !fields || !onSubmit) {
+                // Можно кинуть ошибку или вернуть null
+                console.error('Modal: отсутствуют обязательные поля в modalProps');
+                return null;
+            }
             return (
                 <Modal
                     isOpen={true}
                     onClose={closeModal}
+                    title={title}
+                    fields={fields}
+                    onSubmit={onSubmit}
                     {...modalProps}
                     submissionError={submissionError}
                 />
