@@ -1,19 +1,25 @@
-// src/dataCoordinator.js
-import useAuthStore from './02_stores/authStore/authStore.ts';
-import useBalanceStore from './02_stores/balanceStore/balanceStore.ts';
-import useCreditStore from './02_stores/creditsStore/creditStore.ts';
-import useSpendingsStore from './02_stores/spendingsStore/spendingsStore.ts';
-import useCategoryStore from './02_stores/categoryStore/categoryStore.ts';
-import useGoalsStore from './02_stores/goalsStore/goalsStore.ts';
-import useMainPageStore from './02_stores/mainPageStore/mainPageStore.ts';
-import useRemindersStore from "./02_stores/remindersStore/remindersStore.ts";
+// src/dataCoordinator.ts
+import useAuthStore from './02_stores/authStore/authStore';
+import useBalanceStore from './02_stores/balanceStore/balanceStore';
+import useCreditStore from './02_stores/creditsStore/creditStore';
+import useSpendingsStore from './02_stores/spendingsStore/spendingsStore';
+import useCategoryStore from './02_stores/categoryStore/categoryStore';
+import useGoalsStore from './02_stores/goalsStore/goalsStore';
+import useMainPageStore from './02_stores/mainPageStore/mainPageStore';
+import useRemindersStore from './02_stores/remindersStore/remindersStore';
 
-function isUserAuthenticated() {
+// Импортируем типы из API
+import type { CreditRequest, CreditActionResponse } from './01_api/credit/types';
+import type { SpendingRequest, SpendingActionResponse } from './01_api/spendings/types';
+import type { GoalRequest, GoalActionResponse } from './01_api/goals/types';
+import type { CategoryRequest, CategoryActionResponse } from './01_api/categories/types';
+
+function isUserAuthenticated(): boolean {
     return useAuthStore.getState().isAuthenticated;
 }
 
 // Начальная загрузка всех данных
-async function loadAllData() {
+async function loadAllData(): Promise<void> {
     if (!isUserAuthenticated()) {
         console.log('dataCoordinator: User not authenticated, skipping loadAllData');
         return;
@@ -41,7 +47,8 @@ async function loadAllData() {
     }
 }
 
-async function addCredit(creditData) {
+// Методы для работы с кредитами
+async function addCredit(creditData: CreditRequest): Promise<CreditActionResponse | undefined> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -69,7 +76,7 @@ async function addCredit(creditData) {
     }
 }
 
-async function updateCredit(id, creditData) {
+async function updateCredit(id: number, creditData: CreditRequest): Promise<CreditActionResponse | undefined> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -96,7 +103,7 @@ async function updateCredit(id, creditData) {
     }
 }
 
-async function deleteCredit(id) {
+async function deleteCredit(id: number): Promise<CreditActionResponse | undefined> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -124,7 +131,7 @@ async function deleteCredit(id) {
 }
 
 // Методы для работы с расходами
-async function addSpending(spendingData) {
+async function addSpending(spendingData: SpendingRequest): Promise<SpendingActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -153,7 +160,7 @@ async function addSpending(spendingData) {
     }
 }
 
-async function updateSpending(id, spendingData) {
+async function updateSpending(id: number, spendingData: SpendingRequest): Promise<SpendingActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -181,7 +188,7 @@ async function updateSpending(id, spendingData) {
     }
 }
 
-async function deleteSpending(id) {
+async function deleteSpending(id: number): Promise<SpendingActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -209,10 +216,8 @@ async function deleteSpending(id) {
     }
 }
 
-// После методов для расходов добавить:
-
 // Методы для работы с целями
-async function addGoal(goalData) {
+async function addGoal(goalData: GoalRequest): Promise<GoalActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -237,7 +242,7 @@ async function addGoal(goalData) {
     }
 }
 
-async function updateGoal(id, goalData) {
+async function updateGoal(id: number, goalData: GoalRequest): Promise<GoalActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -260,7 +265,7 @@ async function updateGoal(id, goalData) {
     }
 }
 
-async function deleteGoal(id) {
+async function deleteGoal(id: number): Promise<GoalActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -283,7 +288,7 @@ async function deleteGoal(id) {
     }
 }
 
-async function setCurrentGoalById(id) {
+async function setCurrentGoalById(id: number): Promise<GoalActionResponse> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -307,7 +312,7 @@ async function setCurrentGoalById(id) {
 }
 
 // Методы для работы с категориями
-async function addCategory(categoryData) {
+async function addCategory(categoryData: CategoryRequest): Promise<CategoryActionResponse | undefined> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -332,7 +337,7 @@ async function addCategory(categoryData) {
     }
 }
 
-async function updateCategory(id, categoryData) {
+async function updateCategory(id: number, categoryData: CategoryRequest): Promise<CategoryActionResponse | undefined> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -356,7 +361,7 @@ async function updateCategory(id, categoryData) {
     }
 }
 
-async function deleteCategory(id) {
+async function deleteCategory(id: number): Promise<CategoryActionResponse | undefined> {
     if (!isUserAuthenticated()) {
         throw new Error('User not authenticated');
     }
@@ -380,8 +385,6 @@ async function deleteCategory(id) {
     }
 }
 
-
-// Обновить экспорт
 export const dataCoordinator = {
     loadAllData,
     addCredit,
