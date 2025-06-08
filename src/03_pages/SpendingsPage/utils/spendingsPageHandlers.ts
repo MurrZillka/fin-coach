@@ -1,29 +1,63 @@
-// SpendingsPage/utils/creditsPageHandlers.ts
-import {dateFormatting} from '../../../07_utils/dateFormatting.js';
-import {financialData} from '../../../07_utils/financialData.js';
+// 03_pages/SpendingsPage/utils/spendingsPageHandlers.ts
+import {dateFormatting} from '../../../07_utils/dateFormatting';
+import {financialData} from '../../../07_utils/financialData';
 import {dataCoordinator} from '../../../dataCoordinator';
-import useSpendingsStore from '../../../02_stores/spendingsStore/spendingsStore.ts';
+import useSpendingsStore from '../../../02_stores/spendingsStore/spendingsStore';
+import type {SpendingFormData} from '../config/modalFields';
 import {getSpendingFields} from '../config/modalFields';
+import type {Spending} from '../../../01_api/spendings/types';
+import type {Category} from '../../../01_api/categories/types';
+
+// Типы для параметров хендлеров
+export interface SpendingsPageHandlersParams {
+    categories: Category[] | null;
+    clearError: () => void;
+    clearCategoriesError: () => void;
+    openModal: (modalType: string, config: ModalConfig) => void;
+    closeModal: () => void;
+    setModalSubmissionError: (error: any) => void;
+}
+
+// Типы для конфигурации модальных окон
+export interface ModalConfig {
+    title: string;
+    fields?: any[];
+    initialData?: any;
+    onSubmit?: (formData: any) => Promise<void>;
+    submitText?: string;
+    onFieldChange?: (name: string, value: any, prevFormData: any) => any[];
+    onClose?: () => void;
+    message?: string;
+    onConfirm?: () => Promise<void>;
+    confirmText?: string;
+}
+
+// Типы для возвращаемых хендлеров
+export interface SpendingsPageHandlers {
+    handleAddClick: () => void;
+    handleEditClick: (spending: Spending) => void;
+    handleDeleteClick: (spending: Spending) => void;
+}
 
 export const spendingsPageHandlers = ({
-                                             categories,
-                                             clearError,
-                                             clearCategoriesError,
-                                             openModal,
-                                             closeModal,
-                                             setModalSubmissionError
-                                         }) => {
+    categories,
+    clearError,
+    clearCategoriesError,
+    openModal,
+    closeModal,
+    setModalSubmissionError
+}: SpendingsPageHandlersParams): SpendingsPageHandlers => {
     const { prepareInitialData } = dateFormatting();
     const { prepareDataForSubmit } = financialData();
 
     // API хендлеры
-    const handleAddSubmit = async (formData) => {
+    const handleAddSubmit = async (formData: SpendingFormData): Promise<void> => {
         const dataToSend = prepareDataForSubmit(formData, 'is_finished');
 
         try {
             await dataCoordinator.addSpending(dataToSend);
             closeModal();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error during add spending:', err);
 
             if (err.field) {
@@ -36,13 +70,13 @@ export const spendingsPageHandlers = ({
         }
     };
 
-    const handleEditSubmit = async (id, formData) => {
+    const handleEditSubmit = async (id: number, formData: SpendingFormData): Promise<void> => {
         const dataToUpdate = prepareDataForSubmit(formData, 'is_finished');
 
         try {
             await dataCoordinator.updateSpending(id, dataToUpdate);
             closeModal();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error during edit spending:', err);
 
             if (err.field) {
@@ -55,22 +89,28 @@ export const spendingsPageHandlers = ({
         }
     };
 
-    const handleDeleteSubmit = async (id) => {
+    const handleDeleteSubmit = async (id: number): Promise<void> => {
         try {
             await dataCoordinator.deleteSpending(id);
             closeModal();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error during delete spending:', err);
             const errorMessage = err.message === 'Failed to delete spending'
                 ? 'Ошибка связи или сервера. Попробуйте позже.'
                 : err.message || 'Ошибка при удалении расхода.';
-            useSpendingsStore.getState().setError({ message: errorMessage });
+
+            // Исправлено: передаем полный SpendingFieldError
+            useSpendingsStore.getState().setError({
+                message: errorMessage,
+                field: null,
+                status: 500
+            });
             closeModal();
         }
     };
 
     // UI хендлеры
-    const handleAddClick = () => {
+    const handleAddClick = (): void => {
         clearError();
         clearCategoriesError();
         const initialData = {
@@ -78,7 +118,7 @@ export const spendingsPageHandlers = ({
             is_finished: false,
             date: '',
             end_date: '',
-            category_id: categories && categories.length > 0 ? categories[0].id : ''
+            category_id: categories && categories.length > 0 ? categories[0].id : 0
         };
 
         openModal('addSpending', {
@@ -87,7 +127,7 @@ export const spendingsPageHandlers = ({
             initialData,
             onSubmit: handleAddSubmit,
             submitText: 'Добавить',
-            onFieldChange: (name, value, prevFormData) => {
+            onFieldChange: (name: string, value: any, prevFormData: any) => {
                 const newFormData = { ...prevFormData, [name]: value };
                 if (name === 'is_permanent' && !value) {
                     newFormData.is_finished = false;
@@ -104,7 +144,7 @@ export const spendingsPageHandlers = ({
         });
     };
 
-    const handleEditClick = (spending) => {
+    const handleEditClick = (spending: Spending): void => {
         clearError();
         clearCategoriesError();
         const initialData = prepareInitialData(spending, 'is_finished');
@@ -113,9 +153,9 @@ export const spendingsPageHandlers = ({
             title: 'Редактировать расход',
             fields: getSpendingFields(initialData, categories),
             initialData,
-            onSubmit: (formData) => handleEditSubmit(spending.id, formData),
+            onSubmit: (formData: SpendingFormData) => handleEditSubmit(spending.id, formData),
             submitText: 'Сохранить',
-            onFieldChange: (name, value, prevFormData) => {
+            onFieldChange: (name: string, value: any, prevFormData: any) => {
                 const newFormData = { ...prevFormData, [name]: value };
                 if (name === 'is_permanent' && !value) {
                     newFormData.is_finished = false;
@@ -132,7 +172,7 @@ export const spendingsPageHandlers = ({
         });
     };
 
-    const handleDeleteClick = (spending) => {
+    const handleDeleteClick = (spending: Spending): void => {
         clearError();
         clearCategoriesError();
         openModal('confirmDelete', {

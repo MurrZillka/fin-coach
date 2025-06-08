@@ -7,8 +7,8 @@ import Text from '../../../04_components/ui/Text.js';
 import TextButton from '../../../04_components/ui/TextButton.js';
 import Table from '../../../04_components/ui/Table.js';
 import SpendingCardList from '../../../04_components/mobile/SpendingCardList';
-import {spendingsPageHandlers} from '../utils/spendingsPageHandlers.js';
-import {getSpendingColumns} from '../config/tableColumns';
+import {spendingsPageHandlers} from '../utils/spendingsPageHandlers.ts';
+import {getSpendingColumns} from '../config/tableColumns.js';
 
 export default function SpendingsPage() {
     // Хуки сторов
