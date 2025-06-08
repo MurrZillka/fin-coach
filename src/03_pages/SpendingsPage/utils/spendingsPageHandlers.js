@@ -1,4 +1,4 @@
-// SpendingsPage/utils/creditsPageHandlers.js
+// SpendingsPage/utils/creditsPageHandlers.ts
 import {dateFormatting} from '../../../07_utils/dateFormatting.js';
 import {financialData} from '../../../07_utils/financialData.js';
 import {dataCoordinator} from '../../../dataCoordinator';
