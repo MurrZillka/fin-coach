@@ -1,6 +1,21 @@
-// src/components/ui/cells/GoalActionsCell.jsx
-import IconButton from '../IconButton.js';
+// src/04_components/ui/cells/GoalActionsCell.tsx
+import React from 'react';
+import IconButton from '../IconButton';
 import { PencilIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+export interface Goal {
+    id: string | number;
+    is_achieved?: boolean;
+    [key: string]: any;
+}
+
+export interface GoalActionsCellProps {
+    data: Goal;
+    currentGoal?: Goal | null;
+    onEdit: (goal: Goal) => void;
+    onDelete: (goal: Goal) => void;
+    onSetCurrent: (goal: Goal) => void;
+}
 
 export default function GoalActionsCell({
                                             data,
@@ -8,7 +23,7 @@ export default function GoalActionsCell({
                                             onEdit,
                                             onDelete,
                                             onSetCurrent
-                                        }) {
+                                        }: GoalActionsCellProps) {
     const isCurrent = currentGoal && currentGoal.id === data.id;
     const isAchieved = data.is_achieved;
 

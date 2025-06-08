@@ -1,8 +1,8 @@
 // GoalsPage/config/tableColumns.js
-import GoalDescriptionCell from '../../../04_components/ui/cells/GoalDescriptionCell';
+import GoalDescriptionCell from '../../../04_components/ui/cells/GoalDescriptionCell.js';
 import CurrencyCell from '../../../04_components/ui/cells/CurrencyCell.js';
-import DateCell from '../../../04_components/ui/cells/DateCell';
-import GoalActionsCell from '../../../04_components/ui/cells/GoalActionsCell';
+import DateCell from '../../../04_components/ui/cells/DateCell.js';
+import GoalActionsCell from '../../../04_components/ui/cells/GoalActionsCell.js';
 
 export const getGoalColumns = (currentGoal, balance, handleEditClick, handleDeleteClick, handleSetCurrentClick) => [
     {

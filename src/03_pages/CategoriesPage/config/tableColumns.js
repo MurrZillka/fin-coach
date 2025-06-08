@@ -1,5 +1,5 @@
 // CategoriesPage/config/tableColumns.js
-import SimpleTextCell from '../../../04_components/ui/cells/SimpleTextCell';
+import SimpleTextCell from '../../../04_components/ui/cells/SimpleTextCell.js';
 import CategoryActionsCell from '../../../04_components/ui/cells/CategoryActionsCell.js';
 
 export const getCategoryColumns = (handleEditClick, handleDeleteClick, defaultCategoryName) => [

@@ -1,28 +1,41 @@
-// src/components/ui/cells/GoalDescriptionCell.jsx
-import Text from '../Text.js';
+// src/04_components/ui/cells/GoalDescriptionCell.tsx
+import React from 'react';
+import Text from '../Text';
 import { StarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+
+export interface Goal {
+    id: string | number;
+    description: string;
+    is_achieved?: boolean;
+    amount?: number;
+    [key: string]: any;
+}
+
+export interface GoalDescriptionCellProps {
+    data: Goal;
+    currentGoal?: Goal | null;
+    balance?: number;
+}
 
 export default function GoalDescriptionCell({
                                                 data,
                                                 currentGoal,
                                                 balance
-                                            }) {
+                                            }: GoalDescriptionCellProps) {
     const isCurrent = currentGoal && currentGoal.id === data.id;
     const isAchieved = data.is_achieved;
 
-    // Если цель достигнута - показываем CheckCircleIcon зеленым
     if (isAchieved) {
         return (
             <div className="flex items-center">
                 <CheckCircleIcon className="w-5 h-5 mr-1 text-green-600" />
-                <Text variant="tdPrimary" className="text-green-700">
+                <Text variant="empty" className="text-green-700">
                     {data.description}
                 </Text>
             </div>
         );
     }
 
-    // Если цель не достигнута, но текущая - показываем звезду с цветом прогресса
     if (isCurrent) {
         let starColorClass = 'text-gray-500';
 
@@ -40,15 +53,14 @@ export default function GoalDescriptionCell({
         return (
             <div className="flex items-center">
                 <StarIcon className={`w-5 h-5 mr-1 ${starColorClass}`} />
-                <Text variant="tdPrimary">{data.description}</Text>
+                <Text variant="empty">{data.description}</Text>
             </div>
         );
     }
 
-    // Обычная цель без иконки
     return (
         <div className="flex items-center">
-            <Text variant="tdPrimary">{data.description}</Text>
+            <Text variant="empty">{data.description}</Text>
         </div>
     );
 }
