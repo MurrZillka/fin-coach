@@ -1,19 +1,19 @@
-// GoalsPage/ui/GoalsPage.jsx
+//03_pages/GoalsPage/ui/GoalsPage.tsx
 import React from 'react';
-import Text from '../../../04_components/ui/Text.js';
-import TextButton from '../../../04_components/ui/TextButton.js';
-import useGoalsStore from '../../../02_stores/goalsStore/goalsStore.ts';
-import useModalStore from '../../../02_stores/modalStore/modalStore.ts';
-import useBalanceStore from '../../../02_stores/balanceStore/balanceStore.ts';
+import Text from '../../../04_components/ui/Text';
+import TextButton from '../../../04_components/ui/TextButton';
+import useGoalsStore from '../../../02_stores/goalsStore/goalsStore';
+import useModalStore from '../../../02_stores/modalStore/modalStore';
+import useBalanceStore from '../../../02_stores/balanceStore/balanceStore';
 import GoalsCardList from '../../../04_components/mobile/GoalsCardList';
-import Table from '../../../04_components/ui/Table.js';
-import {goalsPageHandlers} from '../utils/goalsPageHandlers.js';
+import Table from '../../../04_components/ui/Table';
+import {goalsPageHandlers} from '../utils/goalsPageHandlers';
 import {getGoalColumns} from '../config/tableColumns';
 
-export default function GoalsPage() {
+const GoalsPage: React.FC = () => {
     // Хуки сторов
     const { goals, loading, error, currentGoal, clearError } = useGoalsStore();
-    const { balance, isLoading: isBalanceLoading } = useBalanceStore();
+    const { balance, loading: isBalanceLoading } = useBalanceStore();
     const { openModal, closeModal } = useModalStore();
 
     // Получаем хендлеры из кастомного хука
@@ -31,7 +31,7 @@ export default function GoalsPage() {
     const displayError = error;
 
     // Функции рендеринга
-    const renderCurrentGoalSection = () => {
+    const renderCurrentGoalSection = (): React.ReactNode => {
         if (loading || isBalanceLoading) {
             return (
                 <div className="text-blue-700">
@@ -73,7 +73,7 @@ export default function GoalsPage() {
         );
     };
 
-    const renderGoalsContent = () => {
+    const renderGoalsContent = (): React.ReactNode => {
         if (loading && goals === null && !isBalanceLoading) {
             return (
                 <div className="text-center p-4">
@@ -90,7 +90,7 @@ export default function GoalsPage() {
             );
         }
 
-        const shouldShowTable = (goals !== null && goals.length > 0) || (loading && goals === null);
+        const shouldShowTable: boolean = (goals !== null && goals.length > 0) || (loading && goals === null);
 
         if (shouldShowTable) {
             return (
@@ -153,4 +153,6 @@ export default function GoalsPage() {
             </main>
         </div>
     );
-}
+};
+
+export default GoalsPage;
