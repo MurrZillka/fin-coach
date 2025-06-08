@@ -1,4 +1,4 @@
-// GoalsPage/config/tableColumns.js
+// GoalsPage/config/tableColumns.ts
 import GoalDescriptionCell from '../../../04_components/ui/cells/GoalDescriptionCell.js';
 import CurrencyCell from '../../../04_components/ui/cells/CurrencyCell.js';
 import DateCell from '../../../04_components/ui/cells/DateCell.js';

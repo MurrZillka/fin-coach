@@ -1,4 +1,4 @@
-// CreditsPage/config/tableColumns.js
+//03_Pages/CreditsPage/config/tableColumns.ts
 import CreditAmountCell from '../../../04_components/ui/cells/CreditAmountCell.js';
 import SimpleTextCell from '../../../04_components/ui/cells/SimpleTextCell.js';
 import DateCell from '../../../04_components/ui/cells/DateCell.js';

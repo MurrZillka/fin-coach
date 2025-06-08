@@ -1,4 +1,4 @@
-// SpendingsPage/config/tableColumns.js
+// SpendingsPage/config/tableColumns.ts
 import SpendingAmountCell from '../../../04_components/ui/cells/SpendingAmountCell.js';
 import SimpleTextCell from '../../../04_components/ui/cells/SimpleTextCell.js';
 import CategoryCell from '../../../04_components/ui/cells/CategoryCell.js';

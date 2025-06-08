@@ -1,4 +1,4 @@
-// SpendingsPage/config/modalFields.js
+// SpendingsPage/config/modalFields.ts
 export const getSpendingFields = (formData, categories) => {
     const fields = [
         {

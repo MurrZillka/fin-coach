@@ -11,13 +11,6 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { isAuthenticated, status, user } = useAuthStore();
 
-    console.log('🛡️ ProtectedRoute check:', {
-        isAuthenticated,
-        status,
-        hasUser: !!user,
-        path: window.location.pathname
-    });
-
     if (status === 'initializing') {
         console.log('🔄 ProtectedRoute: Showing loader (initializing)');
         return <Loader />;

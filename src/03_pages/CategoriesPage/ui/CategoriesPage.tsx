@@ -1,16 +1,16 @@
-// CategoriesPage/ui/CategoriesPage.jsx
+// CategoriesPage/ui/CategoriesPage.tsx
 import React from 'react';
-import TextButton from '../../../04_components/ui/TextButton.js';
-import Text from '../../../04_components/ui/Text.js';
-import useCategoryStore from '../../../02_stores/categoryStore/categoryStore.ts';
-import useModalStore from '../../../02_stores/modalStore/modalStore.ts';
+import TextButton from '../../../04_components/ui/TextButton';
+import Text from '../../../04_components/ui/Text';
+import useCategoryStore from '../../../02_stores/categoryStore/categoryStore';
+import useModalStore from '../../../02_stores/modalStore/modalStore';
 import CategoriesCardList from '../../../04_components/mobile/CategoriesCardList';
 import {DEFAULT_CATEGORY_NAME} from "../../../constants/categories";
-import Table from "../../../04_components/ui/Table.js";
-import {categoriesPageHandlers} from '../utils/categoriesPageHandlers.js';
+import Table from "../../../04_components/ui/Table";
+import {categoriesPageHandlers} from '../utils/categoriesPageHandlers';
 import {getCategoryColumns} from '../config/tableColumns';
 
-export default function CategoriesPage() {
+const CategoriesPage: React.FC = () => {
     // Хуки сторов
     const { categories, loading, error, clearError } = useCategoryStore();
     const { openModal, closeModal, setModalSubmissionError, modalType } = useModalStore();
@@ -29,13 +29,13 @@ export default function CategoriesPage() {
 
     // Вычисляемые значения
     const displayError = error;
-    const isInitialLoading = loading && categories === null;
-    const showEmptyMessage = categories !== null && categories.length === 0 && !loading;
-    const showList = categories !== null && categories.length > 0;
-    const isBackgroundLoading = loading && categories !== null;
+    const isInitialLoading: boolean = loading && categories === null;
+    const showEmptyMessage: boolean = categories !== null && categories.length === 0 && !loading;
+    const showList: boolean = categories !== null && categories.length > 0;
+    const isBackgroundLoading: boolean = loading && categories !== null;
 
     // Функция рендеринга контента
-    const renderContent = () => {
+    const renderContent = (): React.ReactNode => {
         if (isInitialLoading) {
             return (
                 <div className="text-center p-4">
@@ -104,4 +104,6 @@ export default function CategoriesPage() {
             </main>
         </div>
     );
-}
+};
+
+export default CategoriesPage;

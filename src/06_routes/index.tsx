@@ -1,6 +1,6 @@
 // src/routes/index.tsx
 import { Navigate } from 'react-router-dom';
-import LoginPage from '../03_pages/LoginPage';
+import LoginPage from '../03_pages/LoginPage/LoginPage';
 import SignupPage from '../03_pages/SignupPage';
 import CategoriesPage from '../03_pages/CategoriesPage';
 import CreditsPage from '../03_pages/CreditsPage';

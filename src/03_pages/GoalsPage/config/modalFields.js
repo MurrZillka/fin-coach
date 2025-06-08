@@ -1,4 +1,4 @@
-// GoalsPage/config/modalFields.js
+// GoalsPage/config/modalFields.ts
 export const goalFields = [
     {
         name: 'description',
