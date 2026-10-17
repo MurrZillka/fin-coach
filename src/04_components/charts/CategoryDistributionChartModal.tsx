@@ -296,7 +296,7 @@ const CategoryDistributionChartModal: React.FC<CategoryDistributionChartModalPro
                                         />
                                         <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
                                               className="text-xl font-bold fill-gray-700">
-                                            {`₽${totalAmount.toLocaleString()}`}
+                                            {`₽${totalAmount.toLocaleString('ru-RU')}`}
                                         </text>
                                     </PieChart>
                                 </ResponsiveContainer>

@@ -17,7 +17,9 @@ vi.mock('../../02_stores/categoryStore/categoryStore', () => ({
 }));
 
 // Мокаем агрегатор
-const mockAggregateSpendingsByCategory = vi.fn();
+const { mockAggregateSpendingsByCategory } = vi.hoisted(() => ({
+    mockAggregateSpendingsByCategory: vi.fn(),
+}));
 vi.mock('../../07_utils/spendingAggregator', () => ({
     aggregateSpendingsByCategory: mockAggregateSpendingsByCategory,
 }));
@@ -150,7 +152,7 @@ describe('CategoryDistributionChartModal', () => {
         render(<CategoryDistributionChartModal {...defaultProps} />);
 
         expect(screen.getByTestId('pie-chart')).toBeInTheDocument();
-        expect(screen.getByText('₽8,000')).toBeInTheDocument(); // 5000 + 3000
+        expect(screen.getByText(/^₽8\s000$/)).toBeInTheDocument(); // 5000 + 3000
     });
 
     it('should switch periods and call aggregator', async () => {
@@ -167,7 +169,7 @@ describe('CategoryDistributionChartModal', () => {
             );
         });
 
-        expect(screen.getByText('₽3,000')).toBeInTheDocument(); // 1000 + 2000
+        expect(screen.getByText(/^₽3\s000$/)).toBeInTheDocument(); // 1000 + 2000
     });
 
     it('should show loading when data is loading', () => {

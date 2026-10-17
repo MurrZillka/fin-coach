@@ -8,14 +8,15 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import IconButton from '../../IconButton';
 import useModalStore from '../../../../02_stores/modalStore/modalStore';
 import { clearServerFieldErrors, mapServerErrorToFieldError } from '../utils/fieldErrorMapping.js';
-import type { ModalProps, Field, SubmissionError } from './types';
+import type { ModalProps, Field } from './types';
 
+const EMPTY_INITIAL_DATA: Record<string, any> = {};
 const Modal: React.FC<ModalProps> = ({
                                          isOpen,
                                          onClose,
                                          title,
                                          fields,
-                                         initialData = {},
+                                         initialData = EMPTY_INITIAL_DATA,
                                          onSubmit,
                                          submitText = 'Сохранить',
                                          onFieldChange,
@@ -80,13 +81,18 @@ const Modal: React.FC<ModalProps> = ({
     }, [isOpen]);
 
     useEffect(() => {
-        if ((submissionError as SubmissionError)?.field) {
+        if (
+            submissionError !== null &&
+            typeof submissionError === 'object' &&
+            submissionError.field
+        ) {
             const fieldError = mapServerErrorToFieldError(submissionError);
+
             if (fieldError) {
                 setErrors((prev) => ({
                     ...prev,
-                    [fieldError.field!]: fieldError.message!,
-            }));
+                    [fieldError.field]: fieldError.message,
+                }));
             }
         } else if (submissionError === null) {
             setErrors((prev) => clearServerFieldErrors(prev));
@@ -248,7 +254,7 @@ const Modal: React.FC<ModalProps> = ({
                             : submissionError.message || ''}
                     </div>
                 )}
-                <form onSubmit={handleSubmit} className="space-y-0">
+                <form onSubmit={handleSubmit} className="space-y-0" noValidate>
                     {currentFields.map((field, index) => (
                         <div key={field.name} className="relative">
                             <Input

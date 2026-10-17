@@ -44,8 +44,8 @@ describe('Modal', () => {
             />
         );
         expect(screen.getByText('Test Modal')).toBeInTheDocument();
-        expect(screen.getByLabelText('Имя')).toBeInTheDocument();
-        expect(screen.getByLabelText('Сумма')).toBeInTheDocument();
+        expect(screen.getByLabelText(/^Имя\s*\*?$/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/^Сумма\s*\*?$/)).toBeInTheDocument();
         expect(screen.getByLabelText('Категория')).toBeInTheDocument();
         expect(screen.getByText('Отмена')).toBeInTheDocument();
         expect(screen.getByText('Сохранить')).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe('Modal', () => {
                 onSubmit={onSubmit}
             />
         );
-        const firstInput = screen.getByLabelText('Имя');
+        const firstInput = screen.getByLabelText(/^Имя\s*\*?$/);
         expect(document.activeElement === firstInput).toBe(true);
     });
 
@@ -150,8 +150,8 @@ describe('Modal', () => {
                 onSubmit={onSubmit}
             />
         );
-        fireEvent.change(screen.getByLabelText('Имя'), { target: { value: 'Вася' } });
-        fireEvent.change(screen.getByLabelText('Сумма'), { target: { value: '100' } });
+        fireEvent.change(screen.getByLabelText(/^Имя\s*\*?$/), { target: { value: 'Вася' } });
+        fireEvent.change(screen.getByLabelText(/^Сумма\s*\*?$/), { target: { value: '100' } });
         fireEvent.change(screen.getByLabelText('Категория'), { target: { value: 'food' } });
         fireEvent.click(screen.getByText('Сохранить'));
         expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
@@ -198,7 +198,7 @@ describe('Modal', () => {
                 onFieldChange={onFieldChangeMock}
             />
         );
-        fireEvent.change(screen.getByLabelText('Имя'), { target: { value: 'show' } });
+        fireEvent.change(screen.getByLabelText(/^Имя\s*\*?$/), { target: { value: 'show' } });
         expect(onFieldChangeMock).toHaveBeenCalledWith('name', 'show', expect.any(Object));
         expect(screen.getByLabelText('Доп')).toBeInTheDocument();
     });
@@ -214,8 +214,8 @@ describe('Modal', () => {
                 initialData={{ name: 'Петя', amount: 50, category: 'travel' }}
             />
         );
-        expect(screen.getByLabelText('Имя')).toHaveValue('Петя');
-        expect(screen.getByLabelText('Сумма')).toHaveValue(50);
+        expect(screen.getByLabelText(/^Имя\s*\*?$/)).toHaveValue('Петя');
+        expect(screen.getByLabelText(/^Сумма\s*\*?$/)).toHaveValue(50);
         expect(screen.getByLabelText('Категория')).toHaveValue('travel');
     });
 });

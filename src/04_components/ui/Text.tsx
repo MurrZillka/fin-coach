@@ -59,15 +59,21 @@ export default function Text({
                                  variant = 'body',
                                  children,
                                  className = '',
-                                 as
+                                 as,
+                                 htmlFor,
+                                 id,
                              }: TextProps) {
     const Component = as || defaultTags[variant as keyof typeof defaultTags] || 'span';
     const variantClass = variants[variant as Variant] || '';
     const finalClasses = `${variantClass} ${className}`.trim();
 
     return (
-        // @ts-ignore — если TypeScript ругается на Component как строку
-        <Component className={finalClasses}>
+        // @ts-ignore — существующую типизацию Component пока не меняем
+        <Component
+            className={finalClasses}
+            id={id}
+            htmlFor={Component === 'label' ? htmlFor : undefined}
+        >
             {children}
         </Component>
     );
